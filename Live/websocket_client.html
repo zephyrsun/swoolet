@@ -6,6 +6,8 @@
         console.log("Connected to WebSocket server.")
 
         websocket.send('{"m":"room_enter","room_id":"1","uid":"10001"}')
+        websocket.send('{"m":"room_sendMsg","msg":"一条消息"}')
+        //websocket.send('{"m":"room_quit","room_id":"1","uid":"10001"}')
     }
 
     websocket.onclose = function (evt) {

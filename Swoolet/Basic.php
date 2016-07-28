@@ -213,6 +213,7 @@ abstract class Basic
 
     public function fatalHandler()
     {
-        $this->response(\ob_get_clean());
+        print_r(\ob_get_clean());
+        //$this->response(\ob_get_clean());
     }
 }

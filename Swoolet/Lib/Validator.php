@@ -67,7 +67,7 @@ class Validator
     public function required($key)
     {
         $val = $this->get($key);
-        $result = $val === null;
+        $result = $val !== null;
 
         return $this->checkResult($key, $val, $result, true);
     }

@@ -35,8 +35,7 @@ class App
 
         //$obj = new $class();
         $obj = self::getInstance(self::$namespace . '\\Controller\\' . \ucfirst($query[0]));
-        $obj->init($request);
-        $obj->{$query[1]}();
+        $obj->{$query[1]}($request);
     }
 
     static public function setConfig()
@@ -66,14 +65,9 @@ class App
     }
 }
 
-abstract class Controller
+class Controller
 {
     public $request;
-
-    public function init($request)
-    {
-        $this->request = $request;
-    }
 }
 
 class Router

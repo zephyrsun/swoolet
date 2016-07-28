@@ -4,10 +4,15 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 class WebSocket extends \Swoolet\WebSocket
 {
-    public function onRequest($request, $response)
+    /**
+     * @var \Live\Lib\Conn
+     */
+    static public $conn;
+
+    public function onClose($sw, $fd, $from_id)
     {
-        \Swoolet\Basic::response('Please visit: http://www.camhow.cn/');
-        parent::onRequest($request, $response);
+        //echo 'onClose' . PHP_EOL;
+        self::$conn->quitConn($fd);
     }
 
     /**
@@ -22,9 +27,13 @@ class WebSocket extends \Swoolet\WebSocket
 
         $_GET = \json_decode($frame->data, true);
 
-        $uri = array_shift($_GET);
+        if (is_array($_GET)) {
+            $uri = array_shift($_GET);
 
-        \Swoolet\App::callRequest($uri, $frame);
+            \Swoolet\App::callRequest($uri, $frame);
+        } else {
+            $this->response('');
+        }
     }
 }
 

@@ -16,9 +16,6 @@ class WebSocket extends Basic
         $this->events[] = 'Open';
         $this->events[] = 'Message';
 
-        $q = include BASE_DIR . "Example/Config/dev.php";
-        //var_dump($q);
-
         return new \swoole_websocket_server($host, $port, $this->mode, $this->sock_type);
     }
 
@@ -33,12 +30,11 @@ class WebSocket extends Basic
     public function onRequest($request, $response)
     {
         //parent::response('404');
-        $this->sw->close($this->fd);
     }
 
     public function onHandShake($request, $response)
     {
-        //echo 'onHandShake' . PHP_EOL;
+       // echo 'onHandShake' . PHP_EOL;
     }
 
     public function onOpen($sw, $request)
@@ -59,15 +55,12 @@ class WebSocket extends Basic
             return;
         }
 
-        \ob_start();
         /*
         if ($frame->opcode == \WEBSOCKET_OPCODE_BINARY) {
         } else {
         }
         */
         $this->parseData($frame);
-
-        $this->response(\ob_get_clean());
     }
 
     /**

@@ -22,9 +22,7 @@ class Http extends Basic
         if ($request->server['path_info'] == '/favicon.ico')
             return $this->response('');
 
-        \ob_start();
         $this->parseData($request);
-        $this->response(\ob_get_clean());
     }
 
     /**

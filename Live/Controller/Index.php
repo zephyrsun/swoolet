@@ -8,6 +8,6 @@ class Index extends Basic
 {
     public function index()
     {
-        Response::msg('Hello world!');
+        Response::msg('Hello world!', -1);
     }
 }
