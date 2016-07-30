@@ -2,8 +2,15 @@
 
 namespace Live\Controller;
 
+use \Swoolet\App;
+use \Live\Validator;
+
 class Basic extends \Swoolet\Controller
 {
+    public function getValidator()
+    {
+        return (new Validator($_POST));
+    }
 }
 
 namespace Live;
@@ -35,19 +42,13 @@ class Response
     }
 }
 
-function getParams($callback)
+class Validator extends \Swoolet\Lib\Validator
 {
-    /**
-     * @var \Swoolet\Lib\Validator $v
-     */
-    $v = App::getInstance('\Swoolet\Lib\Validator');
+    public function getResult()
+    {
+        if (!$result = parent::getResult())
+            Response::msg("参数错误：" . $this->getFirstError(), 402);
 
-    $v->setData($_GET);
-
-    $callback($v);
-
-    if (!$result = $v->getResult())
-        return Response::msg("参数错误：" . $v->getFirstError(), 402);
-
-    return $result;
+        return $result;
+    }
 }

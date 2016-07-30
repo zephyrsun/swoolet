@@ -29,12 +29,7 @@ class Room extends Basic
 
     public function enter($request)
     {
-        $data = \Live\getParams(function ($v) {
-            /**
-             * @var \Swoolet\Lib\Validator $v
-             */
-            $v->ge('uid', 1)->ge('room_id', 1);
-        });
+        $data = parent::getValidator()->ge('uid', 1)->ge('room_id', 1)->getResult();
         if (!$data)
             return;
 
@@ -55,17 +50,11 @@ class Room extends Basic
 
     public function sendMsg($request)
     {
-        $data = \Live\getParams(function ($v) {
-            /**
-             * @var \Swoolet\Lib\Validator $v
-             */
-            $v->required('msg');
-        });
+        $data = parent::getValidator()->required('msg')->getResult();
         if (!$data)
             return;
 
         $conn = $this->conn->getConn($request->fd);
-
         if ($conn) {
             list($uid, $room_id) = $conn;
 

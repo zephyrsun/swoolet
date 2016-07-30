@@ -9,6 +9,16 @@ class WebSocket extends \Swoolet\WebSocket
      */
     static public $conn;
 
+    public function onOpen($sw, $request)
+    {
+        $fd = $request->fd;
+        //没有成功登陆,踢出去
+        swoole_timer_after(500, function () use ($fd) {
+            if (!self::$conn->getConn($fd))
+                $this->sw->close($fd);
+        });
+    }
+
     public function onClose($sw, $fd, $from_id)
     {
         //echo 'onClose' . PHP_EOL;
@@ -25,10 +35,12 @@ class WebSocket extends \Swoolet\WebSocket
         if (!$frame->data)
             return;
 
-        $_GET = \json_decode($frame->data, true);
+        $_POST = \json_decode($frame->data, true);
 
-        if (is_array($_GET)) {
-            $uri = array_shift($_GET);
+        if (is_array($_POST)) {
+            $uri = array_shift($_POST);
+
+            echo $uri . PHP_EOL;
 
             \Swoolet\App::callRequest($uri, $frame);
         } else {

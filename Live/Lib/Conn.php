@@ -31,8 +31,10 @@ class Conn
     public function quitConn($fd)
     {
         $conn = $this->getConn($fd);
-        if ($conn)
+        if ($conn) {
             $this->quitRoom($fd, $conn[1]);
+            unset($this->conn[$fd]);
+        }
 
         return $this;
     }

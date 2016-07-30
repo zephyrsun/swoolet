@@ -2,5 +2,15 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-$app = \Swoolet\Http::createServer('Live', 'dev');
+class Http extends \Swoolet\Http
+{
+    public function parseData($request)
+    {
+        $_POST = $request->post ? $request->post : [];
+
+        parent::parseData($request);
+    }
+}
+
+$app = Http::createServer('Live', 'dev');
 $app->run(':80');

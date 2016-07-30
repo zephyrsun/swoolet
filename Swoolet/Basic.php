@@ -19,7 +19,7 @@ abstract class Basic
     ];
 
     //https://github.com/wanhuo/swoole-doc-stu/blob/master/doc/01.swoole_server%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9.md
-    public $setting = [
+    public $option = [
 
         //'worker_num' => 8,
         //'reactor_num' => 2,
@@ -126,7 +126,7 @@ abstract class Basic
 
         $sw = $this->runServer($host, $port);
 
-        $setting += $this->setting;
+        $setting += $this->option;
         if (!$setting['log_file'])
             $setting['log_file'] = "/tmp/swoole_{$port}.log";
 

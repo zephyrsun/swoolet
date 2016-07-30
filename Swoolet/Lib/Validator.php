@@ -18,8 +18,7 @@ namespace Swoolet\Lib;
 /**
  * Class Validator
  *
- * $result = \Swoolet\App::getInstance('\Swoolet\Lib\Validator')
- *            ->setData($_GET)
+ * $result = (new Validator($_POST))
  *            ->length('username', 6, 20)
  *            ->email('abc@examle.com')
  *            ->getResult();
@@ -28,17 +27,15 @@ namespace Swoolet\Lib;
  */
 class Validator
 {
-    public $raw = array();
+    public $raw = [];
 
-    public $result = array();
+    public $result = [];
 
-    private $err = array();
+    private $err = [];
 
-    public function setData($raw)
+    public function __construct($raw)
     {
         $this->raw = $raw;
-
-        return $this;
     }
 
     public function &get($key)
@@ -322,7 +319,7 @@ class Validator
     public function getResult()
     {
         if ($this->getError())
-            return array();
+            return [];
 
         return $this->result;
     }
