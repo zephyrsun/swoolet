@@ -58,3 +58,16 @@ namespace Swoolet\Data {
         }
     }
 }
+
+
+namespace {
+
+    if (!class_exists('\redisProxy', false)) {
+        class redisProxy extends \Redis
+        {
+            public function release()
+            {
+            }
+        }
+    }
+}

@@ -69,6 +69,15 @@ class Validator
         return $this->checkResult($key, $val, $result, true);
     }
 
+    public function mobileNumberCN($key, $required = true)
+    {
+        $val = $this->get($key);
+        $result = strlen($key) == 11 && $key{0} == 1;
+
+        return $this->checkResult($key, $val, $result, $required);
+    }
+
+
     /**
      * email address
      *

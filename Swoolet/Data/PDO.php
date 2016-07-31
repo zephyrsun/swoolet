@@ -533,3 +533,15 @@ namespace Swoolet\Data {
         }
     }
 }
+
+
+namespace {
+    if (!class_exists('\pdoProxy', false)) {
+        class pdoProxy extends \PDO
+        {
+            public function release()
+            {
+            }
+        }
+    }
+}

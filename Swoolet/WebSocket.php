@@ -34,9 +34,13 @@ class WebSocket extends Basic
 
     public function onHandShake($request, $response)
     {
-       // echo 'onHandShake' . PHP_EOL;
+        // echo 'onHandShake' . PHP_EOL;
     }
 
+    /**
+     * @param \swoole_websocket_server $sw
+     * @param \swoole_http_request $request
+     */
     public function onOpen($sw, $request)
     {
         //\ob_start();
@@ -46,8 +50,8 @@ class WebSocket extends Basic
     }
 
     /**
-     * @param $sw
-     * @param $frame \swoole_websocket_frame
+     * @param \swoole_websocket_server $sw
+     * @param \swoole_websocket_frame $frame
      */
     public function onMessage($sw, $frame)
     {

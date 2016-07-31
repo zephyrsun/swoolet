@@ -20,7 +20,7 @@ class Login extends Basic
 
     public function mobile()
     {
-        $data = parent::getValidator()->required('mobile')->required('code')->getResult();
+        $data = parent::getValidator()->mobileNumberCN('mobile')->required('code')->getResult();
         if (!$data)
             return;
 
@@ -41,7 +41,7 @@ class Login extends Basic
 
     public function sendSms()
     {
-        $data = parent::getValidator()->required('mobile')->getResult();
+        $data = parent::getValidator()->mobileNumberCN('mobile')->getResult();
         if (!$data)
             return;
 

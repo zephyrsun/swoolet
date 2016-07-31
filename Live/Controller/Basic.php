@@ -27,6 +27,8 @@ class Response
     static public function msg($msg, $code = 0)
     {
         self::data(array('msg' => $msg), $code);
+
+        return false;
     }
 
     /**

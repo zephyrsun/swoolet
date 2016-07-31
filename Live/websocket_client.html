@@ -1,7 +1,7 @@
 <script>
     "use strict"
 
-    var wsServer = 'ws://192.168.0.85:9512', websocket = new WebSocket(wsServer)
+    var wsServer = 'ws://127.0.0.1:9512', websocket = new WebSocket(wsServer)
     websocket.onopen = function (evt) {
         console.log("Connected to WebSocket server.")
 
