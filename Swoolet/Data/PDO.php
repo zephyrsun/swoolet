@@ -407,7 +407,7 @@ namespace Swoolet\Data {
          * @param $sql
          * @return \PDOStatement
          */
-        public function multiQuery($sql)
+        public function query($sql)
         {
             $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
 
@@ -415,20 +415,18 @@ namespace Swoolet\Data {
         }
 
         /**
-         * @param string $sql
-         * @param $params
-         *
-         * @return bool
+         * @param $sql
+         * @param array $params
+         * @return \PDOStatement
          */
-        public function query($sql, $params = array())
+        public function execSQL($sql, $params = array())
         {
             $this->sql = $sql;
             $this->param = $params;
 
-            if ($this->exec())
-                return $this->sth;
+            $this->exec();
 
-            return false;
+            return $this->sth;
         }
 
         /**

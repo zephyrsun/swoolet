@@ -13,13 +13,18 @@ use Swoolet\Data\PDO;
 
 class User extends PDO
 {
-    public $cfg_key = 'db_1';
-
-    public $table_name = 'user_0';
-
     public $cache;
+
+    public $cfg_key = 'db_1';
     public $timeout = 86400 * 3;
-    public $key_user = 'user:';
+
+    //public $table_name = 'user_0';
+    public $table_prefix = 'user_';
+    public $table_mod = 1e6;
+
+    public $rd_user = 'user:';
+
+    CONST PF_MOBILE = 1;
 
     public function __construct()
     {
@@ -30,49 +35,79 @@ class User extends PDO
         $this->cache = new \Live\Redis\User();
     }
 
-    public function login($username, $login_pf, $avatar = '')
+    public function login($pf, $username, $avatar = '')
     {
-        $user = $this->getByUsername($username);
+        $user = $this->getByUsername($pf, $username);
         if ($user) {
             $uid = $user['uid'];
-            $this->update([
+
+            $this->updateUser([
                 'avatar' => $user['avatar'] ? $user['avatar'] : $avatar,
-            ]);
+            ], $uid);
+
         } else {
-            $uid = $this->insert([
+            $uid = $this->getUID($pf, $username);
+
+            $this->table($uid);
+            $this->insert([
+                'uid' => $uid,
                 'username' => $username,
                 'avatar' => $avatar,
                 'birthday' => '0000-00-00',
-                'login_pf' => $login_pf,
                 'create_ts' => \APP_TS,
             ]);
         }
-
         $user = $this->getUser($uid);
 
         return [
             'user' => $user,
-            'full' => (bool)$user['avatar'],
+            'full' => $user['birthday'] != '0000-00-00',
         ];
     }
 
-    public function getByUsername($username)
+    public function updateUser($data, $uid)
     {
-        return $this->where('username', $username)->fetch();
+        $this->table($uid);
+
+        return parent::update($data);
     }
 
     public function getUser($uid)
     {
-        if (!$user = $this->cache->get($this->key_user . $uid)) {
-            if ($user = $this->where('uid', $uid)->fetch()) {
+        if (!$user = $this->cache->get($this->rd_user . $uid)) {
+            if ($user = $this->table($uid)->where('uid', $uid)->fetch()) {
 
-                unset($user['username'], $user['login_pf'], $user['create_ts']);
+                unset($user['username'], $user['create_ts']);
 
-                $this->cache->set($this->key_user . $uid, $user, $this->timeout);
+                $this->cache->set($this->rd_user . $uid, $user, $this->timeout);
             }
         }
 
         return $user;
+    }
+
+    public function getByUsername($pf, $username)
+    {
+        return PDO::table('user_increment')
+            ->where('pf=? AND username=?', [$pf, $username])
+            ->fetch();
+    }
+
+    public function getUID($pf, $username)
+    {
+        return PDO::table('user_increment')->insert([
+            'pf' => $pf,
+            'username' => $username,
+        ]);
+    }
+
+    public function table($key)
+    {
+        $mod = (int)($key / $this->table_mod);
+
+        $this->clause['table'] = $this->table_prefix . $mod;
+
+        return $this;
     }
 
 }

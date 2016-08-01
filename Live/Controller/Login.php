@@ -32,11 +32,10 @@ class Login extends Basic
         if ($r_code != $code)
             return Response::msg('验证码错误', 1001);
 
-        $user = (new User())->login($mobile, '');
+        $db_user = new User();
+        $user = $db_user->login($db_user::PF_MOBILE, $mobile);
 
-        Response::data([
-            'user' => $user,
-        ]);
+        Response::data($user);
     }
 
     public function sendSms()

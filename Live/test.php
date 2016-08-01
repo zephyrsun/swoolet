@@ -40,8 +40,18 @@ $arr = [
     ]
 ];
 
+$rd = new \Live\Redis\User();
+$ret = $rd->set('1', $arr, 3600);
+var_dump($ret);
+
+$ret = $rd->get('1');
+var_dump($arr);
+
+
+/*
 $bin = \msgpack_pack($arr);
-var_dump(bin2hex($bin));
+var_dump($bin, bin2hex($bin));
 
 $arr = \msgpack_unpack($bin);
 var_dump($arr);
+*/

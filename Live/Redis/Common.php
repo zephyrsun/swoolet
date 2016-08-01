@@ -21,8 +21,10 @@ class Common extends Redis
     {
         $timeout or $timeout = self::DEFAULT_TIMEOUT;
 
-        if (is_array($val))
-            $val = json_encode($val, \JSON_UNESCAPED_UNICODE);
+//        if (is_array($val))
+//            $val = json_encode($val, \JSON_UNESCAPED_UNICODE);
+
+        $val = \msgpack_pack($val);
 
         if (!$ret = $this->link->set($key, $val, $timeout))
             Response::msg('R错误', 100);
@@ -33,7 +35,7 @@ class Common extends Redis
     public function get($key)
     {
         if ($ret = $this->link->get($key))
-            return json_decode($ret, true);
+            return \msgpack_unpack($ret);//return json_decode($ret, true);
 
         return $ret;
     }

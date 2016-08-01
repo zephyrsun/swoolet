@@ -72,7 +72,7 @@ class Validator
     public function mobileNumberCN($key, $required = true)
     {
         $val = $this->get($key);
-        $result = strlen($key) == 11 && $key{0} == 1;
+        $result = strlen($val) == 11 && $val{0} == 1;
 
         return $this->checkResult($key, $val, $result, $required);
     }
