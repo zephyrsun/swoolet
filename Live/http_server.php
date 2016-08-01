@@ -2,8 +2,13 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-class Http extends \Swoolet\Http
+class Server extends \Swoolet\Http
 {
+    /**
+     * @var \Live\Lib\Conn
+     */
+    static public $conn;
+
     public function onWorkerStart($sw, $worker_id)
     {
         parent::onWorkerStart($sw, $worker_id);
@@ -20,5 +25,5 @@ class Http extends \Swoolet\Http
     }
 }
 
-$app = Http::createServer('Live', 'dev');
+$app = Server::createServer('Live', 'dev');
 $app->run(':80');

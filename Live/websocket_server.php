@@ -2,7 +2,7 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-class WebSocket extends \Swoolet\WebSocket
+class Server extends \Swoolet\WebSocket
 {
     /**
      * @var \Live\Lib\Conn
@@ -51,7 +51,7 @@ class WebSocket extends \Swoolet\WebSocket
 
 \Swoolet\Router::$delimiter = '_';
 
-$app = WebSocket::createServer('Live', 'dev');
+$app = Server::createServer('Live', 'dev');
 $app->run(':9502', [
     'open_tcp_keepalive' => 1,
     'tcp_keepidle' => 60,

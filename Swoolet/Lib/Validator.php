@@ -59,14 +59,15 @@ class Validator
      * not null
      *
      * @param $key
-     * @return $this
+     * @param bool $required
+     * @return Validator
      */
-    public function required($key)
+    public function required($key, $required = true)
     {
         $val = $this->get($key);
         $result = $val !== null;
 
-        return $this->checkResult($key, $val, $result, true);
+        return $this->checkResult($key, $val, $result, $required);
     }
 
     public function mobileNumberCN($key, $required = true)

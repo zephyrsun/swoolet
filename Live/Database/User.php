@@ -105,7 +105,7 @@ class User extends PDO
     {
         $mod = (int)($key / $this->table_mod);
 
-        $this->clause['table'] = $this->table_prefix . $mod;
+        PDO::table($this->table_prefix . $mod);
 
         return $this;
     }

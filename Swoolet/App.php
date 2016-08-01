@@ -32,7 +32,7 @@ class App
 
     static public function callRequest($uri, $request = null)
     {
-        \define('APP_TS', time());
+        \define('APP_TS', \time());
 
         $query = Router::parse($uri);
 

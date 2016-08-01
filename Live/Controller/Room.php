@@ -24,7 +24,7 @@ class Room extends Basic
      */
     public function __construct()
     {
-        \WebSocket::$conn = $this->conn = new Conn();
+        \Server::$conn = $this->conn = new Conn();
     }
 
     public function enter($request)
@@ -50,7 +50,7 @@ class Room extends Basic
 
     public function sendMsg($request)
     {
-        $data = parent::getValidator()->required('msg')->getResult();
+        $data = parent::getValidator()->required('msg')->required('horn', false)->getResult();
         if (!$data)
             return;
 
@@ -58,8 +58,17 @@ class Room extends Basic
         if ($conn) {
             list($uid, $room_id) = $conn;
 
+            if ($data['horn']) {
+
+                //todo:扣钱逻辑
+
+                $t = Conn::TYPE_HORN;
+            } else {
+                $t = Conn::TYPE_MESSAGE;
+            }
+
             $this->conn->broadcast($room_id, [
-                't' => Conn::TYPE_MESSAGE,
+                't' => $t,
                 'uid' => $uid,
                 'nickname' => "nickname{$uid}",
                 'msg' => $data['msg'],
@@ -71,15 +80,66 @@ class Room extends Basic
 
     public function quit($request)
     {
-        $data = \Live\getParams(function ($v) {
-            /**
-             * @var \Swoolet\Lib\Validator $v
-             */
-            $v->ge('room_id', 1);
-        });
+        $data = parent::getValidator()->ge('room_id', 1)->getResult();
 
         $room_id = $data['room_id'];
 
         $this->conn->quitRoom($request->fd, $room_id);
+    }
+
+    public function praise($request)
+    {
+        $conn = $this->conn->getConn($request->fd);
+        if ($conn) {
+            list($uid, $room_id) = $conn;
+
+            $this->conn->broadcast($room_id, [
+                't' => Conn::TYPE_PRAISE,
+                'n' => 1,
+            ]);
+        }
+    }
+
+    public function follow($request)
+    {
+        $data = parent::getValidator()->required('to_uid')->getResult();
+        if (!$data)
+            return;
+
+        $conn = $this->conn->getConn($request->fd);
+        if ($conn) {
+            list($uid, $room_id) = $conn;
+
+            //todo:关注逻辑
+
+            $this->conn->broadcast($room_id, [
+                't' => Conn::TYPE_FOLLOW,
+                'uid' => $uid,
+                'nickname' => "nickname{$uid}",
+                'msg' => '关注了主播',
+            ]);
+        }
+    }
+
+    public function sendGift($request)
+    {
+        $data = parent::getValidator()->required('to_uid', false)->getResult();
+        if (!$data)
+            return;
+
+        $conn = $this->conn->getConn($request->fd);
+        if ($conn) {
+            list($uid, $room_id) = $conn;
+
+            //todo:送礼逻辑
+
+            $this->conn->broadcast($room_id, [
+                't' => Conn::TYPE_GIFT,
+                'uid' => $uid,
+                'nickname' => "nickname{$uid}",
+                'msg' => '送给主播',
+            ]);
+        }
+
     }
 }
