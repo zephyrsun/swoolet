@@ -4,10 +4,10 @@ namespace Pili;
 final class Config
 {
     const SDK_VERSION           = '1.5.4';
-    const SDK_USER_AGENT        = 'Pili-sdk-php';
+    const SDK_USER_AGENT        = 'pili-sdk-php';
 
 	public $USE_HTTPS           = false;
-    public $API_HOST            = 'Pili.qiniuapi.com';
+    public $API_HOST            = 'pili.qiniuapi.com';
     public $API_VERSION         = 'v1';
 
     protected static $_instance = NULL;

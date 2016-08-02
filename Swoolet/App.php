@@ -30,7 +30,7 @@ class App
         self::$server->response($str);
     }
 
-    static public function callRequest($uri, $request = null)
+    static public function callRequest($uri, $request)
     {
         \define('APP_TS', \time());
 

@@ -9,7 +9,7 @@
 
 namespace Live\Third;
 
-include BASE_DIR . 'Live/Third/Pili/Pili.php';
+include BASE_DIR . 'Live/Third/pili/Pili.php';
 
 class Pili
 {

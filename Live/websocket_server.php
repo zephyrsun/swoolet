@@ -13,7 +13,7 @@ class Server extends \Swoolet\WebSocket
     {
         $fd = $request->fd;
         //没有成功登陆,踢出去
-        swoole_timer_after(500, function () use ($fd) {
+        swoole_timer_after(1500, function () use ($fd) {
             if (!self::$conn->getConn($fd))
                 $this->sw->close($fd);
         });
@@ -30,7 +30,7 @@ class Server extends \Swoolet\WebSocket
      *
      * @param swoole_websocket_frame $frame
      */
-    public function parseData($frame)
+    public function onMessage($sw, $frame)
     {
         if (!$frame->data)
             return;
@@ -52,9 +52,5 @@ class Server extends \Swoolet\WebSocket
 \Swoolet\Router::$delimiter = '_';
 
 $app = Server::createServer('Live', 'dev');
-$app->run(':9502', [
-    'open_tcp_keepalive' => 1,
-    'tcp_keepidle' => 60,
-    'tcp_keepinterval' => 60,
-    'tcp_keepcount' => 5,
-]);
+$setting = include './Config/swoole_setting.php';
+$app->run(':9502', $setting);

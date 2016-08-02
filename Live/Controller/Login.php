@@ -3,6 +3,7 @@
 namespace Live\Controller;
 
 
+use Live\Cookie;
 use Live\Database\User;
 use Live\Redis\Common;
 use Live\Response;
@@ -18,7 +19,7 @@ class Login extends Basic
             return;
     }
 
-    public function mobile()
+    public function mobile($request)
     {
         $data = parent::getValidator()->mobileNumberCN('mobile')->required('code')->getResult();
         if (!$data)
@@ -34,6 +35,9 @@ class Login extends Basic
 
         $db_user = new User();
         $user = $db_user->login($db_user::PF_MOBILE, $mobile);
+
+        $cookie = new Cookie($request);
+        $cookie->set('token', $user['uid']);
 
         Response::data($user);
     }

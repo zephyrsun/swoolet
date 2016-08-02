@@ -6,6 +6,8 @@ class Http extends Basic
 {
     public $content_type = 'text/html; charset=utf-8';
 
+    public $response;
+
     protected function runServer($host, $port)
     {
         $this->events[] = 'Request';
@@ -21,18 +23,12 @@ class Http extends Basic
      */
     public function onRequest($request, $response)
     {
+        $this->response = $response;
+
         if ($request->server['path_info'] == '/favicon.ico')
             return $this->response('');
 
-        $this->parseData($request);
-    }
-
-    /**
-     * @param \swoole_http_request $request
-     */
-    public function parseData($request)
-    {
-        App::callRequest($request->server['path_info']);
+        App::callRequest($request->server['path_info'], $request);
     }
 
     /**
@@ -41,23 +37,7 @@ class Http extends Basic
      */
     public function response($str)
     {
-        //$str = \gzdeflate($str, 1);
-
-        $header = array(
-            'HTTP/1.1 200 OK',
-            'Date' => \gmdate('D, d M Y H:i:s T', \APP_TS),
-            'Content-Type' => $this->content_type,
-            'Content-Length' => \strlen($str),
-            'Content-Encoding' => 'deflate',
-            //'KeepAlive: off',
-            //'Connection: close',
-        );
-
-        $this->sw->send($this->fd, \implode("\r\n", $header) . "\r\n\r\n");
-
-        if ($str)
-            $this->sw->send($this->fd, $str);
-
-        $this->sw->close($this->fd);
+        $this->response->header("Server", "swoolet");
+        $this->response->end($str);
     }
 }

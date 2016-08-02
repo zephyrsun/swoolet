@@ -16,6 +16,7 @@ class Basic extends \Swoolet\Controller
 namespace Live;
 
 use \Swoolet\App;
+use Swoolet\Lib\Crypt;
 
 class Response
 {
@@ -52,5 +53,40 @@ class Validator extends \Swoolet\Lib\Validator
             Response::msg("参数错误：" . $this->getFirstError(), 402);
 
         return $result;
+    }
+}
+
+class Cookie
+{
+    public function __construct($request)
+    {
+        if ($request->cookie)
+            $_COOKIE = $request->cookie;
+    }
+
+    public function get($key)
+    {
+        $str = &$_COOKIE[$key];
+        if ($str) {
+            $arr = explode('|', $str, 2);
+
+            $cipher = new Crypt($arr[0]);
+            return $cipher->decrypt($arr[1]);
+        }
+
+        return $str;
+    }
+
+    public function set($key, $str)
+    {
+        $expire = 86400 * 90 + \APP_TS;
+
+        $cipher = new Crypt(\APP_TS);
+
+        $str = \APP_TS . '|' . $cipher->encrypt($str);
+
+        $_COOKIE[$key] = $str;
+
+        return App::$server->response->cookie($key, $str, $expire, '/', '', false, false);
     }
 }

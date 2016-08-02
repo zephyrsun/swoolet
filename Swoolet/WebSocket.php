@@ -9,6 +9,11 @@ class WebSocket extends Basic
      */
     public $sw;
 
+    /**
+     * @var \swoole_websocket_frame
+     */
+    public $frame;
+
     protected function runServer($host, $port)
     {
         //$this->events[] = 'HandShake';
@@ -64,14 +69,6 @@ class WebSocket extends Basic
         } else {
         }
         */
-        $this->parseData($frame);
-    }
-
-    /**
-     * @param \swoole_websocket_frame $frame
-     */
-    public function parseData($frame)
-    {
         $this->response("Receiced: {$frame->data}");
     }
 

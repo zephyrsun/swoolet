@@ -11,18 +11,14 @@ namespace Live\Database;
 
 use Swoolet\Data\PDO;
 
-class User extends PDO
+class User extends Basic
 {
-    public $cache;
-
     public $cfg_key = 'db_1';
     public $timeout = 86400 * 3;
 
     //public $table_name = 'user_0';
-    public $table_prefix = 'user_';
-    public $table_mod = 1e6;
 
-    public $rd_user = 'user:';
+    public $key_user = 'user:';
 
     CONST PF_MOBILE = 1;
 
@@ -74,12 +70,12 @@ class User extends PDO
 
     public function getUser($uid)
     {
-        if (!$user = $this->cache->get($this->rd_user . $uid)) {
+        if (!$user = $this->cache->get($this->key_user . $uid)) {
             if ($user = $this->table($uid)->where('uid', $uid)->fetch()) {
 
                 unset($user['username'], $user['create_ts']);
 
-                $this->cache->set($this->rd_user . $uid, $user, $this->timeout);
+                $this->cache->set($this->key_user . $uid, $user, $this->timeout);
             }
         }
 
@@ -100,14 +96,4 @@ class User extends PDO
             'username' => $username,
         ]);
     }
-
-    public function table($key)
-    {
-        $mod = (int)($key / $this->table_mod);
-
-        PDO::table($this->table_prefix . $mod);
-
-        return $this;
-    }
-
 }

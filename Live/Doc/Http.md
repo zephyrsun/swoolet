@@ -29,6 +29,9 @@ mobile //手机号码
 mobile //手机号码
 code //验证码
 
+Cookie:
+token,这个值在调用room_enter时,需要传进来
+
 返回:
 {"uid":2,"avatar":"","birthday":"0000-00-00","full":false,"c":0}
 

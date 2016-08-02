@@ -8,8 +8,10 @@
 
 namespace Live\Controller;
 
+use Live\Database\Gift;
 use \Live\Response;
 use \Live\Lib\Conn;
+use Swoolet\App;
 
 class Room extends Basic
 {
@@ -27,9 +29,9 @@ class Room extends Basic
         \Server::$conn = $this->conn = new Conn();
     }
 
-    public function enter($request)
+    public function enter()
     {
-        $data = parent::getValidator()->ge('uid', 1)->ge('room_id', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('room_id', 1)->getResult();
         if (!$data)
             return;
 
@@ -42,7 +44,7 @@ class Room extends Basic
             'nickname' => "nickname{$uid}",
         ]);
 
-        $this->conn->enterRoom($request->fd, $uid, $room_id);
+        $this->conn->enterRoom(App::$server->frame->fd, $uid, $room_id);
 
         Response::msg('登陆成功');
         //$this->room[$data['room_id']][$this->request->fd] = $data['uid'];
@@ -80,11 +82,9 @@ class Room extends Basic
 
     public function quit($request)
     {
-        $data = parent::getValidator()->ge('room_id', 1)->getResult();
+        $this->conn->quitConn($request->fd);
 
-        $room_id = $data['room_id'];
-
-        $this->conn->quitRoom($request->fd, $room_id);
+        //todo:退出逻辑
     }
 
     public function praise($request)
@@ -92,6 +92,8 @@ class Room extends Basic
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
             list($uid, $room_id) = $conn;
+
+            //todo:点赞逻辑
 
             $this->conn->broadcast($room_id, [
                 't' => Conn::TYPE_PRAISE,
@@ -102,7 +104,7 @@ class Room extends Basic
 
     public function follow($request)
     {
-        $data = parent::getValidator()->required('to_uid')->getResult();
+        $data = parent::getValidator()->getResult();
         if (!$data)
             return;
 
@@ -123,7 +125,7 @@ class Room extends Basic
 
     public function sendGift($request)
     {
-        $data = parent::getValidator()->required('to_uid', false)->getResult();
+        $data = parent::getValidator()->required('gift_id')->getResult();
         if (!$data)
             return;
 
@@ -131,15 +133,25 @@ class Room extends Basic
         if ($conn) {
             list($uid, $room_id) = $conn;
 
-            //todo:送礼逻辑
+            $gift_id = $data['gift_id'];
+            $to_uid = $room_id;
+
+            $ret = (new Gift())->sendGift($uid, $to_uid, $gift_id);
+            if (!$ret)
+                return $ret;
 
             $this->conn->broadcast($room_id, [
                 't' => Conn::TYPE_GIFT,
                 'uid' => $uid,
                 'nickname' => "nickname{$uid}",
                 'msg' => '送给主播',
+                'gift_id' => $gift_id,
             ]);
         }
+    }
+
+    public function createRoom($request)
+    {
 
     }
 }

@@ -66,7 +66,7 @@ namespace Swoolet\Data {
         {
             $this->initial();
 
-            if ($link = &self::$ins[$cfg_key])
+            if ($link = &self::$ins[$cfg_key . $this->option['dbname']])
                 return $this->link = $link;
 
             $cfg = App::getConfig($cfg_key) + $this->option;
@@ -444,10 +444,13 @@ namespace Swoolet\Data {
         }
 
         /**
+         * @param int $autocommit
          * @return bool
          */
-        public function beginTransaction()
+        public function beginTransaction($autocommit = 1)
         {
+            $this->query("SET AUTOCOMMIT=$autocommit");
+
             return $this->link->beginTransaction();
         }
 

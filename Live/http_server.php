@@ -2,6 +2,8 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
+use Swoolet\App;
+
 class Server extends \Swoolet\Http
 {
     /**
@@ -16,14 +18,20 @@ class Server extends \Swoolet\Http
         //echo 'onStart' . PHP_EOL;
     }
 
-    public function parseData($request)
+    public function onRequest($request, $response)
     {
+        $this->response = $response;
+
+        if ($request->server['path_info'] == '/favicon.ico')
+            return $this->response('');
+
         $_POST = $request->post ? $request->post : [];
 
         //header('Content-type: application/json');
-        parent::parseData($request);
+        App::callRequest($request->server['path_info'], $request, $response);
     }
 }
 
 $app = Server::createServer('Live', 'dev');
-$app->run(':80');
+$setting = include './Config/swoole_setting.php';
+$app->run(':80', $setting);
