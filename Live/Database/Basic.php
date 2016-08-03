@@ -15,8 +15,11 @@ class Basic extends PDO
 {
     public $cache;
 
-    public $table_prefix = 'user_';
+    public $table_prefix = '';
     public $table_mod = 1e6;
+
+    public $limit = 20;
+    public $timeout = 86400 * 3;
 
     public function table($key)
     {

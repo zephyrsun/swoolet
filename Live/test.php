@@ -2,13 +2,8 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-$crypt = new \Swoolet\Lib\Crypt('fadfaf');
+echo \msgpack_unpack($ret);
 
-$val = $crypt->encrypt(111);
-var_dump($val);
-//$crypt = new \Swoolet\Lib\Crypt('fadfaf','fadfa');
-$q = $crypt->decrypt($val);
-var_dump($q);
 
 //$q = new \Live\Third\QCloud();
 

@@ -2,7 +2,6 @@
 
 namespace Live\Controller;
 
-
 use Live\Cookie;
 use Live\Database\User;
 use Live\Redis\Common;
@@ -36,10 +35,11 @@ class Login extends Basic
         $db_user = new User();
         $user = $db_user->login($db_user::PF_MOBILE, $mobile);
 
-        $cookie = new Cookie($request);
-        $cookie->set('token', $user['uid']);
-
-        Response::data($user);
+        Response::data([
+            'user' => $user,
+            'full' => $user['birthday'] != '0000-00-00',
+            'token' => Cookie::encrypt($user['uid']),
+        ]);
     }
 
     public function sendSms()

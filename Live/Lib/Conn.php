@@ -9,6 +9,7 @@
 
 namespace Live\Lib;
 
+use Live\Response;
 use \Swoolet\App;
 
 class Conn
@@ -20,11 +21,12 @@ class Conn
     const TYPE_PRAISE = 5;//点赞
     const TYPE_GIFT = 10;//送礼
 
-    public $conn;
+    public $ids;
+    public $room;
 
     public function &getConn($fd)
     {
-        $conn = &$this->conn[$fd] or $conn = [];
+        $conn = &$this->ids[$fd] or $conn = [];
         return $conn;
     }
 
@@ -33,7 +35,7 @@ class Conn
         $conn = $this->getConn($fd);
         if ($conn) {
             $this->quitRoom($fd, $conn[1]);
-            unset($this->conn[$fd]);
+            unset($this->ids[$fd]);
         }
 
         return $this;
@@ -41,19 +43,21 @@ class Conn
 
     public function &getRoom($room_id)
     {
-        $room = &$this->{$room_id} or $room = [];
+        $room = &$this->room[$room_id] or $room = [];
         return $room;
     }
 
     public function enterRoom($fd, $uid, $room_id)
     {
         $room = &$this->getRoom($room_id);
+        //if (!$room)
+        //    return Response::msg('直播已结束', 1024);
 
         //退出已经存在的房间
         $this->quitConn($fd);
 
         //保存链接
-        $this->conn[$fd] = [$uid, $room_id];
+        $this->ids[$fd] = [$uid, $room_id];
 
         //加入房间
         $room[$fd] = $uid;
@@ -65,6 +69,26 @@ class Conn
     {
         $room = &$this->getRoom($room_id);
         unset($room[$fd]);
+    }
+
+    public function createRoom($fd, $uid)
+    {
+        $this->room[$uid] = [];
+
+        $this->enterRoom($fd, $uid, $uid);
+    }
+
+    public function destroyRoom($room_id)
+    {
+        $room = $this->getRoom($room_id);
+
+        if ($room) {
+            foreach ($room as $fd => $data) {
+                unset($this->ids[$fd]);
+            }
+
+            unset($this->room[$room_id]);
+        }
     }
 
     public function broadcast($room_id, $msg)

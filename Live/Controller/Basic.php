@@ -49,10 +49,22 @@ class Validator extends \Swoolet\Lib\Validator
 {
     public function getResult()
     {
-        if (!$result = parent::getResult())
-            Response::msg("参数错误：" . $this->getFirstError(), 402);
+        if (!$data = parent::getResult())
+            return Response::msg("参数错误：" . $this->getFirstError(), 402);
 
-        return $result;
+        if (isset($data['token'])) {
+            $uid = Cookie::decrypt($data['token']);
+
+            /*
+            if ($uid > 0 && is_numeric($uid))
+                $data['uid'] = $uid;
+            else
+                return Response::msg('TOKEN失效', 1012);
+            */
+            $data['uid'] = 1;
+        }
+
+        return $data;
     }
 }
 
@@ -64,15 +76,27 @@ class Cookie
             $_COOKIE = $request->cookie;
     }
 
+    static function decrypt($str)
+    {
+        $arr = explode('|', $str, 2);
+
+        $cipher = new Crypt($arr[0]);
+        return $cipher->decrypt($arr[1]);
+    }
+
+    static function encrypt($str)
+    {
+        $key = base_convert(\APP_TS, 10, 36);
+
+        $cipher = new Crypt($key);
+        return $key . '|' . $cipher->encrypt($str);
+    }
+
     public function get($key)
     {
         $str = &$_COOKIE[$key];
-        if ($str) {
-            $arr = explode('|', $str, 2);
-
-            $cipher = new Crypt($arr[0]);
-            return $cipher->decrypt($arr[1]);
-        }
+        if ($str)
+            return self::decrypt($str);
 
         return $str;
     }
@@ -81,11 +105,7 @@ class Cookie
     {
         $expire = 86400 * 90 + \APP_TS;
 
-        $cipher = new Crypt(\APP_TS);
-
-        $str = \APP_TS . '|' . $cipher->encrypt($str);
-
-        $_COOKIE[$key] = $str;
+        $_COOKIE[$key] = self::encrypt($str);
 
         return App::$server->response->cookie($key, $str, $expire, '/', '', false, false);
     }

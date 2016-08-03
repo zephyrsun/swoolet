@@ -14,9 +14,7 @@ use Swoolet\Data\PDO;
 class User extends Basic
 {
     public $cfg_key = 'db_1';
-    public $timeout = 86400 * 3;
-
-    //public $table_name = 'user_0';
+    public $table_prefix = 'user_';
 
     public $key_user = 'user:';
 
@@ -55,10 +53,7 @@ class User extends Basic
         }
         $user = $this->getUser($uid);
 
-        return [
-            'user' => $user,
-            'full' => $user['birthday'] != '0000-00-00',
-        ];
+        return $user;
     }
 
     public function updateUser($data, $uid)

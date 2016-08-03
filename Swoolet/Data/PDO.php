@@ -71,7 +71,7 @@ namespace Swoolet\Data {
 
             $cfg = App::getConfig($cfg_key) + $this->option;
 
-            $this->link = $link = new \pdoProxy(
+            return $this->link = $link = new \pdoProxy(
                 "{$cfg['driver']}:host={$cfg['host']};port={$cfg['port']};dbname={$cfg['dbname']};charset={$cfg['charset']};",
                 $cfg['username'],
                 $cfg['password'],
@@ -398,6 +398,8 @@ namespace Swoolet\Data {
 
             if ($clear_group_by)
                 $this->groupBy('');
+
+            $this->clause['limit'] = '';
 
             return $this->select('count(*)')->limit(1)->fetchColumn(0);
         }

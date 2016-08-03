@@ -51,18 +51,22 @@ class Crypt
 
     public function encrypt($str)
     {
-        $cipher = $this->init();
-        $str = base64_encode(mcrypt_generic($cipher, $str));
-        mcrypt_generic_deinit($cipher);
+        if ($str) {
+            $cipher = $this->init();
+            $str = base64_encode(mcrypt_generic($cipher, $str));
+            mcrypt_generic_deinit($cipher);
+        }
 
         return $str;
     }
 
     public function decrypt($str)
     {
-        $cipher = $this->init();
-        $str = mdecrypt_generic($cipher, base64_decode($str)); //$str = rtrim($str, "\0");
-        mcrypt_generic_deinit($cipher);
+        if ($str) {
+            $cipher = $this->init();
+            $str = mdecrypt_generic($cipher, base64_decode($str)); //$str = rtrim($str, "\0");
+            mcrypt_generic_deinit($cipher);
+        }
 
         return $str;
     }

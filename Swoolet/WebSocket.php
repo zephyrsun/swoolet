@@ -9,11 +9,6 @@ class WebSocket extends Basic
      */
     public $sw;
 
-    /**
-     * @var \swoole_websocket_frame
-     */
-    public $frame;
-
     protected function runServer($host, $port)
     {
         //$this->events[] = 'HandShake';

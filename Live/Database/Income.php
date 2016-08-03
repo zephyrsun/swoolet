@@ -19,6 +19,7 @@ use Swoolet\Data\PDO;
 class Income extends Basic
 {
     public $cfg_key = 'db_1';
+    public $table_prefix = 'user_';
 
     public function __construct()
     {
@@ -36,13 +37,13 @@ class Income extends Basic
 
         $ret = $this->table($uid)->where('uid', $uid)->update("money = money + $money");
         if (!$ret) {
-            $ret = $this->insert([
+            $ret = $this->table($uid)->insert([
                 'uid' => $uid,
                 'money' => $money,
             ]);
 
             if (!$ret)
-                return Response::msg('数据更新失败', 1012);
+                return Response::msg('数据更新失败', 1014);
         }
 
         return $ret;
@@ -53,13 +54,13 @@ class Income extends Basic
         if ($money < 0)
             $money = -$money;
         elseif ($money == 0)
-            return Response::msg('参数错误', 1012);
+            return Response::msg('参数错误', 1016);
 
         $ret = $this->table($uid)->where('uid = ? AND money >= ?', [$uid, $money])
             ->update("money = money - $money");
 
         if (!$ret)
-            return Response::msg('余额不足', 1012);
+            return Response::msg('余额不足', 1017);
 
         return $ret;
     }

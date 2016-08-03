@@ -78,7 +78,6 @@ const TYPE_GIFT = 10;//送礼
 ```
 
 ###送礼
-###关注主播
 ```
 请求:
 {"m":"room_sendGift","gift_id":1}
@@ -89,3 +88,5 @@ const TYPE_GIFT = 10;//送礼
 房间消息(t值参考`房间消息类型`):
 {"t":3,"uid":"10001","nickname":"nickname10001","msg":"送给主播","gift_id":1}
 ```
+
+###开播

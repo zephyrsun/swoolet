@@ -29,7 +29,7 @@ namespace Swoolet\Data {
 
         /**
          * @param $cfg_key
-         * @return mixed
+         * @return \redisProxy
          */
         public function dial($cfg_key)
         {

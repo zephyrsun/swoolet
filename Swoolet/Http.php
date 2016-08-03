@@ -4,8 +4,6 @@ namespace Swoolet;
 
 class Http extends Basic
 {
-    public $content_type = 'text/html; charset=utf-8';
-
     public $response;
 
     protected function runServer($host, $port)

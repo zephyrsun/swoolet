@@ -22,7 +22,8 @@ class Server extends \Swoolet\WebSocket
     public function onClose($sw, $fd, $from_id)
     {
         //echo 'onClose' . PHP_EOL;
-        self::$conn->quitConn($fd);
+        if (self::$conn)
+            self::$conn->quitConn($fd);
     }
 
     /**

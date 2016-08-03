@@ -69,19 +69,42 @@ class Gift extends Basic
 
         $this->beginTransaction();
         $ret = (new Balance())->sub($uid, $money);
-        if (!$ret)
-            return $ret;
-
-        $ret = (new MoneyLog())->add($uid, $to_uid, $money, 1, $gift_id);
         if (!$ret) {
             $this->rollback();
-            return Response::msg('送礼失败',1015);
+            return $ret;
+        }
+
+        $ret = (new MoneyLog())->add($uid, $to_uid, $money, 1, "gift:{$gift_id}");
+        if (!$ret) {
+            $this->rollback();
+            return Response::msg('送礼失败', 1015);
         }
 
         $ret = (new Income())->add($to_uid, $money);
         if (!$ret) {
             $this->rollback();
-            return Response::msg('送礼失败',1013);
+            return Response::msg('送礼失败', 1013);
+        }
+
+        $this->commit();
+        return $ret;
+    }
+
+    public function sendHorn($uid, $to_uid)
+    {
+        $money = 20;
+
+        $this->beginTransaction();
+        $ret = (new Balance())->sub($uid, $money);
+        if (!$ret) {
+            $this->rollback();
+            return $ret;
+        }
+
+        $ret = (new MoneyLog())->add($uid, $to_uid, $money, 1, 'horn');
+        if (!$ret) {
+            $this->rollback();
+            return Response::msg('发送弹幕失败', 1018);
         }
 
         $this->commit();

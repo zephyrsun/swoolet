@@ -8,6 +8,8 @@
 
 namespace Live\Controller;
 
+use Live\Cookie;
+use Live\Database\Fan;
 use Live\Database\Gift;
 use \Live\Response;
 use \Live\Lib\Conn;
@@ -29,7 +31,7 @@ class Room extends Basic
         \Server::$conn = $this->conn = new Conn();
     }
 
-    public function enter()
+    public function enter($request)
     {
         $data = parent::getValidator()->required('token')->ge('room_id', 1)->getResult();
         if (!$data)
@@ -44,9 +46,9 @@ class Room extends Basic
             'nickname' => "nickname{$uid}",
         ]);
 
-        $this->conn->enterRoom(App::$server->frame->fd, $uid, $room_id);
-
-        Response::msg('登陆成功');
+        $ret = $this->conn->enterRoom($request->fd, $uid, $room_id);
+        if ($ret)
+            Response::msg('登陆成功');
         //$this->room[$data['room_id']][$this->request->fd] = $data['uid'];
     }
 
@@ -62,7 +64,10 @@ class Room extends Basic
 
             if ($data['horn']) {
 
-                //todo:扣钱逻辑
+                $to_uid = $room_id;
+                $ret = (new Gift())->sendHorn($uid, $to_uid);
+                if (!$ret)
+                    return $ret;
 
                 $t = Conn::TYPE_HORN;
             } else {
@@ -104,22 +109,20 @@ class Room extends Basic
 
     public function follow($request)
     {
-        $data = parent::getValidator()->getResult();
-        if (!$data)
-            return;
-
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
             list($uid, $room_id) = $conn;
 
-            //todo:关注逻辑
-
-            $this->conn->broadcast($room_id, [
-                't' => Conn::TYPE_FOLLOW,
-                'uid' => $uid,
-                'nickname' => "nickname{$uid}",
-                'msg' => '关注了主播',
-            ]);
+            $follow_uid = $room_id;
+            $ret = (new Fan())->beFan($uid, $follow_uid);
+            if ($ret) {
+                $this->conn->broadcast($room_id, [
+                    't' => Conn::TYPE_FOLLOW,
+                    'uid' => $uid,
+                    'nickname' => "nickname{$uid}",
+                    'msg' => '关注了主播',
+                ]);
+            }
         }
     }
 
@@ -136,6 +139,9 @@ class Room extends Basic
             $gift_id = $data['gift_id'];
             $to_uid = $room_id;
 
+            if ($uid == $to_uid)
+                return Response::msg('礼物不能送给自己', 1023);
+
             $ret = (new Gift())->sendGift($uid, $to_uid, $gift_id);
             if (!$ret)
                 return $ret;
@@ -147,11 +153,29 @@ class Room extends Basic
                 'msg' => '送给主播',
                 'gift_id' => $gift_id,
             ]);
+
         }
     }
 
-    public function createRoom($request)
+    public function startLive($request)
     {
+        $data = parent::getValidator()->required('token')->getResult();
+        if (!$data)
+            return;
 
+        $uid = $data['uid'];
+
+        $this->conn->createRoom($request->fd, $uid);
+    }
+
+    public function stopLive($request)
+    {
+        $conn = $this->conn->getConn($request->fd);
+
+        if ($conn) {
+            list($uid, $room_id) = $conn;
+
+            $this->conn->destroyRoom($room_id);
+        }
     }
 }
