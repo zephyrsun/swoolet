@@ -25,7 +25,7 @@ class MoneyLog extends Basic
 
     public function table($key)
     {
-        return  PDO::table('m_2016');
+        return PDO::table('m_2016');
     }
 
     public function add($uid, $to_uid, $money, $status = 1, $data = '')
@@ -39,7 +39,7 @@ class MoneyLog extends Basic
             'money' => $money,
             'status' => $status,
             'data' => $data,
-            'ts' => \APP_TS,
+            'ts' => \Swoolet\App::$ts,
         ]);
     }
 }

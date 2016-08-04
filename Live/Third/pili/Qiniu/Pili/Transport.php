@@ -1,18 +1,16 @@
 <?php
-namespace Pili;
+namespace Qiniu\Pili;
 
-use \Qiniu\Utils;
-use \Qiniu\HttpRequest;
-use \Qiniu\Credentials;
-use \Pili\Config;
+use \Qiniu\Pili\Utils;
+use \Qiniu\Pili\HttpRequest;
 
 final class Transport
 {
-    private $_credentials;
+    private $_mac;
 
-    public function __construct($credentials)
+    public function __construct($mac)
     {
-    	$this->_credentials = $credentials; 
+    	$this->_mac = $mac;
     }
 
     public function send($method, $url, $body = NULL)
@@ -24,16 +22,19 @@ final class Transport
 
     private function _setHeaders($method, $url, $body = NULL)
     {
-        $ctType = 'application/json';
-        $macToken = $this->_credentials->MACToken($method, $url, $ctType, $body);
+        if ($method != HttpRequest::GET){
+            $cType = 'application/json';
+        } else {
+            $cType = NULL;
+        }
+        $macToken = $this->_mac->MACToken($method, $url, $cType, $body);
         $ua = Utils::getUserAgent(Config::SDK_USER_AGENT, Config::SDK_VERSION);
         return array(
-            'Content-Type'  => $ctType,
+            'Content-Type'  => $cType,
             'User-Agent'    => $ua,
             'Authorization' => $macToken,
         );
     }
-
 }
 
 ?>

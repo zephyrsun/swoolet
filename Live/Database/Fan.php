@@ -14,13 +14,25 @@ class Fan extends Follow
     public $key = 'fan:';
     public $key_count = 'fan_n:';
 
+    public $limit = 5000;
+
     public function beFan($uid, $follow_uid)
     {
-        $fan = $this->add($uid, $follow_uid);
+        if ($this->isFollow($uid, $follow_uid) === false) {
+            $fan = $this->add($uid, $follow_uid);
 
-        $db_follow = new Follow();
-        $follow = $db_follow->add($follow_uid, $uid);
+            $db_follow = new Follow();
+            $follow = $db_follow->add($follow_uid, $uid);
 
-        return $fan;
+            return $fan;
+        }
+
+        return false;
+    }
+
+    public function isFollow($uid, $follow_uid)
+    {
+        $this->getList($uid, 0);
+        return $this->cache->link->zScore($this->key . $uid, $follow_uid);
     }
 }

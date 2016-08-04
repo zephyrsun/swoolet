@@ -19,31 +19,16 @@ class App
     /**
      * @var Basic $server
      */
-    static public $ins, $server, $config, $namespace = 'App', $env = 'test';
+    static public $ins, $server, $config, $ts = 0;
 
-    /**
-     * @param $str
-     * @return null
-     */
-    static public function response($str)
+//    static public function response($str)
+//    {
+//        self::$server->response($str);
+//    }
+
+    static public function setConfig($namespace, $env)
     {
-        self::$server->response($str);
-    }
-
-    static public function callRequest($uri, $request)
-    {
-        \define('APP_TS', \time());
-
-        $query = Router::parse($uri);
-
-        //$obj = new $class();
-        $obj = self::getInstance(self::$namespace . '\\Controller\\' . \ucfirst($query[0]));
-        $obj->{$query[1]}($request);
-    }
-
-    static public function setConfig()
-    {
-        self::$config = import(self::$namespace . '/Config/' . self::$env) or self::$config = array();
+        self::$config = import($namespace . '/Config/' . $env) or self::$config = array();
     }
 
     static public function getConfig($key)
@@ -73,6 +58,12 @@ class App
 class Controller
 {
     public $request;
+
+    public function __call($name, $arguments)
+    {
+        $class = get_called_class();
+        echo "Method error: {$class}::{$name}" . PHP_EOL;
+    }
 }
 
 class Router

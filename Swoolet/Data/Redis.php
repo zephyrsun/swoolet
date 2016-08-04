@@ -42,11 +42,12 @@ namespace Swoolet\Data {
             $link = new \redisProxy();
 
             $link->connect($cfg['host'], $cfg['port'], $cfg['timeout']);
-            if (!$link->select($this->db_index))
-                return null;
 
             if ($cfg['password'])
                 $link->auth($cfg['password']);
+
+            if (!$link->select($this->db_index))
+                return null;
 
             return $this->link = $link;
         }

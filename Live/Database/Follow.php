@@ -18,6 +18,8 @@ class Follow extends Basic
     public $key = 'follow:';
     public $key_count = 'follow_n:';
 
+    public $limit = 500;
+
     public function __construct()
     {
         $this->option['dbname'] = 'live_follow';
@@ -45,17 +47,17 @@ class Follow extends Basic
         return $ret;
     }
 
-    public function getList($uid, $id)
+    public function getList($uid, $start_id)
     {
         $key = $this->key . $uid;
         $key_count = $this->key_count . $uid;
 
-        if ($list = $this->cache->revRange($key, $id, $this->limit, true)) {
+        if ($list = $this->cache->revRange($key, $start_id, $this->limit, true)) {
             $count = $this->cache->getCount($key_count);
         } else {
             $count = 0;
 
-            $list = $this->table($uid)->where('uid = ? AND id > ?', [$uid, $id])->limit(500)->fetchAll();
+            $list = $this->table($uid)->where('uid = ? AND id > ?', [$uid, $start_id])->limit($this->limit)->fetchAll();
             if ($list) {
                 $n = 0;
                 $data = [$key];
@@ -72,7 +74,7 @@ class Follow extends Basic
                 call_user_func_array([$this->cache->link, 'zAdd'], $data);
                 $this->cache->expire($key, $this->timeout);
 
-                $list = $this->cache->revRange($key, $id, $this->limit, true);
+                $list = $this->cache->revRange($key, $start_id, $this->limit, true);
             }
         }
 

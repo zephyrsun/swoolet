@@ -20,7 +20,7 @@ const TYPE_GIFT = 10;//送礼
 ###进入直播间
 ```
 请求:
-{"m":"room_enter","room_id":"1","token":"xxxxxxxx"}
+{"m":"room_join","room_id":"1","token":"xxxxxxxx"}
 
 返回:
 {"msg":"登陆成功","c":0}
@@ -32,19 +32,22 @@ const TYPE_GIFT = 10;//送礼
 ###发消息
 ```
 请求:
-{"m":"room_sendMsg","msg":"一条消息"}
+{"m":"room_sendMsg","msg":"一条消息","horn":1,"cb":"fadfad"}
+
+horn这个值可传也不可传,传的话表示发弹幕
+
 
 返回:
 {"msg":"发送成功","c":0}
 
 房间消息(t值参考`房间消息类型`):
-{"t":4,"uid":"10001","nickname":"nickname10001","msg":"一条消息"}
+{"t":4,"user":{"uid":"10001","nickname":"nickname10001"},"msg":"一条消息"}
 ```
 
 ###退出直播间
 ```
 请求:
-{"m":"room_quit"}
+{"m":"room_leave"}
 
 返回:
 无
@@ -74,7 +77,7 @@ const TYPE_GIFT = 10;//送礼
 无
 
 房间消息(t值参考`房间消息类型`):
-{"t":3,"uid":"10001","nickname":"nickname10001","msg":"关注了主播"}
+{"t":3,"user":{"uid":"10001","nickname":"nickname10001"},"msg":"关注了主播"}
 ```
 
 ###送礼
@@ -86,7 +89,25 @@ const TYPE_GIFT = 10;//送礼
 无
 
 房间消息(t值参考`房间消息类型`):
-{"t":3,"uid":"10001","nickname":"nickname10001","msg":"送给主播","gift_id":1}
+{"t":3,"user":{"uid":"10001","nickname":"nickname10001"},"msg":"送给主播","gift_id":1}
 ```
 
 ###开播
+
+```
+请求:
+{"m":"room_start","token":"xxxxxx"}
+
+返回:
+{"publish_url":"rtmp://xxxxxxxx","c":0}
+```
+
+###停播
+
+```
+请求:
+{"m":"room_stop","token":"xxxxxx"}
+
+返回:
+{""}
+```

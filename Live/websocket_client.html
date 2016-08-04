@@ -5,8 +5,9 @@
     websocket.onopen = function (evt) {
         console.log("Connected to WebSocket server.")
 
-        websocket.send('{"m":"room_enter","room_id":"2","token":"10001"}')
-        websocket.send('{"m":"room_follow"}')
+        //websocket.send('{"m":"room_enter","room_id":"2","token":"10001"}')
+        //websocket.send('{"m":"room_follow"}')
+        websocket.send('{"m":"room_start","token":"xxx"}')
         //websocket.send('{"m":"room_quit","room_id":"1","uid":"10001"}')
     }
 

@@ -78,7 +78,6 @@ class Validator
         return $this->checkResult($key, $val, $result, $required);
     }
 
-
     /**
      * email address
      *

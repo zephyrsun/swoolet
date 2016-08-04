@@ -1,0 +1,61 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: sunzhenghua
+ * Date: 16/7/29
+ * Time: 下午2:51
+ */
+
+namespace Live\Database;
+
+
+use Live\Response;
+use Swoolet\Data\PDO;
+
+class Live extends Basic
+{
+    public $cfg_key = 'db_1';
+    public $table_prefix = 'live';
+
+    public function __construct()
+    {
+        $this->option['dbname'] = 'live';
+
+        parent::__construct();
+
+        //$this->cache = new \Live\Redis\Room();
+    }
+
+    public function table($key)
+    {
+        PDO::table($this->table_prefix);
+
+        return $this;
+    }
+
+    public function start($uid, $new_data)
+    {
+        $data = $this->get($uid);
+
+        if ($data) {
+            $ret = $this->table($uid)->where('uid', $uid)->update($new_data);
+        } else {
+            $ret = $this->table($uid)->insert($new_data + ['uid' => $uid]);
+        }
+
+        if (!$ret)
+            return Response::msg('开播失败', 1025);
+
+        return $ret;
+    }
+
+    public function stop($uid)
+    {
+        return $this->table($uid)->where('uid = ? AND status = 1', $uid)->update(['status' => 0]);
+    }
+
+    public function get($uid)
+    {
+        return $this->table($uid)->where('uid', $uid)->fetch();
+    }
+}

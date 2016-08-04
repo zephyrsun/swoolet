@@ -20,6 +20,7 @@ use Swoolet\Lib\Crypt;
 
 class Response
 {
+
     /**
      * @param $msg
      * @param $code
@@ -41,7 +42,9 @@ class Response
     {
         $data['c'] = $code;
 
-        App::response(json_encode($data, \JSON_UNESCAPED_UNICODE));
+        \Server::$msg = json_encode($data, \JSON_UNESCAPED_UNICODE);
+
+        return true;
     }
 }
 
@@ -53,15 +56,15 @@ class Validator extends \Swoolet\Lib\Validator
             return Response::msg("参数错误：" . $this->getFirstError(), 402);
 
         if (isset($data['token'])) {
+
             $uid = Cookie::decrypt($data['token']);
 
-            /*
             if ($uid > 0 && is_numeric($uid))
                 $data['uid'] = $uid;
             else
                 return Response::msg('TOKEN失效', 1012);
-            */
-            $data['uid'] = 1;
+
+            //$data['uid'] = 1;
         }
 
         return $data;
@@ -79,6 +82,8 @@ class Cookie
     static function decrypt($str)
     {
         $arr = explode('|', $str, 2);
+        if (count($arr) != 2)
+            return false;
 
         $cipher = new Crypt($arr[0]);
         return $cipher->decrypt($arr[1]);
@@ -86,7 +91,7 @@ class Cookie
 
     static function encrypt($str)
     {
-        $key = base_convert(\APP_TS, 10, 36);
+        $key = base_convert(\Swoolet\App::$ts, 10, 36);
 
         $cipher = new Crypt($key);
         return $key . '|' . $cipher->encrypt($str);
@@ -103,7 +108,7 @@ class Cookie
 
     public function set($key, $str)
     {
-        $expire = 86400 * 90 + \APP_TS;
+        $expire = 86400 * 90 + \Swoolet\App::$ts;
 
         $_COOKIE[$key] = self::encrypt($str);
 

@@ -20,6 +20,7 @@ class Conn
     const TYPE_ENTER = 4;//进入房间
     const TYPE_PRAISE = 5;//点赞
     const TYPE_GIFT = 10;//送礼
+    const TYPE_LIVE_STOP = 20;//停播
 
     public $ids;
     public $room;
@@ -82,12 +83,18 @@ class Conn
     {
         $room = $this->getRoom($room_id);
 
-        if ($room) {
-            foreach ($room as $fd => $data) {
-                unset($this->ids[$fd]);
-            }
+        $msg = [
+            't' => Conn::TYPE_LIVE_STOP,
+            'msg' => '直播结束',
+        ];
 
-            unset($this->room[$room_id]);
+        /**
+         * @var \swoole_websocket_server $sw
+         */
+        $sw = App::$server->sw;
+        foreach ($room as $fd => $data) {
+            $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
+            $sw->close($fd);
         }
     }
 

@@ -13,6 +13,9 @@ use Swoolet\Data\PDO;
 
 class Basic extends PDO
 {
+    /**
+     * @var \Live\Redis\Common $cache
+     */
     public $cache;
 
     public $table_prefix = '';

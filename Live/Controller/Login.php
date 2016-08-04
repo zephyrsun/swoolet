@@ -28,7 +28,6 @@ class Login extends Basic
         $code = $data['code'];
 
         $r_code = (new Common())->get($this->sms_key . $mobile);
-
         if ($r_code != $code)
             return Response::msg('验证码错误', 1001);
 

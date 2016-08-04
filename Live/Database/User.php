@@ -31,13 +31,15 @@ class User extends Basic
 
     public function login($pf, $username, $avatar = '')
     {
-        $user = $this->getByUsername($pf, $username);
-        if ($user) {
-            $uid = $user['uid'];
+        $user_map = $this->getByUsername($pf, $username);
+        if ($user_map) {
+            $uid = $user_map['uid'];
 
-            $this->updateUser([
-                'avatar' => $user['avatar'] ? $user['avatar'] : $avatar,
-            ], $uid);
+            if ($avatar) {
+                $this->updateUser([
+                    'avatar' => $avatar,
+                ], $uid);
+            }
 
         } else {
             $uid = $this->getUID($pf, $username);
@@ -48,7 +50,7 @@ class User extends Basic
                 'username' => $username,
                 'avatar' => $avatar,
                 'birthday' => '0000-00-00',
-                'create_ts' => \APP_TS,
+                'create_ts' => \Swoolet\App::$ts,
             ]);
         }
         $user = $this->getUser($uid);

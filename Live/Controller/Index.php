@@ -9,7 +9,13 @@ class Index extends Basic
 {
     public function index()
     {
-        //Response::msg('Hello world!', -1);
-        App::response('Hello world!');
+        return Response::msg('Hello world!');
+    }
+
+    public function _test()
+    {
+        //$q = (new \Live\Third\Pili())->stop('test_1_1470301542', '1470301542', \Swoolet\App::$ts);
+
+        var_dump(11);
     }
 }

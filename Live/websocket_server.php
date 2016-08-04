@@ -1,9 +1,13 @@
 <?php
 
+error_reporting(E_ALL);
+
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 class Server extends \Swoolet\WebSocket
 {
+    static public $msg;
+
     /**
      * @var \Live\Lib\Conn
      */
@@ -43,7 +47,9 @@ class Server extends \Swoolet\WebSocket
 
             echo $uri . PHP_EOL;
 
-            \Swoolet\App::callRequest($uri, $frame);
+            $this->callRequest($uri, $frame);
+
+            $this->response(self::$msg);
         } else {
             $this->response('');
         }

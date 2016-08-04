@@ -22,6 +22,7 @@ class Crypt
         'algo' => \MCRYPT_RIJNDAEL_256,
         'mode' => \MCRYPT_MODE_CBC,
         'key' => 'SWOOLET_WARNING_PLEASE_CHANGE_KEY',
+        'secret' => '',
     ];
 
     public $secret;

@@ -72,6 +72,15 @@ abstract class Basic
     public $sw;
     public $fd;
 
+    public $namespace = 'App';
+    public $env = 'test';
+
+    public function __construct($namespace, $env)
+    {
+        $this->namespace = $namespace;
+        $this->env = $env;
+    }
+
     /**
      * a shortcut
      *
@@ -82,10 +91,7 @@ abstract class Basic
     {
         $class = get_called_class();
 
-        App::$namespace = $namespace;
-        App::$env = $env;
-
-        return App::$server = new $class();
+        return App::$server = new $class($namespace, $env);
     }
 
     /**
@@ -160,7 +166,7 @@ abstract class Basic
         function_exists('opcache_reset') && opcache_reset();
         function_exists('apc_clear_cache') && apc_clear_cache();
 
-        App::setConfig();
+        App::setConfig($this->namespace, $this->env);
 
         //echo 'onWorkerStart' . PHP_EOL;
     }
@@ -199,6 +205,19 @@ abstract class Basic
     public function onFinish($sw, $task_id, $data)
     {
         //echo 'onFinish' . PHP_EOL;
+    }
+
+    public function callRequest($uri, $request)
+    {
+        App::$ts = \time();
+
+        $query = Router::parse($uri);
+
+        $class = $this->namespace . '\\Controller\\' . \ucfirst($query[0]);
+        if (class_exists($class)) {
+            $obj = App::getInstance($class);
+            return $obj->{$query[1]}($request);
+        }
     }
 
     /**

@@ -70,7 +70,6 @@ namespace Swoolet\Data {
                 return $this->link = $link;
 
             $cfg = App::getConfig($cfg_key) + $this->option;
-
             return $this->link = $link = new \pdoProxy(
                 "{$cfg['driver']}:host={$cfg['host']};port={$cfg['port']};dbname={$cfg['dbname']};charset={$cfg['charset']};",
                 $cfg['username'],
@@ -123,7 +122,7 @@ namespace Swoolet\Data {
          */
         public function table($table)
         {
-            $this->clause['table'] = $table;
+            $this->clause['table'] = $this->table_prefix = $table;
 
             return $this;
         }
@@ -443,6 +442,19 @@ namespace Swoolet\Data {
             $this->initial();
 
             return $ret;
+        }
+
+        public function getError()
+        {
+            if ($this->sth) {
+                if ($this->sth->errorCode() > 0)
+                    return $this->sth->debugDumpParams();
+            } elseif ($this->link) {
+                if ($this->link->errorCode() > 0)
+                    return $this->link->errorInfo();
+            }
+
+            return [];
         }
 
         /**

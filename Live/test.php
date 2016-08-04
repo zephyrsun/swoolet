@@ -2,8 +2,42 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-echo \msgpack_unpack($ret);
+\Swoolet\App::setConfig('Live', 'dev');
 
+$u = new \Live\Database\User();
+
+$user = $u->getByUsername($u::PF_MOBILE, 15921258181);
+
+var_dump($user);
+/*
+class  test
+{
+    public $link;
+    public $channel = 'test';
+
+    public function __construct()
+    {
+        $this->link = new \Redis();
+        $this->link->connect('127.0.0.1', '6379');
+    }
+
+    function sub()
+    {
+        $this->link->subscribe([$this->channel], function ($redis, $chan, $msg) {
+            var_dump('1111', $chan, $msg);
+        });
+    }
+
+    public function __destruct()
+    {
+        var_dump('dest');
+    }
+}
+
+$test = new test();
+$test->sub();
+sleep(1e5);
+*/
 
 //$q = new \Live\Third\QCloud();
 

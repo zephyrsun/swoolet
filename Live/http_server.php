@@ -1,11 +1,17 @@
 <?php
 
-include \dirname(__DIR__) . '/Swoolet/App.php';
+error_reporting(E_ALL);
 
-use Swoolet\App;
+include \dirname(__DIR__) . '/Swoolet/App.php';
 
 class Server extends \Swoolet\Http
 {
+    static public $msg;
+    /**
+     * @var \Live\Lib\Conn
+     */
+    static public $conn;
+
     public function onRequest($request, $response)
     {
         $this->response = $response;
@@ -13,10 +19,12 @@ class Server extends \Swoolet\Http
         if ($request->server['path_info'] == '/favicon.ico')
             return $this->response('');
 
-        $_POST = $request->post ? $request->post : [];
+        if (isset($request->post))
+            $_POST = $request->post;
 
-        //header('Content-type: application/json');
-        App::callRequest($request->server['path_info'], $request);
+        $this->callRequest($request->server['path_info'], $request);
+
+        $this->response(self::$msg);
     }
 }
 

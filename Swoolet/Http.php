@@ -26,7 +26,7 @@ class Http extends Basic
         if ($request->server['path_info'] == '/favicon.ico')
             return $this->response('');
 
-        App::callRequest($request->server['path_info'], $request);
+        $this->response($this->callRequest($request->server['path_info'], $request));
     }
 
     /**

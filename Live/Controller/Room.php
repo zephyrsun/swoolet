@@ -8,12 +8,10 @@
 
 namespace Live\Controller;
 
-use Live\Cookie;
 use Live\Database\Fan;
 use Live\Database\Gift;
 use \Live\Response;
 use \Live\Lib\Conn;
-use Swoolet\App;
 
 class Room extends Basic
 {
@@ -31,32 +29,43 @@ class Room extends Basic
         \Server::$conn = $this->conn = new Conn();
     }
 
-    public function enter($request)
+    public function join($request)
     {
         $data = parent::getValidator()->required('token')->ge('room_id', 1)->getResult();
         if (!$data)
-            return;
+            return $data;
 
         $room_id = $data['room_id'];
         $uid = $data['uid'];
 
         $this->conn->broadcast($room_id, [
             't' => Conn::TYPE_ENTER,
-            'uid' => $uid,
-            'nickname' => "nickname{$uid}",
+            'user' => [
+                'uid' => $uid,
+                'nickname' => "nickname{$uid}",
+            ],
         ]);
 
         $ret = $this->conn->enterRoom($request->fd, $uid, $room_id);
-        if ($ret)
-            Response::msg('登陆成功');
+
+        return Response::msg('登陆成功');
         //$this->room[$data['room_id']][$this->request->fd] = $data['uid'];
+    }
+
+    public function leave($request)
+    {
+        $this->conn->quitConn($request->fd);
+
+        //todo:退出逻辑
+
+        return Response::msg('ok');
     }
 
     public function sendMsg($request)
     {
         $data = parent::getValidator()->required('msg')->required('horn', false)->getResult();
         if (!$data)
-            return;
+            return $data;
 
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
@@ -76,20 +85,15 @@ class Room extends Basic
 
             $this->conn->broadcast($room_id, [
                 't' => $t,
-                'uid' => $uid,
-                'nickname' => "nickname{$uid}",
+                'user' => [
+                    'uid' => $uid,
+                    'nickname' => "nickname{$uid}",
+                ],
                 'msg' => $data['msg'],
             ]);
-
-            Response::msg('发送成功');
         }
-    }
 
-    public function quit($request)
-    {
-        $this->conn->quitConn($request->fd);
-
-        //todo:退出逻辑
+        return Response::msg('ok');
     }
 
     public function praise($request)
@@ -105,6 +109,8 @@ class Room extends Basic
                 'n' => 1,
             ]);
         }
+
+        return Response::msg('ok');
     }
 
     public function follow($request)
@@ -118,19 +124,23 @@ class Room extends Basic
             if ($ret) {
                 $this->conn->broadcast($room_id, [
                     't' => Conn::TYPE_FOLLOW,
-                    'uid' => $uid,
-                    'nickname' => "nickname{$uid}",
+                    'user' => [
+                        'uid' => $uid,
+                        'nickname' => "nickname{$uid}",
+                    ],
                     'msg' => '关注了主播',
                 ]);
             }
         }
+
+        return Response::msg('ok');
     }
 
     public function sendGift($request)
     {
         $data = parent::getValidator()->required('gift_id')->getResult();
         if (!$data)
-            return;
+            return $data;
 
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
@@ -148,27 +158,36 @@ class Room extends Basic
 
             $this->conn->broadcast($room_id, [
                 't' => Conn::TYPE_GIFT,
-                'uid' => $uid,
-                'nickname' => "nickname{$uid}",
+                'user' => [
+                    'uid' => $uid,
+                    'nickname' => "nickname{$uid}",
+                ],
                 'msg' => '送给主播',
                 'gift_id' => $gift_id,
             ]);
-
         }
+
+        return Response::msg('ok');
     }
 
-    public function startLive($request)
+    public function start($request)
     {
         $data = parent::getValidator()->required('token')->getResult();
         if (!$data)
-            return;
+            return $data;
 
         $uid = $data['uid'];
 
         $this->conn->createRoom($request->fd, $uid);
+
+        $data = (new \Live\Lib\Live())->start($uid);
+
+        return Response::data([
+            'publish_url' => $data['publish_url'],
+        ]);
     }
 
-    public function stopLive($request)
+    public function stop($request)
     {
         $conn = $this->conn->getConn($request->fd);
 
@@ -176,6 +195,15 @@ class Room extends Basic
             list($uid, $room_id) = $conn;
 
             $this->conn->destroyRoom($room_id);
+
+            $data = (new \Live\Lib\Live())->stop($uid);
+
+            return Response::data([
+                't' => Conn::TYPE_LIVE_STOP,
+                'd' => $data,
+            ]);
         }
+
+        return Response::msg('ok');
     }
 }
