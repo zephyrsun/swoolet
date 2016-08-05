@@ -32,12 +32,12 @@ class RedisClient
 
     function trace($msg)
     {
-        echo "-----------------------------------------\n".trim($msg)."\n-----------------------------------------\n";
+        echo "-----------------------------------------\n" . trim($msg) . "\n-----------------------------------------\n";
     }
 
     function stats()
     {
-        $stats = "Idle connection: ".count($this->pool)."<br />\n";
+        $stats = "Idle connection: " . count($this->pool) . "<br />\n";
         return $stats;
     }
 
@@ -45,8 +45,7 @@ class RedisClient
     {
         $lines[] = "hmset";
         $lines[] = $key;
-        foreach($value as $k => $v)
-        {
+        foreach ($value as $k => $v) {
             $lines[] = $k;
             $lines[] = $v;
         }
@@ -68,8 +67,7 @@ class RedisClient
     function parseRequest($array)
     {
         $cmd = '*' . count($array) . "\r\n";
-        foreach ($array as $item)
-        {
+        foreach ($array as $item) {
             $cmd .= '$' . strlen($item) . "\r\n" . $item . "\r\n";
         }
         return $cmd;
@@ -90,20 +88,16 @@ class RedisClient
      */
     protected function getConnection()
     {
-        if (count($this->pool) > 0)
-        {
+        if (count($this->pool) > 0) {
             /**
              * @var $connection RedisConnection
              */
-            foreach($this->pool as $k => $connection)
-            {
+            foreach ($this->pool as $k => $connection) {
                 unset($this->pool[$k]);
                 break;
             }
             return $connection;
-        }
-        else
-        {
+        } else {
             return new RedisConnection($this);
         }
     }
@@ -176,15 +170,12 @@ class RedisConnection
         /**
          * 如果已经连接，直接发送数据
          */
-        if ($this->client->isConnected())
-        {
+        if ($this->client->isConnected()) {
             $this->client->send($cmd);
-        }
-        /**
+        } /**
          * 未连接，等待连接成功后发送数据
          */
-        else
-        {
+        else {
             $this->wait_send = $cmd;
         }
         $this->callback = $callback;
@@ -194,8 +185,7 @@ class RedisConnection
 
     function onConnect(\swoole_client $client)
     {
-        if ($this->wait_send)
-        {
+        if ($this->wait_send) {
             $client->send($this->wait_send);
             $this->wait_send = '';
         }
@@ -209,35 +199,24 @@ class RedisConnection
     function onReceive($cli, $data)
     {
         $success = true;
-        if ($this->redis->debug)
-        {
+        if ($this->redis->debug) {
             $this->redis->trace($data);
         }
-        if ($this->wait_recv)
-        {
+        if ($this->wait_recv) {
             $this->buffer .= $data;
-            if ($this->multi_line)
-            {
+            if ($this->multi_line) {
                 $require_line_n = $this->multi_line * 2 + 1 - substr_count($data, "$-1\r\n");
-                if (substr_count($this->buffer, "\r\n") - 1 == $require_line_n)
-                {
+                if (substr_count($this->buffer, "\r\n") - 1 == $require_line_n) {
                     goto parse_multi_line;
-                }
-                else
-                {
+                } else {
                     return;
                 }
-            }
-            else
-            {
+            } else {
                 //就绪
-                if (strlen($this->buffer) >= $this->wait_recv)
-                {
+                if (strlen($this->buffer) >= $this->wait_recv) {
                     $result = rtrim($this->buffer, "\r\n");
                     goto ready;
-                }
-                else
-                {
+                } else {
                     return;
                 }
             }
@@ -245,81 +224,59 @@ class RedisConnection
 
         $lines = explode("\r\n", $data, 2);
         $type = $lines[0][0];
-        if ($type == '-')
-        {
+        if ($type == '-') {
             $success = false;
             $result = substr($lines[0], 1);
-        }
-        elseif ($type == '+')
-        {
+        } elseif ($type == '+') {
             $result = substr($lines[0], 1);;
-        }
-        //只有一行数据
-        elseif ($type == '$')
-        {
+        } //只有一行数据
+        elseif ($type == '$') {
             $len = intval(substr($lines[0], 1));
-            if ($len > strlen($lines[1]))
-            {
+            if ($len > strlen($lines[1])) {
                 $this->wait_recv = $len;
                 $this->buffer = $lines[1];
                 $this->multi_line = false;
                 return;
             }
             $result = $lines[1];
-        }
-        //多行数据
-        elseif ($type == '*')
-        {
+        } //多行数据
+        elseif ($type == '*') {
             parse_multi_line:
             $data_line_num = intval(substr($lines[0], 1));
             $data_lines = explode("\r\n", $lines[1]);
             $require_line_n = $data_line_num * 2 - substr_count($data, "$-1\r\n");
             $lines_n = count($data_lines) - 1;
 
-            if ($lines_n == $require_line_n)
-            {
+            if ($lines_n == $require_line_n) {
                 $result = array();
                 $key_n = 0;
-                for ($i = 0; $i < $lines_n; $i++)
-                {
+                for ($i = 0; $i < $lines_n; $i++) {
                     //not exists
-                    if (substr($data_lines[$i], 1, 2) === '-1')
-                    {
+                    if (substr($data_lines[$i], 1, 2) === '-1') {
                         $value = false;
-                    }
-                    else
-                    {
+                    } else {
                         $value = $data_lines[$i + 1];
                         $i++;
                     }
-                    if ($this->fields)
-                    {
+                    if ($this->fields) {
                         $result[$this->fields[$key_n]] = $value;
-                    }
-                    else
-                    {
+                    } else {
                         $result[] = $value;
                     }
-                    $key_n  ++;
+                    $key_n++;
                 }
                 goto ready;
-            }
-            //数据不足，需要缓存
-            else
-            {
+            } //数据不足，需要缓存
+            else {
                 $this->multi_line = $data_line_num;
                 $this->buffer = $lines[1];
                 $this->wait_recv = true;
                 return;
             }
-        }
-        elseif ($type == ':')
-        {
+        } elseif ($type == ':') {
             $result = intval(substr($lines[0], 1));
             goto ready;
-        }
-        else
-        {
+        } else {
             echo "Response is not a redis result. String:\n$data\n";
             return;
         }
@@ -332,8 +289,7 @@ class RedisConnection
 
     function onClose(\swoole_client $cli)
     {
-        if ($this->wait_send)
-        {
+        if ($this->wait_send) {
             $this->redis->freeConnection($cli->sock, $this);
             call_user_func($this->callback, "timeout", false);
         }

@@ -2,13 +2,10 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-\Swoolet\App::setConfig('Live', 'dev');
 
-$u = new \Live\Database\User();
+\Swoolet\App::setConfig('Live','test');
 
-$user = $u->getByUsername($u::PF_MOBILE, 15921258181);
-
-var_dump($user);
+$q = new \Live\Database\User();
 /*
 class  test
 {

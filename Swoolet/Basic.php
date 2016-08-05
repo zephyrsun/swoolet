@@ -2,6 +2,9 @@
 
 namespace Swoolet;
 
+use Swoolet\Data\PDO;
+use Swoolet\Data\Redis;
+
 abstract class Basic
 {
     public $events = [
@@ -119,10 +122,9 @@ abstract class Basic
      * @param $address
      *        - :9501
      *        - 127.0.0.1:9501
-     * @param array $setting
      * @return \swoole_server
      */
-    public function run($address, array $setting = array())
+    public function run($address)
     {
         register_shutdown_function([$this, 'fatalHandler']);
 
@@ -132,7 +134,8 @@ abstract class Basic
 
         $sw = $this->runServer($host, $port);
 
-        $setting += $this->option;
+        App::setConfig($this->namespace, $this->env);
+        $setting = App::getConfig('swoole') + $this->option;
         if (!$setting['log_file'])
             $setting['log_file'] = "/tmp/swoole_{$port}.log";
 
@@ -168,7 +171,10 @@ abstract class Basic
 
         App::setConfig($this->namespace, $this->env);
 
-        //echo 'onWorkerStart' . PHP_EOL;
+        PDO::$ins = [];
+        Redis::$ins = [];
+
+        //var_dump(APP::$config);
     }
 
     public function onWorkerStop($sw, $worker_id)

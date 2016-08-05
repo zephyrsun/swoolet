@@ -16,7 +16,7 @@ namespace Swoolet\Data {
             'charset' => 'utf8',
             'username' => 'root',
             'password' => '',
-            'options' => [],
+            'option' => [],
         ];
 
         /**
@@ -74,7 +74,7 @@ namespace Swoolet\Data {
                 "{$cfg['driver']}:host={$cfg['host']};port={$cfg['port']};dbname={$cfg['dbname']};charset={$cfg['charset']};",
                 $cfg['username'],
                 $cfg['password'],
-                $cfg['options'] + $this->pdo_option
+                $cfg['option'] + $this->pdo_option
             );
         }
 
@@ -122,7 +122,7 @@ namespace Swoolet\Data {
          */
         public function table($table)
         {
-            $this->clause['table'] = $this->table_prefix = $table;
+            $this->clause['table'] = $this->table_name = $table;
 
             return $this;
         }

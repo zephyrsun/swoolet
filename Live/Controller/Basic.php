@@ -56,13 +56,12 @@ class Validator extends \Swoolet\Lib\Validator
             return Response::msg("参数错误：" . $this->getFirstError(), 402);
 
         if (isset($data['token'])) {
-
-            $uid = Cookie::decrypt($data['token']);
-
-            if ($uid > 0 && is_numeric($uid))
+            $str = Cookie::decrypt($data['token']);
+            $uid = (int)$str;
+            if ($uid > 0 && $uid == $str)
                 $data['uid'] = $uid;
             else
-                return Response::msg('TOKEN失效', 1012);
+                return Response::msg('TOKEN失效', -1);
 
             //$data['uid'] = 1;
         }

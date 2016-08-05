@@ -28,7 +28,7 @@ class App
 
     static public function setConfig($namespace, $env)
     {
-        self::$config = import($namespace . '/Config/' . $env) or self::$config = array();
+        return self::$config = import($namespace . '/Config/' . $env) or self::$config = array();
     }
 
     static public function getConfig($key)

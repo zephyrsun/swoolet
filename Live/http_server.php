@@ -1,5 +1,10 @@
 <?php
 
+if (!$env = &$argv[1]) {
+    echo 'Please input ENV' . PHP_EOL;
+    return;
+}
+
 error_reporting(E_ALL);
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
@@ -28,6 +33,5 @@ class Server extends \Swoolet\Http
     }
 }
 
-$app = Server::createServer('Live', 'dev');
-$setting = include './Config/swoole_setting.php';
-$app->run(':80', $setting);
+$app = Server::createServer('Live', $env);
+$app->run(':80');
