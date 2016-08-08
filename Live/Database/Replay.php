@@ -8,7 +8,6 @@
 
 namespace Live\Database;
 
-use Swoolet\Data\PDO;
 
 class Replay extends Basic
 {
@@ -21,7 +20,7 @@ class Replay extends Basic
 
         parent::__construct();
 
-        $this->cache = new \Live\Redis\User();
+        //$this->cache = new \Live\Redis\User();
     }
 
     public function saveReplay($uid, $data)

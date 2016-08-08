@@ -29,17 +29,19 @@ class User extends Basic
         $this->cache = new \Live\Redis\User();
     }
 
-    public function login($pf, $username, $avatar = '')
+    public function login($pf, $username, $nickname = '', $avatar = '')
     {
         $user_map = $this->getByUsername($pf, $username);
         if ($user_map) {
             $uid = $user_map['uid'];
 
+            /*
             if ($avatar) {
                 $this->updateUser([
                     'avatar' => $avatar,
                 ], $uid);
             }
+            */
 
         } else {
             $uid = $this->getUID($pf, $username);
@@ -50,6 +52,7 @@ class User extends Basic
                 'username' => $username,
                 'avatar' => $avatar,
                 'birthday' => '0000-00-00',
+                'nickname' => $nickname,
                 'create_ts' => \Swoolet\App::$ts,
             ]);
         }
@@ -65,16 +68,31 @@ class User extends Basic
         return parent::update($data);
     }
 
+    public function getShowInfo($uid, $type = 'simple')
+    {
+        $user = $this->getUser($uid);
+
+        $ret = [
+            'uid' => $user['uid'],
+            'nickname' => $user['nickname'],
+            'avatar' => $user['avatar'],
+            //'height' => $user['height'],
+        ];
+
+        if ($type == 'lv')
+            $ret['lv'] = (new UserLevel())->getLv($uid);
+
+        return $ret;
+    }
+
     public function getUser($uid)
     {
-        if (!$user = $this->cache->get($this->key_user . $uid)) {
-            if ($user = $this->table($uid)->where('uid', $uid)->fetch()) {
-
+        $user = $this->getWithCache($this->key_user . $uid, function () use ($uid) {
+            if ($user = $this->table($uid)->where('uid', $uid)->fetch())
                 unset($user['username'], $user['create_ts']);
 
-                $this->cache->set($this->key_user . $uid, $user, $this->timeout);
-            }
-        }
+            return $user;
+        });
 
         return $user;
     }

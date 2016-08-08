@@ -9,7 +9,7 @@
 
 namespace Live\Third;
 
-include BASE_DIR . 'Live/Third/pili/Pili_v2.php';
+include BASE_DIR . 'Live/Third/pili/Pili.php';
 
 class Pili
 {
@@ -17,26 +17,23 @@ class Pili
     const SK = '6wt1qX8e34HDMaop6hsfYBGiq-X32Tmf6k66VCW6';
     const HUB = 'camhow';
 
-    const PUBLISH_DOMAIN = 'pili-publish.camhow.com.cn';
-
     public $hub;
 
     public function __construct()
     {
-        $mac = new \Qiniu\Pili\Mac(self::AK, self::SK);
-        $client = new \Qiniu\Pili\Client($mac);
-        $this->hub = $client->hub(self::HUB);
+        $credentials = new \Qiniu\Credentials(self::AK, self::SK); #=> Credentials Object
+        $this->hub = new \Pili\Hub($credentials, self::HUB); # => Hub Object
     }
 
     public function start($key)
     {
         //$stream = $this->hub->stream($key);
 
-        $this->hub->create($key);
+        $stream = $this->hub->createStream($key, null, 'static');
 
-        $publish_url = \Qiniu\Pili\RTMPPublishURL(self::PUBLISH_DOMAIN, self::HUB, $key, 3600, self::AK, self::SK);
-        $play_url = \Qiniu\Pili\RTMPPlayURL(self::PUBLISH_DOMAIN, self::HUB, $key);
-        $hls_url = \Qiniu\Pili\HLSPlayURL(self::PUBLISH_DOMAIN, self::HUB, $key);
+        $publish_url = $stream->rtmpPublishUrl();
+        $play_url = $stream->rtmpLiveUrls()['ORIGIN'];
+        $hls_url = $stream->hlsLiveUrls()['ORIGIN'];
 
         return [
             'publish_url' => $publish_url,
@@ -47,19 +44,20 @@ class Pili
 
     public function stop($key, $start_ts, $end_ts)
     {
-        $stream = $this->hub->stream($key);
+        $stream = $this->hub->createStream($key, null, 'static');
 
         try {
-            $fname = $stream->save((int)$start_ts, (int)$end_ts);
+            $ret = $stream->saveAs("{$key}_{$start_ts}.mp4", null, (int)$start_ts, (int)$end_ts);
         } catch (\Exception $e) {
-            $fname = null;
+            $ret = null;
         }
 
-        if (!$fname)
-            return $fname;
+        if (!$ret)
+            return $ret;
 
         return [
-            'play_url' => '',
+            'play_url' => $ret['targetUrl'],
+            'hls_url' => $ret['url'],
             'duration' => $end_ts - $start_ts,
         ];
     }

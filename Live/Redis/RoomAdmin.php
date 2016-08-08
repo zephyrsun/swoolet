@@ -9,7 +9,7 @@
 namespace Live\Redis;
 
 
-class Room extends Common
+class RoomAdmin extends Common
 {
     public $cfg_key = 'redis_1';
 }

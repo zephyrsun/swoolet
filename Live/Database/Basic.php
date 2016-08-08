@@ -33,4 +33,14 @@ class Basic extends PDO
         return $this;
     }
 
+    public function getWithCache($key, $callback)
+    {
+        if (true || !$data = $this->cache->get($key)) {
+            if ($data = $callback())
+                $this->cache->set($key, $data, $this->timeout);
+        }
+
+        return $data;
+    }
+
 }

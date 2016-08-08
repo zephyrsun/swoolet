@@ -71,8 +71,7 @@ class WebSocket extends Basic
     {
         //$str = \gzdeflate($str, 1);
         //$this->sw->push($this->fd, \implode("\r\n", $header) . "\r\n\r\n");
-
-        if ($str)
+        if ($this->fd)
             $this->sw->push($this->fd, $str);
     }
 }

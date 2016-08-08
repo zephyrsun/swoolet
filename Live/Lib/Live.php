@@ -28,16 +28,16 @@ class Live
 
     public function getKey($uid)
     {
-        return "{$this->prefix}{$uid}";
+        return "{$this->prefix}{$uid}_" . \Swoolet\App::$ts;
     }
 
     public function start($uid)
     {
-
         $ret = $this->sdk->start($this->getKey($uid));
         $this->db->start($uid, $ret + [
                 'status' => self::STATUS_START,
-                'publish_ts' => \Swoolet\App::$ts,
+                'ts' => \Swoolet\App::$ts,
+                'cover' => '',
             ]);
 
         return $ret;
@@ -47,7 +47,7 @@ class Live
     {
         $this->db->stop($uid);
 
-        $live_data = $this->db->get($uid);
+        $live_data = $this->db->getLive($uid);
 
         $stream_data = $this->sdk->stop($this->getKey($uid), $live_data['publis_ts'], \Swoolet\App::$ts);
         $data = ['duration' => 0];

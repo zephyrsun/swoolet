@@ -26,7 +26,7 @@ const TYPE_GIFT = 10;//送礼
 {"m":"room_join","room_id":"1","token":"xxxxxxxx"}
 
 返回:
-{"msg":"登陆成功","c":0}
+{"m":"room_join","live":{"play_url":"rtmp:\/\/pili-publish.camhow.com.cn\/camhow\/test_1"},"msg":"欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。","user":{"uid":1,"nickname":"15921258181","avatar":""},"c":0}
 
 房间消息(t值参考`房间消息类型`):
 {"t":4,"uid":"10001","nickname":"nickname10001"}

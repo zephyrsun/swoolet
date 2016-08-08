@@ -9,21 +9,18 @@ error_reporting(E_ALL);
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
+use \Live\Lib\Conn;
+
 class Server extends \Swoolet\WebSocket
 {
     static public $msg;
-
-    /**
-     * @var \Live\Lib\Conn
-     */
-    static public $conn;
 
     public function onOpen($sw, $request)
     {
         $fd = $request->fd;
         //没有成功登陆,踢出去
         swoole_timer_after(1500, function () use ($fd) {
-            if (!self::$conn->getConn($fd))
+            if (!Conn::$ins->getConn($fd))
                 $this->sw->close($fd);
         });
     }
@@ -31,8 +28,8 @@ class Server extends \Swoolet\WebSocket
     public function onClose($sw, $fd, $from_id)
     {
         //echo 'onClose' . PHP_EOL;
-        if (self::$conn)
-            self::$conn->quitConn($fd);
+        if (Conn::$ins)
+            Conn::$ins->quitConn($fd);
     }
 
     /**
@@ -48,8 +45,8 @@ class Server extends \Swoolet\WebSocket
         $_POST = \json_decode($frame->data, true);
 
         if (is_array($_POST)) {
-            $uri = array_shift($_POST);
-
+            //$uri = array_shift($_POST);
+            $uri = \current($_POST);
             echo $uri . PHP_EOL;
 
             $this->callRequest($uri, $frame);

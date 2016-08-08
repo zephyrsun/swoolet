@@ -19,11 +19,27 @@ class Conn
     const TYPE_FOLLOW = 3;//关注主播
     const TYPE_ENTER = 4;//进入房间
     const TYPE_PRAISE = 5;//点赞
+    const TYPE_SYS_MESSAGE = 6;//系统消息
     const TYPE_GIFT = 10;//送礼
     const TYPE_LIVE_STOP = 20;//停播
 
     public $ids;
     public $room;
+
+    /**
+     * @var Conn $ins
+     */
+    static public $ins;
+
+    /**
+     * @return Conn
+     */
+    static public function getInstance()
+    {
+        self::$ins or self::$ins = new Conn();
+
+        return self::$ins;
+    }
 
     public function &getConn($fd)
     {

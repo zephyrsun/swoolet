@@ -59,7 +59,7 @@ class Validator extends \Swoolet\Lib\Validator
             $str = Cookie::decrypt($data['token']);
             $uid = (int)$str;
             if ($uid > 0 && $uid == $str)
-                $data['uid'] = $uid;
+                $data['token_uid'] = $uid;
             else
                 return Response::msg('TOKEN失效', -1);
 

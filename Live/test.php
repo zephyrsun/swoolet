@@ -3,9 +3,28 @@
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 
-\Swoolet\App::setConfig('Live','test');
+\Swoolet\App::setConfig('Live', 'test');
 
-$q = new \Live\Database\User();
+$q = \Live\Database\UserLevel::exp2lv(105600);
+
+var_dump($q);
+exit;
+$q = 3;
+$i = 0;
+$n = 100;
+$f = 100;
+$a = [];
+while ($i < 40) {
+
+    $a[$q++] = $n;
+
+    if ($q >= 30)
+        $f = 200;
+
+    $n += $f * ++$i;
+}
+
+var_export($a);
 /*
 class  test
 {

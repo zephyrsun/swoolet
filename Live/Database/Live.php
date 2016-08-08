@@ -16,6 +16,7 @@ class Live extends Basic
 {
     public $cfg_key = 'db_1';
     public $table_prefix = 'live';
+    public $key_live = 'live:';
 
     public function __construct()
     {
@@ -23,7 +24,7 @@ class Live extends Basic
 
         parent::__construct();
 
-        //$this->cache = new \Live\Redis\Room();
+        $this->cache = new \Live\Redis\Room();
     }
 
     public function table($key)
@@ -35,7 +36,7 @@ class Live extends Basic
 
     public function start($uid, $new_data)
     {
-        $data = $this->get($uid);
+        $data = $this->getLive($uid);
 
         if ($data) {
             $ret = $this->table($uid)->where('uid', $uid)->update($new_data);
@@ -54,8 +55,23 @@ class Live extends Basic
         return $this->table($uid)->where('uid = ? AND status = 1', $uid)->update(['status' => 0]);
     }
 
-    public function get($uid)
+    public function getLive($uid, $type = 'app')
     {
-        return $this->table($uid)->where('uid', $uid)->fetch();
+        $live = $this->getWithCache($this->key_live . $uid, function () use ($uid) {
+            return $this->table($uid)->where('uid', $uid)->fetch();
+        });
+
+        if ($type == 'app') {
+            //play in app
+            $live = [
+                'play_url' => $live['play_url'],
+            ];
+        } elseif ($type == 'h5') {
+            $live = [
+                'hls_url' => $live['hls_url'],
+            ];
+        }
+
+        return $live;
     }
 }

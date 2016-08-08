@@ -10,6 +10,9 @@ namespace Live\Controller;
 
 use Live\Database\Fan;
 use Live\Database\Gift;
+use Live\Database\Live;
+use Live\Database\User;
+use Live\Database\RoomAdmin;
 use \Live\Response;
 use \Live\Lib\Conn;
 
@@ -26,7 +29,7 @@ class Room extends Basic
      */
     public function __construct()
     {
-        \Server::$conn = $this->conn = new Conn();
+        $this->conn = Conn::getInstance();
     }
 
     public function join($request)
@@ -36,19 +39,26 @@ class Room extends Basic
             return $data;
 
         $room_id = $data['room_id'];
-        $uid = $data['uid'];
+        $token_uid = $data['token_uid'];
+
+        $db_user = new User();
 
         $this->conn->broadcast($room_id, [
             't' => Conn::TYPE_ENTER,
-            'user' => [
-                'uid' => $uid,
-                'nickname' => "nickname{$uid}",
-            ],
+            'user' => $db_user->getShowInfo($token_uid, 'simple'),
         ]);
 
-        $ret = $this->conn->enterRoom($request->fd, $uid, $room_id);
+        $ret = $this->conn->enterRoom($request->fd, $token_uid, $room_id);
 
-        return Response::msg('登陆成功');
+        $user = $db_user->getShowInfo($room_id, 'simple');
+        $user['admin'] = (new RoomAdmin())->isAdmin($room_id, $token_uid);
+
+        return Response::data([
+            'm' => $_POST['m'],
+            'live' => (new Live())->getLive($room_id, 'app'),
+            'msg' => '欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。',
+            'user' => $user,
+        ]);
         //$this->room[$data['room_id']][$this->request->fd] = $data['uid'];
     }
 
@@ -176,13 +186,13 @@ class Room extends Basic
         if (!$data)
             return $data;
 
-        $uid = $data['uid'];
+        $token_uid = $data['token_uid'];
 
-        $this->conn->createRoom($request->fd, $uid);
+        $this->conn->createRoom($request->fd, $token_uid);
 
-        $data = (new \Live\Lib\Live())->start($uid);
-
+        $data = (new \Live\Lib\Live())->start($token_uid);
         return Response::data([
+            'm' => $_POST['m'],
             'publish_url' => $data['publish_url'],
         ]);
     }
