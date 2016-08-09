@@ -4,7 +4,10 @@ namespace Swoolet;
 
 class Http extends Basic
 {
-    public $response;
+    /**
+     * @var \swoole_http_response $resp
+     */
+    public $resp;
 
     protected function runServer($host, $port)
     {
@@ -21,7 +24,7 @@ class Http extends Basic
      */
     public function onRequest($request, $response)
     {
-        $this->response = $response;
+        $this->resp = $response;
 
         if ($request->server['path_info'] == '/favicon.ico')
             return $this->response('');
@@ -35,7 +38,7 @@ class Http extends Basic
      */
     public function response($str)
     {
-        $this->response->header("Server", "swoolet");
-        $this->response->end($str);
+        $this->resp->header("Server", "swoolet");
+        $this->resp->end($str);
     }
 }

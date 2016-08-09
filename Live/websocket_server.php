@@ -5,8 +5,6 @@ if (!$env = &$argv[1]) {
     return;
 }
 
-error_reporting(E_ALL);
-
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 use \Live\Lib\Conn;
@@ -43,7 +41,6 @@ class Server extends \Swoolet\WebSocket
             return;
 
         $_POST = \json_decode($frame->data, true);
-
         if (is_array($_POST)) {
             //$uri = array_shift($_POST);
             $uri = \current($_POST);
@@ -52,8 +49,6 @@ class Server extends \Swoolet\WebSocket
             $this->callRequest($uri, $frame);
 
             $this->response(self::$msg);
-        } else {
-            $this->response('');
         }
     }
 }

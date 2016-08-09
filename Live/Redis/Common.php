@@ -54,9 +54,9 @@ class Common extends Redis
         return $ret;
     }
 
-    public function revRange($key, $score, $limit, $with_score)
+    public function revRange($key, $start, $limit, $with_score)
     {
-        return $this->link->zRevRange($key, $score, $limit - 1, $with_score);
+        return $this->link->zRevRange($key, $start, $limit - 1, $with_score);
     }
 
     public function expire($key, $ttl)

@@ -9,6 +9,7 @@
 namespace Live\Database;
 
 
+use Live\Redis\Rank;
 use Live\Response;
 use Swoolet\Data\PDO;
 
@@ -61,20 +62,20 @@ class Gift extends Basic
         return null;
     }
 
-    public function sendGift($uid, $to_uid, $gift_id)
+    public function sendGift($send_uid, $to_uid, $gift_id)
     {
         $money = $this->getGift($gift_id, 'money');
         if (!$money)
             return Response::msg('参数错误', 1010);
 
         $this->beginTransaction();
-        $ret = (new Balance())->sub($uid, $money);
+        $ret = (new Balance())->sub($send_uid, $money);
         if (!$ret) {
             $this->rollback();
             return $ret;
         }
 
-        $ret = (new MoneyLog())->add($uid, $to_uid, $money, 1, "gift:{$gift_id}");
+        $ret = (new MoneyLog())->add($send_uid, $to_uid, $money, 1, "gift:{$gift_id}");
         if (!$ret) {
             $this->rollback();
             return Response::msg('送礼失败', 1015);
@@ -86,7 +87,10 @@ class Gift extends Basic
             return Response::msg('送礼失败', 1013);
         }
 
-        $this->commit();
+        if ($ret = $this->commit()) {
+            (new Rank())->addRank($send_uid, $to_uid, $money);
+        }
+
         return $ret;
     }
 

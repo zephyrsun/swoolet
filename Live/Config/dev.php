@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL);
+
 $db_ip = '127.0.0.1';
 $db_port = 3366;
 $db_user = 'root';

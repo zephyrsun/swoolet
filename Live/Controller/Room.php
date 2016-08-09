@@ -13,6 +13,7 @@ use Live\Database\Gift;
 use Live\Database\Live;
 use Live\Database\User;
 use Live\Database\RoomAdmin;
+use Live\Redis\Rank;
 use \Live\Response;
 use \Live\Lib\Conn;
 
@@ -53,13 +54,14 @@ class Room extends Basic
         }
 
         $user = $db_user->getShowInfo($room_id, 'lv');
-        $user['admin'] = (new RoomAdmin())->isAdmin($room_id, $token_uid);
 
         return Response::data([
             'm' => $_POST['m'],
             'live' => (new Live())->getLive($room_id, 'app'),
             'msg' => '欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。',
             'user' => $user,
+            'rank' => (new Rank())->getRankInRoom($room_id, 0),
+            'admin' => (new RoomAdmin())->isAdmin($room_id, $token_uid),
         ]);
         //$this->room[$data['room_id']][$this->request->fd] = $data['uid'];
     }
@@ -80,6 +82,7 @@ class Room extends Basic
             return $data;
 
         $conn = $this->conn->getConn($request->fd);
+
         if ($conn) {
             list($uid, $room_id) = $conn;
 
@@ -164,8 +167,7 @@ class Room extends Basic
             if ($uid == $to_uid)
                 return Response::msg('礼物不能送给自己', 1023);
 
-            $ret = (new Gift())->sendGift($uid, $to_uid, $gift_id);
-            if (!$ret)
+            if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id))
                 return $ret;
 
             $this->conn->broadcast($room_id, [

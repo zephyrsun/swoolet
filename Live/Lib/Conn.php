@@ -112,7 +112,7 @@ class Conn
          */
         $sw = App::$server->sw;
         foreach ($this->getRoom($room_id) as $uid => $fd) {
-            yield $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
+            $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
         }
     }
 }

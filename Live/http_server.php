@@ -5,8 +5,6 @@ if (!$env = &$argv[1]) {
     return;
 }
 
-error_reporting(E_ALL);
-
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 class Server extends \Swoolet\Http
@@ -19,7 +17,7 @@ class Server extends \Swoolet\Http
 
     public function onRequest($request, $response)
     {
-        $this->response = $response;
+        $this->resp = $response;
 
         if ($request->server['path_info'] == '/favicon.ico')
             return $this->response('');
