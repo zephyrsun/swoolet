@@ -9,6 +9,7 @@
 namespace Live\Database;
 
 
+use Live\Redis\UserExt;
 use Live\Response;
 use Swoolet\Data\PDO;
 
@@ -27,7 +28,14 @@ class Income extends Basic
 
         PDO::__construct();
 
-        //$this->cache = new \Live\Redis\User();
+        $this->cache = new UserExt();
+    }
+
+    public function getIncome($uid)
+    {
+        return $this->cache->getWithCallback($uid, 'income', function () use ($uid) {
+            return $this->table($uid)->select('income')->where('uid', $uid)->fetchColumn();
+        });
     }
 
     public function add($uid, $money)
@@ -35,33 +43,20 @@ class Income extends Basic
         if ($money <= 0)
             return Response::msg('参数错误', 1011);
 
-        $ret = $this->table($uid)->where('uid', $uid)->update("money = money + $money");
+        $ret = $this->table($uid)->where('uid', $uid)->update("income = income + $money, total = total + $money");
         if (!$ret) {
             $ret = $this->table($uid)->insert([
                 'uid' => $uid,
                 'money' => $money,
+                'total' => $money,
             ]);
-
-            if (!$ret)
-                return Response::msg('数据更新失败', 1014);
         }
 
-        return $ret;
-    }
+        if ($ret) {
+            $this->cache->del($uid, 'income');
+            return $ret;
+        }
 
-    public function sub($uid, $money)
-    {
-        if ($money < 0)
-            $money = -$money;
-        elseif ($money == 0)
-            return Response::msg('参数错误', 1016);
-
-        $ret = $this->table($uid)->where('uid = ? AND money >= ?', [$uid, $money])
-            ->update("money = money - $money");
-
-        if (!$ret)
-            return Response::msg('余额不足', 1017);
-
-        return $ret;
+        return Response::msg('数据更新失败', 1019);
     }
 }

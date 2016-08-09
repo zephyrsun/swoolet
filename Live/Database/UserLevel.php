@@ -75,14 +75,12 @@ class UserLevel extends Basic
         if ($exp <= 0)
             return false;
 
-        $key = $this->key_ext . $uid;
-
-        $new_exp = $this->cache->link->hIncrBy($key, 'exp', $exp);
+        $new_exp = $this->cache->incr($uid, 'exp', $exp);
         if (!$new_exp)
             return Response::msg('服务器错误', 1030);
 
         $lv = self::exp2lv($new_exp);
-        $this->cache->link->hSet($key, 'lv', $lv);
+        $this->cache->set($uid, 'lv', $lv);
 
         if ($new_exp == $exp) {
             //new
@@ -105,14 +103,11 @@ class UserLevel extends Basic
 
     public function getLv($uid)
     {
-        $key = $this->key_ext . $uid;
+        if (!$lv = $this->cache->get($uid, 'lv')) {
 
-        $lv = $this->cache->link->hGet($key, 'lv');
-
-        if (!$lv) {
             $data = $this->table($uid)->select('exp,lv')->where('uid', $uid)->fetch();
             if ($data) {
-                $this->cache->link->hMset($key, $data);
+                $this->cache->mSet($uid, $data);
                 $lv = $data['lv'];
             }
         }

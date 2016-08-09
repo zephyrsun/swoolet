@@ -50,9 +50,11 @@ class User extends Basic
             $this->insert([
                 'uid' => $uid,
                 'username' => $username,
-                'avatar' => $avatar,
-                'birthday' => '0000-00-00',
                 'nickname' => $nickname,
+                'height' => 0,
+                'birthday' => '0000-00-00',
+                'sign' => '',
+                'avatar' => $avatar,
                 'create_ts' => \Swoolet\App::$ts,
             ]);
         }

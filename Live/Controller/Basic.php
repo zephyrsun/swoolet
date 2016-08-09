@@ -60,9 +60,9 @@ class Validator extends \Swoolet\Lib\Validator
             $uid = (int)$str;
             if ($uid > 0 && $uid == $str)
                 $data['token_uid'] = $uid;
-            else
+            else {
                 return Response::msg('TOKEN失效', -1);
-
+            }
             //$data['uid'] = 1;
         }
 

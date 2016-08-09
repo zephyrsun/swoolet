@@ -218,7 +218,7 @@ class Validator
         if ($length)
             $val = \mb_strlen($val);
 
-        $result = $val <= $ref;
+        $result = is_numeric($val) && $val <= $ref;
 
         return $this->checkResult($key, $val, $result, $required);
     }
@@ -239,7 +239,7 @@ class Validator
         if ($length)
             $val = \mb_strlen($val);
 
-        $result = $val >= $ref;
+        $result = is_numeric($val) && $val >= $ref;
 
         return $this->checkResult($key, $val, $result, $required);
     }
@@ -260,7 +260,7 @@ class Validator
         if ($length)
             $val = \mb_strlen($val);
 
-        $result = $val >= $min && $val <= $max;
+        $result = is_numeric($val) && $val >= $min && $val <= $max;
 
         return $this->checkResult($key, $val, $result, $required);
     }

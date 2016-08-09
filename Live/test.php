@@ -3,9 +3,11 @@
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 
-\Swoolet\App::setConfig('Live', 'test');
+\Swoolet\App::setConfig('Live', 'dev');
 
-$q = \Live\Database\UserLevel::exp2lv(105600);
+$income = new  \Live\Database\Income();
+
+$q = $income->getIncome(2);
 
 var_dump($q);
 exit;

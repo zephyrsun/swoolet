@@ -41,23 +41,6 @@ class Conn
         return self::$ins;
     }
 
-    public function &getConn($fd)
-    {
-        $conn = &$this->ids[$fd] or $conn = [];
-        return $conn;
-    }
-
-    public function quitConn($fd)
-    {
-        $conn = $this->getConn($fd);
-        if ($conn) {
-            $this->quitRoom($fd, $conn[1]);
-            unset($this->ids[$fd]);
-        }
-
-        return $this;
-    }
-
     public function &getRoom($room_id)
     {
         $room = &$this->room[$room_id] or $room = [];
@@ -67,8 +50,6 @@ class Conn
     public function enterRoom($fd, $uid, $room_id)
     {
         $room = &$this->getRoom($room_id);
-        //if (!$room)
-        //    return Response::msg('直播已结束', 1024);
 
         //退出已经存在的房间
         $this->quitConn($fd);
@@ -77,15 +58,25 @@ class Conn
         $this->ids[$fd] = [$uid, $room_id];
 
         //加入房间
-        $room[$fd] = $uid;
+        $room[$uid] = $fd;
 
         return $room;
     }
 
-    public function quitRoom($fd, $room_id)
+    public function &getConn($fd)
     {
-        $room = &$this->getRoom($room_id);
-        unset($room[$fd]);
+        return $this->ids[$fd];
+    }
+
+    public function quitConn($fd)
+    {
+        $conn = $this->getConn($fd);
+        if ($conn) {
+            list($uid, $room_id) = $conn;
+            unset($this->room[$room_id][$uid], $this->ids[$fd]);
+        }
+
+        return $this;
     }
 
     public function createRoom($fd, $uid)
@@ -108,7 +99,7 @@ class Conn
          * @var \swoole_websocket_server $sw
          */
         $sw = App::$server->sw;
-        foreach ($room as $fd => $data) {
+        foreach ($room as $uid => $fd) {
             $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
             $sw->close($fd);
         }
@@ -120,7 +111,7 @@ class Conn
          * @var \swoole_websocket_server $sw
          */
         $sw = App::$server->sw;
-        foreach ($this->getRoom($room_id) as $fd => $data) {
+        foreach ($this->getRoom($room_id) as $uid => $fd) {
             yield $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
         }
     }

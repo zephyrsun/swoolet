@@ -63,9 +63,9 @@ class Crypt
 
     public function decrypt($str)
     {
-        if ($str) {
+        if ($str && $str = base64_decode($str)) {
             $cipher = $this->init();
-            $str = mdecrypt_generic($cipher, base64_decode($str)); //$str = rtrim($str, "\0");
+            $str = mdecrypt_generic($cipher, $str); //$str = rtrim($str, "\0");
             mcrypt_generic_deinit($cipher);
         }
 

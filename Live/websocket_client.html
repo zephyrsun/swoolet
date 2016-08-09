@@ -8,9 +8,9 @@
     websocket.onopen = function (evt) {
         console.log("Connected to WebSocket server.")
 
-        //websocket.send('{"m":"room_join","room_id":"1","token":"obex5e|rbjsYlXE2RdUDHEZmfwdsqXJg+XoHTJ0pXqSfC5XWjs="}')
+        websocket.send('{"m":"room_join","room_id":"1","token":"obex5e|rbjsYlXE2RdUDHEZmfwdsqXJg+XoHTJ0pXqSfC5XWjs="}')
         //websocket.send('{"m":"room_follow"}')
-        websocket.send('{"m":"room_start","token":"obki0a|rbjsYlXE2RdUDHEZmfwdsqXJg+XoHTJ0pXqSfC5XWjs="}')
+        //websocket.send('{"m":"room_start","token":"obki0a|rbjsYlXE2RdUDHEZmfwdsqXJg+XoHTJ0pXqSfC5XWjs="}')
         //websocket.send('{"m":"room_quit","room_id":"1","uid":"10001"}')
     }
 

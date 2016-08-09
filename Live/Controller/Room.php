@@ -43,14 +43,16 @@ class Room extends Basic
 
         $db_user = new User();
 
-        $this->conn->broadcast($room_id, [
-            't' => Conn::TYPE_ENTER,
-            'user' => $db_user->getShowInfo($token_uid, 'simple'),
-        ]);
+        if (!(new \Live\Redis\RoomAdmin())->isSilence($token_uid, $room_id)) {
+            $this->conn->broadcast($room_id, [
+                't' => Conn::TYPE_ENTER,
+                'user' => $db_user->getShowInfo($token_uid, 'simple'),
+            ]);
 
-        $ret = $this->conn->enterRoom($request->fd, $token_uid, $room_id);
+            $this->conn->enterRoom($request->fd, $token_uid, $room_id);
+        }
 
-        $user = $db_user->getShowInfo($room_id, 'simple');
+        $user = $db_user->getShowInfo($room_id, 'lv');
         $user['admin'] = (new RoomAdmin())->isAdmin($room_id, $token_uid);
 
         return Response::data([

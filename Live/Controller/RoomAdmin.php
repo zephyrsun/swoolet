@@ -23,11 +23,11 @@ class RoomAdmin extends Basic
 
     public function add($request)
     {
-        $data = parent::getValidator()->required('token')->ge('admin_uid', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->getResult();
         if (!$data)
             return $data;
 
-        $admin_uid = $data['admin_uid'];
+        $admin_uid = $data['uid'];
         $room_id = $token_uid = $data['token_uid'];
 
         $ret = (new \Live\Database\RoomAdmin())->add($token_uid, $admin_uid);
@@ -45,14 +45,43 @@ class RoomAdmin extends Basic
 
     public function del($request)
     {
-        $data = parent::getValidator()->required('token')->ge('admin_uid', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->getResult();
         if (!$data)
             return $data;
 
-        $admin_uid = $data['admin_uid'];
+        $admin_uid = $data['uid'];
         $token_uid = $data['token_uid'];
 
         $ret = (new RoomAdmin())->del($token_uid, $admin_uid);
+
+        return Response::msg('ok');
+    }
+
+    /**
+     * 禁言是2小时
+     * @param $request
+     * @return null
+     */
+    public function silenceUser($request)
+    {
+        $data = parent::getValidator()->ge('uid', 1)->getResult();
+        if (!$data)
+            return $data;
+
+        $conn = $this->conn->getConn($request->fd);
+
+        if ($conn) {
+            list($uid, $room_id) = $conn;
+
+            $to_uid = $data['uid'];
+
+            if ($uid != $room_id || !(new \Live\Database\RoomAdmin())->isAdmin($room_id, $to_uid))
+                return Response::msg('没有权限', 1031);
+
+            $this->conn->quitConn($request->fd);
+
+            (new \Live\Redis\RoomAdmin())->silenceUser($to_uid, $room_id);
+        }
 
         return Response::msg('ok');
     }

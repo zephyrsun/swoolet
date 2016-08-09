@@ -47,12 +47,20 @@ class Follow extends Basic
         return $ret;
     }
 
-    public function getList($uid, $start_id)
+    public function getCount($uid)
+    {
+        $arr = $this->getList($uid, 0, 1);
+        return $arr[1];
+    }
+
+    public function getList($uid, $start_id, $limit = 0)
     {
         $key = $this->key . $uid;
         $key_count = $this->key_count . $uid;
 
-        if ($list = $this->cache->revRange($key, $start_id, $this->limit, true)) {
+        $limit or $limit = $this->limit;
+
+        if ($list = $this->cache->revRange($key, $start_id, $limit, true)) {
             $count = $this->cache->getCount($key_count);
         } else {
             $count = 0;

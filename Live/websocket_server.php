@@ -20,7 +20,7 @@ class Server extends \Swoolet\WebSocket
         $fd = $request->fd;
         //没有成功登陆,踢出去
         swoole_timer_after(1500, function () use ($fd) {
-            if (!Conn::$ins->getConn($fd))
+            if (Conn::$ins && !Conn::$ins->getConn($fd))
                 $this->sw->close($fd);
         });
     }
