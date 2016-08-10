@@ -5,6 +5,7 @@ if (!$env = &$argv[1]) {
     return;
 }
 
+
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 use \Live\Lib\Conn;
@@ -12,22 +13,28 @@ use \Live\Lib\Conn;
 class Server extends \Swoolet\WebSocket
 {
     static public $msg;
+    /**
+     * @var \Live\Lib\Conn
+     */
+    static public $conn;
 
     public function onOpen($sw, $request)
     {
         $fd = $request->fd;
         //没有成功登陆,踢出去
         swoole_timer_after(1500, function () use ($fd) {
-            if (Conn::$ins && !Conn::$ins->getConn($fd))
+            if (Server::$conn && !Server::$conn->getConn($fd)) {
+                //Conn::$ins->quitConn($fd);
                 $this->sw->close($fd);
+            }
         });
     }
 
     public function onClose($sw, $fd, $from_id)
     {
-        //echo 'onClose' . PHP_EOL;
-        if (Conn::$ins)
-            Conn::$ins->quitConn($fd);
+        \Swoolet\log('onClose', $fd);
+        if (Server::$conn)
+            Server::$conn->quitConn($fd);
     }
 
     /**
@@ -37,14 +44,12 @@ class Server extends \Swoolet\WebSocket
      */
     public function onMessage($sw, $frame)
     {
-        if (!$frame->data)
+        if (!$frame->finish)
             return;
 
         $_POST = \json_decode($frame->data, true);
-        if (is_array($_POST)) {
-            //$uri = array_shift($_POST);
-            $uri = \current($_POST);
-            echo $uri . PHP_EOL;
+        if ($_POST && $uri = &$_POST['m']) {
+            \Swoolet\log($uri, $frame->fd);
 
             $this->callRequest($uri, $frame);
 
@@ -56,4 +61,7 @@ class Server extends \Swoolet\WebSocket
 \Swoolet\Router::$delimiter = '_';
 
 $app = Server::createServer('Live', $env);
+
+Server::$conn = new \Live\Lib\Conn();
+
 $app->run(':9502');

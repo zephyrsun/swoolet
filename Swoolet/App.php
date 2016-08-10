@@ -292,3 +292,8 @@ function import($name)
 
     return null;
 }
+
+function log($msg, $fd)
+{
+    echo date("Y-m-d H:i:s", \Swoolet\App::$ts) . " ($fd)" . $msg . PHP_EOL;
+}

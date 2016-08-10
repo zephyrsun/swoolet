@@ -10,6 +10,7 @@
 namespace Live\Lib;
 
 use Live\Response;
+use Live\Database\User;
 use \Swoolet\App;
 
 class Conn
@@ -26,28 +27,13 @@ class Conn
     public $ids;
     public $room;
 
-    /**
-     * @var Conn $ins
-     */
-    static public $ins;
-
-    /**
-     * @return Conn
-     */
-    static public function getInstance()
-    {
-        self::$ins or self::$ins = new Conn();
-
-        return self::$ins;
-    }
-
     public function &getRoom($room_id)
     {
         $room = &$this->room[$room_id] or $room = [];
         return $room;
     }
 
-    public function enterRoom($fd, $uid, $room_id)
+    public function enterRoom($fd, $uid, $room_id, $nickname, $avatar)
     {
         $room = &$this->getRoom($room_id);
 
@@ -55,7 +41,7 @@ class Conn
         $this->quitConn($fd);
 
         //保存链接
-        $this->ids[$fd] = [$uid, $room_id];
+        $this->ids[$fd] = [$uid, $room_id, $nickname, $avatar];
 
         //加入房间
         $room[$uid] = $fd;
@@ -76,14 +62,16 @@ class Conn
             unset($this->room[$room_id][$uid], $this->ids[$fd]);
         }
 
-        return $this;
+        return $conn;
     }
 
     public function createRoom($fd, $uid)
     {
         $this->room[$uid] = [];
 
-        $this->enterRoom($fd, $uid, $uid);
+        $user = (new User())->getShowInfo($uid, 'simple');
+
+        $this->enterRoom($fd, $uid, $uid, $user['nickname'], $user['avatar']);
     }
 
     public function destroyRoom($room_id)
@@ -105,13 +93,16 @@ class Conn
         }
     }
 
-    public function broadcast($room_id, $msg)
+    public function broadcast($room_id, $my_fd, $msg)
     {
         /**
          * @var \swoole_websocket_server $sw
          */
         $sw = App::$server->sw;
         foreach ($this->getRoom($room_id) as $uid => $fd) {
+            if ($my_fd == $fd)
+                continue;
+
             $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
         }
     }

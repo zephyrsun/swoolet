@@ -13,6 +13,7 @@ use Live\Database\Gift;
 use Live\Database\Live;
 use Live\Database\User;
 use Live\Database\RoomAdmin;
+use Live\Database\UserLevel;
 use Live\Redis\Rank;
 use \Live\Response;
 use \Live\Lib\Conn;
@@ -30,12 +31,12 @@ class Room extends Basic
      */
     public function __construct()
     {
-        $this->conn = Conn::getInstance();
+        $this->conn = \Server::$conn;
     }
 
     public function join($request)
     {
-        $data = parent::getValidator()->required('token')->ge('room_id', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('room_id', 1)->required('first', false)->getResult();
         if (!$data)
             return $data;
 
@@ -43,26 +44,37 @@ class Room extends Basic
         $token_uid = $data['token_uid'];
 
         $db_user = new User();
+        $user = $db_user->getShowInfo($token_uid, 'simple');
+        if (!$user)
+            return Response::msg('登录失败', 1032);
+
+        $rank = new Rank();
 
         if (!(new \Live\Redis\RoomAdmin())->isSilence($token_uid, $room_id)) {
-            $this->conn->broadcast($room_id, [
+            $this->conn->broadcast($room_id, $request->fd, [
                 't' => Conn::TYPE_ENTER,
-                'user' => $db_user->getShowInfo($token_uid, 'simple'),
+                'user' => $user,
             ]);
 
-            $this->conn->enterRoom($request->fd, $token_uid, $room_id);
+            $this->conn->enterRoom($request->fd, $token_uid, $room_id, $user['nickname'], $user['avatar']);
+
+            $rank->joinRoom($token_uid, $room_id);
         }
 
         $user = $db_user->getShowInfo($room_id, 'lv');
 
-        return Response::data([
-            'm' => $_POST['m'],
-            'live' => (new Live())->getLive($room_id, 'app'),
-            'msg' => '欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。',
-            'user' => $user,
-            'rank' => (new Rank())->getRankInRoom($room_id, 0),
-            'admin' => (new RoomAdmin())->isAdmin($room_id, $token_uid),
-        ]);
+        $first = $data['first'];
+        if ($first)
+            return Response::data([
+                'm' => $_POST['m'],
+                'live' => (new Live())->getLive($room_id, 'app'),
+                'msg' => '欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。',
+                'user' => $user,
+                'rank' => $rank->getRankInRoom($room_id, 0),
+                'admin' => (new RoomAdmin())->isAdmin($room_id, $token_uid),
+            ]);
+
+        return Response::msg('');
         //$this->room[$data['room_id']][$this->request->fd] = $data['uid'];
     }
 
@@ -84,7 +96,7 @@ class Room extends Basic
         $conn = $this->conn->getConn($request->fd);
 
         if ($conn) {
-            list($uid, $room_id) = $conn;
+            list($uid, $room_id, $nickname) = $conn;
 
             if ($data['horn']) {
 
@@ -98,11 +110,12 @@ class Room extends Basic
                 $t = Conn::TYPE_MESSAGE;
             }
 
-            $this->conn->broadcast($room_id, [
+            $this->conn->broadcast($room_id, $request->fd, [
                 't' => $t,
                 'user' => [
                     'uid' => $uid,
-                    'nickname' => "nickname{$uid}",
+                    'nickname' => $nickname,
+                    'lv' => (new UserLevel())->getLv($uid),
                 ],
                 'msg' => $data['msg'],
             ]);
@@ -119,7 +132,7 @@ class Room extends Basic
 
             //todo:点赞逻辑
 
-            $this->conn->broadcast($room_id, [
+            $this->conn->broadcast($room_id, $request->fd, [
                 't' => Conn::TYPE_PRAISE,
                 'n' => 1,
             ]);
@@ -137,7 +150,7 @@ class Room extends Basic
             $follow_uid = $room_id;
             $ret = (new Fan())->beFan($uid, $follow_uid);
             if ($ret) {
-                $this->conn->broadcast($room_id, [
+                $this->conn->broadcast($room_id, $request->fd, [
                     't' => Conn::TYPE_FOLLOW,
                     'user' => [
                         'uid' => $uid,
@@ -170,7 +183,7 @@ class Room extends Basic
             if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id))
                 return $ret;
 
-            $this->conn->broadcast($room_id, [
+            $this->conn->broadcast($room_id, $request->fd, [
                 't' => Conn::TYPE_GIFT,
                 'user' => [
                     'uid' => $uid,

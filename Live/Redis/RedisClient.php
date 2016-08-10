@@ -202,6 +202,7 @@ class RedisConnection
         if ($this->redis->debug) {
             $this->redis->trace($data);
         }
+        var_dump($data);
         if ($this->wait_recv) {
             $this->buffer .= $data;
             if ($this->multi_line) {

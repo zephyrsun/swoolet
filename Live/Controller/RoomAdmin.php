@@ -18,7 +18,7 @@ class RoomAdmin extends Basic
 
     public function __construct()
     {
-        $this->conn = Conn::getInstance();
+        $this->conn = \Server::$conn;
     }
 
     public function add($request)
@@ -33,7 +33,7 @@ class RoomAdmin extends Basic
         $ret = (new \Live\Database\RoomAdmin())->add($token_uid, $admin_uid);
 
         if ($ret) {
-            $this->conn->broadcast($room_id, [
+            $this->conn->broadcast($room_id, $request->fd, [
                 't' => Conn::TYPE_SYS_MESSAGE,
                 'user' => (new User())->getShowInfo($admin_uid, 'simple'),
                 'msg' => ':nickname被任命为管理员',

@@ -24,8 +24,6 @@ class User extends Basic
         if (!$data)
             return $data;
 
-        var_dump($data);
-
         $uid = $data['uid'];
 
         $user = (new \Live\Database\User())->getUser($uid);
@@ -39,5 +37,16 @@ class User extends Basic
         ];
 
         return Response::data($user);
+    }
+
+    public function follow($request)
+    {
+        $data = parent::getValidator()->required('token')->ge('start', false)->getResult();
+        if (!$data)
+            return $data;
+    }
+
+    public function fan($request)
+    {
     }
 }

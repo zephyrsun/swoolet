@@ -28,9 +28,26 @@ class Rank extends Common
         $this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
     }
 
+    public function joinRoom($join_uid, $uid)
+    {
+        $limit = 10;
+        $key = $this->key_rank_room . $uid;
+
+        $n = $this->link->zCard($key);
+        if ($n < $limit) {
+
+            //每周5点清空
+            if ($n == 0) {
+                $this->link->expireAt(strtotime('next monday') + 18000);
+            }
+
+            $this->link->zAdd($key, $n, $join_uid);
+        }
+    }
+
     public function getRankInRoom($uid, $start)
     {
-        return $this->_getRank($this->key_rank_room . $uid, $start);
+        return $this->_getRank($this->key_rank_room . $uid, $start, 'room');
     }
 
     public function getRankOfSend($start)
@@ -43,17 +60,18 @@ class Rank extends Common
         return $this->_getRank($this->key_rank_income, $start);
     }
 
-    private function _getRank($key, $start)
+    private function _getRank($key, $start, $type = '')
     {
         $data = parent::revRange($key, $start, 20, true);
 
         $ret = array();
         $db_user = new \Live\Database\User();
         foreach ($data as $uid => $money) {
-            $ret[] = [
-                'user' => $db_user->getShowInfo($uid, 'simple'),
-                'money' => $money,
-            ];
+
+            $user = $db_user->getShowInfo($uid, 'simple');
+            $user['money'] = $money;
+
+            $ret[] = $user;
         }
 
         return $ret;

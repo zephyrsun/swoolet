@@ -14,6 +14,9 @@ $redis_pass = 'sh.camhow.live@Redis';
 
 return [
     'swoole' => [
+        'worker_num' => 1,
+        'reactor_num' => 1,
+
         'open_tcp_keepalive' => 1,
         'tcp_keepidle' => 60,
         'tcp_keepinterval' => 60,

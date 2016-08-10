@@ -23,7 +23,9 @@ const TYPE_GIFT = 10;//送礼
 ###进入直播间
 ```
 请求:
-{"m":"room_join","room_id":"1","token":"xxxxxxxx"}
+{"m":"room_join","room_id":"1","token":"xxxxxxxx","first":true}
+
+first:第一次进入需要传
 
 返回:
 {"m":"room_join","live":{"play_url":"rtmp:\/\/pili-publish.camhow.com.cn\/camhow\/test_1"},"msg":"欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。","user":{"uid":1,"nickname":"15921258181","avatar":""},"c":0}
@@ -62,13 +64,15 @@ horn这个值可传也不可传,传的话表示发弹幕
 ###点赞
 ```
 请求:
-{"m":"room_parise"}
+{"m":"room_praise"}
 
 返回:
 无
 
 房间消息(t值参考`房间消息类型`):
 {"t":5,"n":1}
+
+n:表示显示几个赞
 ```
 
 ###关注主播

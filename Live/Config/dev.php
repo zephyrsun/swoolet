@@ -9,6 +9,9 @@ $db_pass = 'ZAXSq1w2';
 
 return [
     'swoole' => [
+        'worker_num' => 4,
+        'reactor_num' => 4,
+
         'open_tcp_keepalive' => 1,
         'tcp_keepidle' => 60,
         'tcp_keepinterval' => 60,

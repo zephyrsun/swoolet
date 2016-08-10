@@ -22,7 +22,7 @@ class Crypt
         'algo' => \MCRYPT_RIJNDAEL_256,
         'mode' => \MCRYPT_MODE_CBC,
         'key' => 'SWOOLET_WARNING_PLEASE_CHANGE_KEY',
-        'secret' => '',
+        //'secret' => '',
     ];
 
     public $secret;
@@ -39,7 +39,7 @@ class Crypt
 
         $cipher = \mcrypt_module_open($cfg['algo'], '', $cfg['mode'], '');
 
-        $hash_key = hash_hmac('sha1', $cfg['key'], $cfg['secret']);
+        $hash_key = hash_hmac('sha1', $cfg['key'], $this->secret);
 
         $key = substr($hash_key, 0, \mcrypt_enc_get_key_size($cipher));
 

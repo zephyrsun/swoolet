@@ -31,4 +31,7 @@ class Server extends \Swoolet\Http
 }
 
 $app = Server::createServer('Live', $env);
+
+Server::$conn = new \Live\Lib\Conn();
+
 $app->run(':80');

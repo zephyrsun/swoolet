@@ -73,6 +73,8 @@ class User extends Basic
     public function getShowInfo($uid, $type = 'simple')
     {
         $user = $this->getUser($uid);
+        if (!$user)
+            return false;
 
         $ret = [
             'uid' => $user['uid'],

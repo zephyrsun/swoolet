@@ -2,8 +2,19 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-echo strtotime('next monday') + 18000;
 
+\Swoolet\App::setConfig('Live', 'dev');
+
+$redis = new \Live\Redis\RedisClient('127.0.0.1');
+
+$redis->subscribe('test', function ($result, $success) {
+    var_dump('1111', $result, $success);
+});
+
+$redis->publish('test', function ($result, $success) {
+    var_dump('222', $result, $success);
+});
+var_dump(1);
 
 /*
 class  test
