@@ -76,15 +76,19 @@ class User extends Basic
         if (!$user)
             return false;
 
-        $ret = [
-            'uid' => $user['uid'],
-            'nickname' => $user['nickname'],
-            'avatar' => $user['avatar'],
-            //'height' => $user['height'],
-        ];
+        if ($type == 'simple') {
+            $ret = [
+                'uid' => $user['uid'],
+                'nickname' => $user['nickname'],
+                'avatar' => $user['avatar'],
+                //'height' => $user['height'],
+            ];
+        } else {
+            $ret = $user + [
+                    'lv' => (new UserLevel())->getLv($uid)
+                ];
+        }
 
-        if ($type == 'lv')
-            $ret['lv'] = (new UserLevel())->getLv($uid);
 
         return $ret;
     }

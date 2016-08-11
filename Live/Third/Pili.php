@@ -13,9 +13,9 @@ include BASE_DIR . 'Live/Third/pili/Pili.php';
 
 class Pili
 {
-    const AK = 'qNag3DRwm0rr3SjKY4XiIcMYIqyw-zhFetgmKsco';
-    const SK = '6wt1qX8e34HDMaop6hsfYBGiq-X32Tmf6k66VCW6';
-    const HUB = 'camhow';
+    const AK = 'uk_JgveWYYcNXE730vQdHyRaAV86DplixzERLRy-';
+    const SK = 'EHNf0jpUcLa8iVRO47aL178lF_zcPnsEwTE4LD-c';
+    const HUB = 'kanhao';
 
     public $hub;
 

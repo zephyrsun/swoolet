@@ -17,6 +17,8 @@ class Rank extends Common
     public $key_rank_income = 'rank_income';
 
     public $key_rank_room = 'rank_room:';
+    public $key_room_user_num = 'room_user_num:';
+
 
     public function addRank($send_uid, $to_uid, $n)
     {
@@ -28,21 +30,41 @@ class Rank extends Common
         $this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
     }
 
-    public function joinRoom($join_uid, $uid)
+    public function joinRoom($room_id, $uid)
     {
         $limit = 10;
-        $key = $this->key_rank_room . $uid;
+        $key = $this->key_rank_room . $room_id;
 
         $n = $this->link->zCard($key);
         if ($n < $limit) {
 
             //每周5点清空
             if ($n == 0) {
-                $this->link->expireAt(strtotime('next monday') + 18000);
+                $this->link->expireAt(\strtotime('next monday') + 18000);
             }
 
-            $this->link->zAdd($key, $n, $join_uid);
+            $this->link->zIncrBy($key, 0, $uid);
         }
+
+        $this->incrRoomUserNum($room_id);
+
+        return $n;
+    }
+
+    public function incrRoomUserNum($room_id)
+    {
+        $key = $this->key_room_user_num . $room_id;
+        $n = $this->link->incr($key);
+        if ($n == 1) {
+            $this->link->expire($key, 3600 * 5);
+        }
+
+        return $n;
+    }
+
+    public function getRoomUserNum($room_id)
+    {
+        return (int)$this->link->get($this->key_room_user_num . $room_id);
     }
 
     public function getRankInRoom($uid, $start)
@@ -68,7 +90,7 @@ class Rank extends Common
         $db_user = new \Live\Database\User();
         foreach ($data as $uid => $money) {
 
-            $user = $db_user->getShowInfo($uid, 'simple');
+            $user = $db_user->getShowInfo($uid, 'more');
             $user['money'] = $money;
 
             $ret[] = $user;

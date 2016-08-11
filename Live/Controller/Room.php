@@ -9,7 +9,9 @@
 namespace Live\Controller;
 
 use Live\Database\Fan;
+use Live\Database\Follow;
 use Live\Database\Gift;
+use Live\Database\Income;
 use Live\Database\Live;
 use Live\Database\User;
 use Live\Database\RoomAdmin;
@@ -58,7 +60,7 @@ class Room extends Basic
 
             $this->conn->enterRoom($request->fd, $token_uid, $room_id, $user['nickname'], $user['avatar']);
 
-            $rank->joinRoom($token_uid, $room_id);
+            $rank->joinRoom($room_id, $token_uid);
         }
 
         $user = $db_user->getShowInfo($room_id, 'lv');
@@ -72,6 +74,9 @@ class Room extends Basic
                 'user' => $user,
                 'rank' => $rank->getRankInRoom($room_id, 0),
                 'admin' => (new RoomAdmin())->isAdmin($room_id, $token_uid),
+                'follow' => (new Fan())->isFollow($token_uid, $room_id),
+                'num' => $rank->getRoomUserNum($room_id),
+                'money' => (new Income())->getIncome($room_id),
             ]);
 
         return Response::msg('');
@@ -132,9 +137,14 @@ class Room extends Basic
 
             //todo:点赞逻辑
 
+            $user = (new User())->getUser($uid);
             $this->conn->broadcast($room_id, $request->fd, [
                 't' => Conn::TYPE_PRAISE,
                 'n' => 1,
+                'user' => [
+                    'uid' => $user['uid'],
+                    'nickname' => $user['nickname'],
+                ],
             ]);
         }
 

@@ -8,6 +8,8 @@
 
 namespace Live\Lib;
 
+use Live\Redis\Rank;
+
 class Live
 {
     const STATUS_START = 1;
@@ -39,6 +41,8 @@ class Live
                 'ts' => \Swoolet\App::$ts,
                 'cover' => '',
             ]);
+
+        (new Rank())->incrRoomUserNum($uid);
 
         return $ret;
     }

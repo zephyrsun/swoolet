@@ -36,7 +36,7 @@ class User extends Basic
             'fan' => (new Fan())->getCount($uid),
         ];
 
-        return Response::data($user);
+        return Response::data(['user' => $user]);
     }
 
     public function follow($request)
