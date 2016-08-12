@@ -34,6 +34,7 @@ class Room extends Basic
     public function __construct()
     {
         $this->conn = \Server::$conn;
+        $this->conn->subscribe();
     }
 
     public function join($request)
@@ -51,19 +52,19 @@ class Room extends Basic
             return Response::msg('登录失败', 1032);
 
         $rank = new Rank();
-
         if (!(new \Live\Redis\RoomAdmin())->isSilence($token_uid, $room_id)) {
-            $this->conn->broadcast($room_id, $request->fd, [
+            $this->conn->roomMsg($room_id, $token_uid, [
                 't' => Conn::TYPE_ENTER,
                 'user' => $user,
             ]);
 
-            $this->conn->enterRoom($request->fd, $token_uid, $room_id, $user['nickname'], $user['avatar']);
+            $this->conn->joinRoom($request->fd, $token_uid, $room_id, $user['nickname'], $user['avatar']);
 
             $rank->joinRoom($room_id, $token_uid);
         }
 
-        $user = $db_user->getShowInfo($room_id, 'lv');
+        if ($token_uid != $room_id)
+            $user = $db_user->getShowInfo($room_id, 'lv');
 
         $first = $data['first'];
         if ($first)
@@ -115,7 +116,7 @@ class Room extends Basic
                 $t = Conn::TYPE_MESSAGE;
             }
 
-            $this->conn->broadcast($room_id, $request->fd, [
+            $this->conn->roomMsg($room_id, $uid, [
                 't' => $t,
                 'user' => [
                     'uid' => $uid,
@@ -138,7 +139,7 @@ class Room extends Basic
             //todo:点赞逻辑
 
             $user = (new User())->getUser($uid);
-            $this->conn->broadcast($room_id, $request->fd, [
+            $this->conn->roomMsg($room_id, $uid, [
                 't' => Conn::TYPE_PRAISE,
                 'n' => 1,
                 'user' => [
@@ -160,7 +161,7 @@ class Room extends Basic
             $follow_uid = $room_id;
             $ret = (new Fan())->beFan($uid, $follow_uid);
             if ($ret) {
-                $this->conn->broadcast($room_id, $request->fd, [
+                $this->conn->roomMsg($room_id, $uid, [
                     't' => Conn::TYPE_FOLLOW,
                     'user' => [
                         'uid' => $uid,
@@ -193,7 +194,7 @@ class Room extends Basic
             if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id))
                 return $ret;
 
-            $this->conn->broadcast($room_id, $request->fd, [
+            $this->conn->roomMsg($room_id, $uid, [
                 't' => Conn::TYPE_GIFT,
                 'user' => [
                     'uid' => $uid,
@@ -217,7 +218,9 @@ class Room extends Basic
 
         $this->conn->createRoom($request->fd, $token_uid);
 
-        $data = (new \Live\Lib\Live())->start($token_uid);
+        if(!$data = (new \Live\Lib\Live())->start($token_uid))
+            return $data;
+
         return Response::data([
             'm' => $_POST['m'],
             'publish_url' => $data['publish_url'],
@@ -231,7 +234,7 @@ class Room extends Basic
         if ($conn) {
             list($uid, $room_id) = $conn;
 
-            $this->conn->destroyRoom($room_id);
+            $this->conn->destroyRoom($room_id, $request->fd);
 
             $data = (new \Live\Lib\Live())->stop($uid);
 

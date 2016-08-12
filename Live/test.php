@@ -2,7 +2,12 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
+\Swoolet\App::setConfig('Live', 'test');
+
+
 echo strtotime('next monday') + 18000;
+
+$sub = new \Swoolet\Data\RedisAsync('redis_async');
 
 
 /*

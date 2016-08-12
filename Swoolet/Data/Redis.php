@@ -21,10 +21,10 @@ namespace Swoolet\Data {
         public $cfg_key = '';
         public $db_index = 0;
 
-        public function __construct()
+        public function __construct($cfg_key = '')
         {
-            if ($this->cfg_key)
-                $this->dial($this->cfg_key);
+            if ($cfg_key || $cfg_key = $this->cfg_key)
+                $this->dial($cfg_key);
         }
 
         /**

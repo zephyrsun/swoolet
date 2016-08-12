@@ -61,15 +61,17 @@ class Live extends Basic
             return $this->table($uid)->where('uid', $uid)->fetch();
         });
 
-        if ($type == 'app') {
-            //play in app
-            $live = [
-                'play_url' => $live['play_url'],
-            ];
-        } elseif ($type == 'h5') {
-            $live = [
-                'hls_url' => $live['hls_url'],
-            ];
+        if ($live) {
+            if ($type == 'app') {
+                //play in app
+                $live = [
+                    'play_url' => $live['play_url'],
+                ];
+            } elseif ($type == 'h5') {
+                $live = [
+                    'hls_url' => $live['hls_url'],
+                ];
+            }
         }
 
         return $live;

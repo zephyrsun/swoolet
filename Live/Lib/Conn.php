@@ -26,6 +26,50 @@ class Conn
 
     public $ids;
     public $room;
+    public $sub;
+    public $pub;
+    public $key_conn = 'conn';
+
+    static public $subscribe = false;
+
+    public function __construct()
+    {
+        $this->sub = new \Swoolet\Data\RedisAsync('redis_async');
+        $this->pub = new \Swoolet\Data\RedisAsync('redis_async');
+        //$this->redis->debug = 1;
+    }
+
+    public function subscribe()
+    {
+        if (self::$subscribe)
+            return;
+
+        $this->sub->subscribe($this->key_conn, function ($data, $success) {
+            //var_dump('subscribe', $data[2]);
+
+            $data = \msgpack_unpack($data[2]);
+            if (is_array($data) && $action = &$data['action']) {
+                $this->{$action}($data);
+            }
+
+            /*
+
+            if ($data = \msgpack_unpack($data[2]) && $action = &$data['action']){
+                var_dump($data['action']);
+
+                $this->{$action}($data);
+            }
+            */
+        });
+
+        self::$subscribe = true;
+    }
+
+    public function unsubscribe($fd)
+    {
+        $this->sub->unsubscribe($this->key_conn, function ($data, $success) {
+        });
+    }
 
     public function &getRoom($room_id)
     {
@@ -33,7 +77,7 @@ class Conn
         return $room;
     }
 
-    public function enterRoom($fd, $uid, $room_id, $nickname, $avatar)
+    public function joinRoom($fd, $uid, $room_id, $nickname, $avatar)
     {
         $room = &$this->getRoom($room_id);
 
@@ -45,6 +89,8 @@ class Conn
 
         //加入房间
         $room[$uid] = $fd;
+
+        //var_dump('joinRoom', $this->room);
 
         return $room;
     }
@@ -62,6 +108,8 @@ class Conn
             unset($this->room[$room_id][$uid], $this->ids[$fd]);
         }
 
+        //var_dump('quitConn', $this->room);
+
         return $conn;
     }
 
@@ -71,39 +119,46 @@ class Conn
 
         $user = (new User())->getShowInfo($uid, 'simple');
 
-        $this->enterRoom($fd, $uid, $uid, $user['nickname'], $user['avatar']);
+        $this->joinRoom($fd, $uid, $uid, $user['nickname'], $user['avatar']);
     }
 
-    public function destroyRoom($room_id)
+    public function destroyRoom($room_id, $fd)
     {
-        $room = $this->getRoom($room_id);
-
-        $msg = [
+        $this->roomMsg($room_id, $fd, [
             't' => Conn::TYPE_LIVE_STOP,
             'msg' => '直播结束',
-        ];
-
-        /**
-         * @var \swoole_websocket_server $sw
-         */
-        $sw = App::$server->sw;
-        foreach ($room as $uid => $fd) {
-            $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
-            $sw->close($fd);
-        }
+        ]);
     }
 
-    public function broadcast($room_id, $my_fd, $msg)
+    public function roomMsg($room_id, $uid, $msg)
     {
+        $msg = [
+            'action' => 'push',
+            'room_id' => $room_id,
+            'uid' => $uid,
+            'msg' => $msg,
+        ];
+
+        $this->pub->publish($this->key_conn, \msgpack_pack($msg), function ($result, $success) {
+            //var_dump('publish', $result, $success);
+        });
+    }
+
+    public function push($data)
+    {
+        $room_id = $data['room_id'];
+        $send_uid = $data['uid'];
+        $msg = json_encode($data['msg'], \JSON_UNESCAPED_UNICODE);
+        //var_dump($this->room, $send_fd);
+
         /**
          * @var \swoole_websocket_server $sw
          */
         $sw = App::$server->sw;
-        foreach ($this->getRoom($room_id) as $uid => $fd) {
-            if ($my_fd == $fd)
-                continue;
 
-            $sw->push($fd, json_encode($msg, \JSON_UNESCAPED_UNICODE));
+        foreach ($this->getRoom($room_id) as $uid => $fd) {
+            if ($send_uid != $uid)
+                $sw->push($fd, $msg);
         }
     }
 }

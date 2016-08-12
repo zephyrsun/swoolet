@@ -1,6 +1,8 @@
 <?php
 namespace Swoolet\Data;
 
+use \Swoolet\App;
+
 /**
  * Class Redis
  *
@@ -17,8 +19,6 @@ class RedisAsync
 {
     public $crlf = "\r\n";
 
-    public $host;
-    public $port;
     public $debug = false;
 
     /**
@@ -27,10 +27,14 @@ class RedisAsync
      */
     public $pool = array();
 
-    public function __construct($host = 'localhost', $port = 6379, $timeout = 0.1)
+    public $cfg_key = '';
+
+    public $option = ['host' => '127.0.0.1', 'port' => 6379, 'password' => ''];
+
+    public function __construct($cfg_key = '')
     {
-        $this->host = $host;
-        $this->port = $port;
+        if ($cfg_key || $cfg_key = $this->cfg_key)
+            $this->option = App::getConfig($cfg_key) + $this->option;
     }
 
     public function trace($msg)
@@ -147,10 +151,16 @@ class RedisConnection
         $client->on('error', [$this, 'onError']);
         $client->on('receive', [$this, 'onReceive']);
         $client->on('close', [$this, 'onClose']);
-        $client->connect($redis->host, $redis->port);
+        $client->connect($redis->option['host'], $redis->option['port']);
+
         $this->client = $client;
         $redis->pool[$client->sock] = $this;
         $this->redis = $redis;
+
+        if ($redis->option['password']) {
+            $this->command('auth', $redis->option['password'], function () {
+            });
+        }
     }
 
     /**
@@ -199,6 +209,14 @@ class RedisConnection
     public function onError()
     {
         echo 'Failed to connect redis server' . PHP_EOL;
+    }
+
+    public function onClose(\swoole_client $cli)
+    {
+        if ($this->wait_send) {
+            $this->redis->freeConnection($cli->sock, $this);
+            call_user_func($this->callback, 'timeout', false);
+        }
     }
 
     public function onReceive($cli, $data)
@@ -295,13 +313,5 @@ class RedisConnection
             $this->buffer = substr($this->buffer, $len + 2);
 
         return $chunk;
-    }
-
-    public function onClose(\swoole_client $cli)
-    {
-        if ($this->wait_send) {
-            $this->redis->freeConnection($cli->sock, $this);
-            call_user_func($this->callback, 'timeout', false);
-        }
     }
 }

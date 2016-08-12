@@ -52,10 +52,10 @@ namespace Swoolet\Data {
             \PDO::MYSQL_ATTR_FOUND_ROWS => true, //1008
         ];
 
-        public function __construct()
+        public function __construct($cfg_key = '')
         {
-            if ($this->cfg_key)
-                $this->dial($this->cfg_key);
+            if ($cfg_key || $cfg_key = $this->cfg_key)
+                $this->dial($cfg_key);
         }
 
         /**

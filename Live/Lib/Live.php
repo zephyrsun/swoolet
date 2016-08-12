@@ -36,11 +36,13 @@ class Live
     public function start($uid)
     {
         $ret = $this->sdk->start($this->getKey($uid));
-        $this->db->start($uid, $ret + [
+        $ok = $this->db->start($uid, $ret + [
                 'status' => self::STATUS_START,
                 'ts' => \Swoolet\App::$ts,
                 'cover' => '',
             ]);
+        if (!$ok)
+            return $ok;
 
         (new Rank())->incrRoomUserNum($uid);
 

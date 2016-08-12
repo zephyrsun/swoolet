@@ -3,17 +3,17 @@
 
     //ws://test.camhow.com.cn:9502
     //ws://127.0.0.1:9512
-    var websocket = new WebSocket('ws://test.camhow.com.cn:9502')
-    //var websocket = new WebSocket('ws://127.0.0.1:9512')
+    //var websocket = new WebSocket('ws://test.camhow.com.cn:9502')
+    var websocket = new WebSocket('ws://127.0.0.1:9512')
 
     websocket.onopen = function (evt) {
         console.log("Connected to WebSocket server.")
 
         //dev
-        //websocket.send('{"m":"room_join","room_id":"1","token":"obofuw|p512ehxx4d8yTN4A\/kQmIY5qMSw5P5vFAeAeq5kwIZU="}')
+        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"obofuw|p512ehxx4d8yTN4A\/kQmIY5qMSw5P5vFAeAeq5kwIZU="}')
 
         //test
-        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"obohrx|JRqm03RF4UlANIWrq0k6DE2FLDxOkxb+Ox3bsp8ZGtg="}')
+        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"obohrx|JRqm03RF4UlANIWrq0k6DE2FLDxOkxb+Ox3bsp8ZGtg="}')
 
         websocket.send('{"m":"room_sendMsg","msg":"你好2"}')
         //websocket.send('{"m":"room_follow"}')

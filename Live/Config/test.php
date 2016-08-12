@@ -27,6 +27,7 @@ return [
     ],
     'crypt' => ['key' => 'BKeVxo9IKu+k', 'secret' => 'KoP9FIPy+SVaE4F'],
     'redis_1' => ['host' => '127.0.0.1', 'port' => 6399, 'timeout' => 0.0, 'password' => $redis_pass],
+    'redis_async' => ['host' => '127.0.0.1', 'port' => 6399, 'timeout' => 0.0, 'password' => $redis_pass],
     'db_1' => ['host' => $db_ip, 'port' => $db_port, 'username' => $db_user, 'password' => $db_pass, 'option' => $db_option],
     'db_2' => ['host' => $db_ip, 'port' => $db_port, 'username' => $db_user, 'password' => $db_pass, 'option' => $db_option],
 ];
