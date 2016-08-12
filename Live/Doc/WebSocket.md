@@ -103,7 +103,7 @@ n:表示显示几个赞
 
 ```
 请求:
-{"m":"room_start","token":"xxxxxx"}
+{"m":"room_start","token":"xxxxxx","title":"我的直播","city":"城市"}
 
 返回:
 {"publish_url":"rtmp://xxxxxxxx","c":0}

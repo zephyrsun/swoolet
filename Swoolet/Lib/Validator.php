@@ -271,7 +271,7 @@ class Validator
      * @param $key
      * @param $max
      * @param bool $required
-     * @return $this
+     * @return Validator
      */
     public function lengthLE($key, $max, $required = true)
     {

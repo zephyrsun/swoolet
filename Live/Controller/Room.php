@@ -210,16 +210,16 @@ class Room extends Basic
 
     public function start($request)
     {
-        $data = parent::getValidator()->required('token')->getResult();
+        $data = parent::getValidator()->lengthLE('title', 12)->lengthLE('city', 2)->required('token')->getResult();
         if (!$data)
             return $data;
 
         $token_uid = $data['token_uid'];
 
-        $this->conn->createRoom($request->fd, $token_uid);
-
-        if(!$data = (new \Live\Lib\Live())->start($token_uid))
+        if (!$data = (new \Live\Lib\Live())->start($token_uid, $data))
             return $data;
+
+        $this->conn->createRoom($request->fd, $token_uid);
 
         return Response::data([
             'm' => $_POST['m'],

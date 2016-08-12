@@ -9,8 +9,15 @@
 
 namespace Live\Third;
 
-include BASE_DIR . 'Live/Third/qiniu/Auth.php';
-include BASE_DIR . 'Live/Third/qiniu/Storage/UploadManager.php';
+include BASE_DIR . 'Live/Third/Qiniu/Auth.php';
+include BASE_DIR . 'Live/Third/Qiniu/Zone.php';
+include BASE_DIR . 'Live/Third/Qiniu/Config.php';
+include BASE_DIR . 'Live/Third/Qiniu/functions.php';
+include BASE_DIR . 'Live/Third/Qiniu/Storage/UploadManager.php';
+include BASE_DIR . 'Live/Third/Qiniu/Storage/FormUploader.php';
+include BASE_DIR . 'Live/Third/Qiniu/Http/Client.php';
+include BASE_DIR . 'Live/Third/Qiniu/Http/Request.php';
+include BASE_DIR . 'Live/Third/Qiniu/Http/Response.php';
 
 use Live\Response;
 use Qiniu\Auth;
@@ -24,26 +31,27 @@ class Qiniu
 
     public $auth;
 
+    public $domain = [
+        'live-cover' => 'http://obs24956g.bkt.clouddn.com/',
+        'avatar' => 'http://obself92s.bkt.clouddn.com/',
+    ];
+
     public function __construct()
     {
         $this->auth = new Auth(self::AK, self::SK);
     }
 
-    public function uploadCover($uid, $filename)
+    public function uploadCover($bucket, $filename, $key)
     {
-        $bucket = 'live-cover';
-
         $token = $this->auth->uploadToken($bucket);
-
-        $new_name = "{$uid}_" . \Swoolet\App::$ts;
 
         $uploadMgr = new UploadManager();
 
-        list($ret, $err) = $uploadMgr->putFile($token, $new_name, $filename);
+        list($ret, $err) = $uploadMgr->putFile($token, $key, $filename);
 
         if ($err)
             return Response::msg('上传失败', 1033);
 
-        return $ret;
+        return $this->domain[$bucket] . $key;
     }
 }

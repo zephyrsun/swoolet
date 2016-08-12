@@ -33,13 +33,14 @@ class Live
         return "{$this->prefix}{$uid}_" . \Swoolet\App::$ts;
     }
 
-    public function start($uid)
+    public function start($uid, $data)
     {
         $ret = $this->sdk->start($this->getKey($uid));
-        $ok = $this->db->start($uid, $ret + [
+        $ok = $this->db->updateLive($uid, $ret + [
                 'status' => self::STATUS_START,
                 'ts' => \Swoolet\App::$ts,
-                'cover' => '',
+                'title' => $data['title'],
+                'city' => $data['city'],
             ]);
         if (!$ok)
             return $ok;

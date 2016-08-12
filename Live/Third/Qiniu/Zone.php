@@ -14,11 +14,11 @@ final class Zone
 
     public static function zone0()
     {
-        return new self('http://up.qiniu.com', 'http://upload.qiniu.com');
+        return new self('http://up.Qiniu.com', 'http://upload.Qiniu.com');
     }
 
     public static function zone1()
     {
-        return new self('http://up-z1.qiniu.com', 'http://upload-z1.qiniu.com');
+        return new self('http://up-z1.Qiniu.com', 'http://upload-z1.Qiniu.com');
     }
 }

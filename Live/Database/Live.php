@@ -34,7 +34,7 @@ class Live extends Basic
         return $this;
     }
 
-    public function start($uid, $new_data)
+    public function updateLive($uid, $new_data)
     {
         $data = $this->getLive($uid);
 

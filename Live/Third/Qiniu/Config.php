@@ -10,7 +10,7 @@ final class Config
     const IO_HOST  = 'http://iovip.qbox.me';            // 七牛源站Host
     const RS_HOST  = 'http://rs.qbox.me';               // 文件元信息管理操作Host
     const RSF_HOST = 'http://rsf.qbox.me';              // 列举操作Host
-    const API_HOST = 'http://api.qiniu.com';            // 数据处理操作Host
+    const API_HOST = 'http://api.Qiniu.com';            // 数据处理操作Host
 
     private $upHost;                                    // 上传Host
     private $upHostBackup;                              // 上传备用Host

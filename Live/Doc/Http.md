@@ -88,3 +88,35 @@ uid //禁言谁
 
 返回:
 无
+
+###上传头像
+接口:
+/Upload/avatar
+
+参数:
+token 
+表单图片流
+
+返回:
+{"img":"http:\/\/obs24956g.bkt.clouddn.com\/1_1470988982.jpg","c":0}
+
+###上传封面
+接口:
+/Upload/cover
+
+参数:
+token 
+表单图片流
+
+返回:
+{"img":"http:\/\/obs24956g.bkt.clouddn.com\/1_1470988982.jpg","c":0}
+
+###坐标获取城市信息
+接口:
+/Map/getCity
+
+参数:
+location 39.983424,116.322987
+
+返回:
+{"city":"北京市","c":0}
