@@ -7,7 +7,10 @@ const TYPE_HORN = 2;//广播喇叭
 const TYPE_FOLLOW = 3;//关注主播
 const TYPE_ENTER = 4;//进入房间
 const TYPE_PRAISE = 5;//点赞
+const TYPE_ROOM_BROADCAST = 6;//房间广播
+const TYPE_ROOM_ONE = 7;//只自己收到
 const TYPE_GIFT = 10;//送礼
+const TYPE_LIVE_STOP = 20;//停播
 ```
 
 #服务器接口

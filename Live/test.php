@@ -2,12 +2,20 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-\Swoolet\App::setConfig('Live', 'test');
+\Swoolet\App::setConfig('Live', 'dev');
 
+//$link = new \redisProxy();
+//$link->connect('127.0.0.1', 6366, 0);
+//
+//$link->select(0);
 
-echo strtotime('next monday') + 18000;
+$db_user = new \Live\Database\User();
+$user = $db_user->getShowInfo(1, 'simple');
 
-$sub = new \Swoolet\Data\RedisAsync('redis_async');
+var_dump($user);
+
+$user = $db_user->getShowInfo(2, 'simple');
+var_dump($user);
 
 
 /*

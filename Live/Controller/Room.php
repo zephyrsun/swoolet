@@ -52,15 +52,20 @@ class Room extends Basic
             return Response::msg('登录失败', 1032);
 
         $rank = new Rank();
-        if (!(new \Live\Redis\RoomAdmin())->isSilence($token_uid, $room_id)) {
+        $room_admin = new RoomAdmin();
+        if (!$room_admin->isSilence($room_id, $token_uid)) {
             $this->conn->roomMsg($room_id, $token_uid, [
                 't' => Conn::TYPE_ENTER,
                 'user' => $user,
             ]);
 
-            $this->conn->joinRoom($request->fd, $token_uid, $room_id, $user['nickname'], $user['avatar']);
+            $admin = $room_admin->isAdmin($room_id, $token_uid);
+
+            $this->conn->joinRoom($request->fd, $token_uid, $room_id, $user['nickname'], $user['avatar'], $admin);
 
             $rank->joinRoom($room_id, $token_uid);
+        } else {
+            $admin = false;
         }
 
         if ($token_uid != $room_id)
@@ -74,7 +79,7 @@ class Room extends Basic
                 'msg' => '欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。',
                 'user' => $user,
                 'rank' => $rank->getRankInRoom($room_id, 0),
-                'admin' => (new RoomAdmin())->isAdmin($room_id, $token_uid),
+                'admin' => $admin,
                 'follow' => (new Fan())->isFollow($token_uid, $room_id),
                 'num' => $rank->getRoomUserNum($room_id),
                 'money' => (new Income())->getIncome($room_id),
@@ -102,7 +107,14 @@ class Room extends Basic
         $conn = $this->conn->getConn($request->fd);
 
         if ($conn) {
-            list($uid, $room_id, $nickname) = $conn;
+            list($uid, $room_id, $nickname, $avatar, $admin) = $conn;
+
+            $user = [
+                'uid' => $uid,
+                'nickname' => $nickname,
+                'lv' => (new UserLevel())->getLv($uid),
+                'admin' => $admin,
+            ];
 
             if ($data['horn']) {
 
@@ -111,6 +123,8 @@ class Room extends Basic
                 if (!$ret)
                     return $ret;
 
+                $user['avatar'] = $avatar;
+
                 $t = Conn::TYPE_HORN;
             } else {
                 $t = Conn::TYPE_MESSAGE;
@@ -118,11 +132,7 @@ class Room extends Basic
 
             $this->conn->roomMsg($room_id, $uid, [
                 't' => $t,
-                'user' => [
-                    'uid' => $uid,
-                    'nickname' => $nickname,
-                    'lv' => (new UserLevel())->getLv($uid),
-                ],
+                'user' => $user,
                 'msg' => $data['msg'],
             ]);
         }
@@ -134,17 +144,17 @@ class Room extends Basic
     {
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid, $room_id) = $conn;
+            list($uid, $room_id, $nickname, $avatar) = $conn;
 
             //todo:点赞逻辑
 
-            $user = (new User())->getUser($uid);
+            //$user = (new User())->getUser($uid);
             $this->conn->roomMsg($room_id, $uid, [
                 't' => Conn::TYPE_PRAISE,
                 'n' => 1,
                 'user' => [
-                    'uid' => $user['uid'],
-                    'nickname' => $user['nickname'],
+                    'uid' => $uid,
+                    'nickname' => $nickname,
                 ],
             ]);
         }
@@ -159,7 +169,7 @@ class Room extends Basic
             list($uid, $room_id) = $conn;
 
             $follow_uid = $room_id;
-            $ret = (new Fan())->beFan($uid, $follow_uid);
+            $ret = (new Fan())->follow($uid, $follow_uid);
             if ($ret) {
                 $this->conn->roomMsg($room_id, $uid, [
                     't' => Conn::TYPE_FOLLOW,
@@ -220,6 +230,9 @@ class Room extends Basic
             return $data;
 
         $this->conn->createRoom($request->fd, $token_uid);
+
+        //重新加载管理员
+        (new RoomAdmin())->getRoomAdmin($token_uid);
 
         return Response::data([
             'm' => $_POST['m'],

@@ -20,7 +20,8 @@ class Conn
     const TYPE_FOLLOW = 3;//关注主播
     const TYPE_ENTER = 4;//进入房间
     const TYPE_PRAISE = 5;//点赞
-    const TYPE_SYS_MESSAGE = 6;//系统消息
+    const TYPE_ROOM_BROADCAST = 6;//房间广播
+    const TYPE_ROOM_ONE = 7;//只自己收到
     const TYPE_GIFT = 10;//送礼
     const TYPE_LIVE_STOP = 20;//停播
 
@@ -48,7 +49,7 @@ class Conn
             //var_dump('subscribe', $data[2]);
 
             $data = \msgpack_unpack($data[2]);
-            if (is_array($data) && $action = &$data['action']) {
+            if (is_array($data) && $action = &$data['a']) {
                 $this->{$action}($data);
             }
 
@@ -77,7 +78,7 @@ class Conn
         return $room;
     }
 
-    public function joinRoom($fd, $uid, $room_id, $nickname, $avatar)
+    public function joinRoom($fd, $uid, $room_id, $nickname, $avatar, $admin)
     {
         $room = &$this->getRoom($room_id);
 
@@ -85,7 +86,7 @@ class Conn
         $this->quitConn($fd);
 
         //保存链接
-        $this->ids[$fd] = [$uid, $room_id, $nickname, $avatar];
+        $this->ids[$fd] = [$uid, $room_id, $nickname, $avatar, $admin];
 
         //加入房间
         $room[$uid] = $fd;
@@ -113,6 +114,14 @@ class Conn
         return $conn;
     }
 
+    public function kickRoomUser($room_id, $uid)
+    {
+        if (isset($this->room[$room_id][$uid])) {
+            $fd = $this->room[$room_id][$uid];
+            $this->quitConn($fd);
+        }
+    }
+
     public function createRoom($fd, $uid)
     {
         $this->room[$uid] = [];
@@ -130,10 +139,10 @@ class Conn
         ]);
     }
 
-    public function roomMsg($room_id, $uid, $msg)
+    public function roomMsg($room_id, $uid, $msg, $action = 'pRoom')
     {
         $msg = [
-            'action' => 'push',
+            'a' => $action,
             'room_id' => $room_id,
             'uid' => $uid,
             'msg' => $msg,
@@ -144,7 +153,12 @@ class Conn
         });
     }
 
-    public function push($data)
+    public function roomUserMsg($room_id, $to_uid, $msg)
+    {
+        $this->roomMsg($room_id, $to_uid, $msg, 'pRoomUser');
+    }
+
+    public function pRoom($data)
     {
         $room_id = $data['room_id'];
         $send_uid = $data['uid'];
@@ -160,5 +174,22 @@ class Conn
             if ($send_uid != $uid)
                 $sw->push($fd, $msg);
         }
+    }
+
+    public function pRoomUser($data)
+    {
+        $room_id = $data['room_id'];
+        $to_uid = $data['uid'];
+        $msg = json_encode($data['msg'], \JSON_UNESCAPED_UNICODE);
+        //var_dump($this->room, $send_fd);
+
+        /**
+         * @var \swoole_websocket_server $sw
+         */
+        $sw = App::$server->sw;
+
+        $room = $this->getRoom($room_id);
+        if ($fd = &$room[$to_uid])
+            $sw->push($fd, $msg);
     }
 }

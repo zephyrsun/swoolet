@@ -3,7 +3,6 @@
 namespace Live\Controller;
 
 use Live\Cookie;
-use Live\Database\User;
 use Live\Redis\Common;
 use Live\Response;
 
@@ -31,7 +30,7 @@ class Login extends Basic
         if ($r_code != $code)
             return Response::msg('验证码错误', 1001);
 
-        $db_user = new User();
+        $db_user = new \Live\Database\User();
         $user = $db_user->login($db_user::PF_MOBILE, $mobile);
 
         Response::data([

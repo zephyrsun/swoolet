@@ -40,7 +40,6 @@ namespace Swoolet\Data {
 
             //https://github.com/swoole/php-cp
             $link = new \redisProxy();
-
             $link->connect($cfg['host'], $cfg['port'], $cfg['timeout']);
 
             if ($cfg['password'])

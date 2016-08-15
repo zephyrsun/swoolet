@@ -18,7 +18,7 @@ class Upload extends Basic
 {
     public function cover($request)
     {
-        $this->_upload($request, 'live-cover', function ($uid, $img) {
+        $this->_upload($request, 'cover', function ($uid, $img) {
             (new Live())->updateLive($uid, [
                 'cover' => $img
             ]);
@@ -58,7 +58,7 @@ class Upload extends Basic
 
         $name = $token_uid . '_' . \Swoolet\App::$ts . ".{$ext}";
 
-        $img = (new Qiniu())->uploadCover($bucket, $tmp_name, $name);
+        $img = (new Qiniu())->upload($bucket, $tmp_name, $name);
         if (!$img)
             return $img;
 

@@ -16,18 +16,33 @@ class Fan extends Follow
 
     public $limit = 5000;
 
-    public function beFan($uid, $follow_uid)
+    /**
+     * @param $uid
+     * @param $follow_uid 被关注人的uid
+     * @return bool
+     */
+    public function follow($uid, $follow_uid)
     {
-        if ($this->isFollow($uid, $follow_uid) === false) {
-            $fan = $this->add($uid, $follow_uid);
+        if ($uid == $follow_uid || $this->isFollow($uid, $follow_uid) !== false)
+            return false;
 
-            $db_follow = new Follow();
-            $follow = $db_follow->add($follow_uid, $uid);
+        $fan = $this->add($uid, $follow_uid);
 
-            return $fan;
-        }
+        $follow = (new Follow())->add($follow_uid, $uid);
 
-        return false;
+        return $fan;
+    }
+
+    public function unfollow($uid, $follow_uid)
+    {
+        if ($uid == $follow_uid)
+            return false;
+
+        $fan = $this->del($uid, $follow_uid);
+
+        $follow = (new Follow())->del($follow_uid, $uid);
+
+        return $fan;
     }
 
     public function isFollow($uid, $follow_uid)

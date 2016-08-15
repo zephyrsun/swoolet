@@ -39,10 +39,19 @@ class Follow extends Basic
         $ret = $this->table($uid)->insert([
             'uid' => $uid,
             'ref_uid' => $ref_uid,
-        ]);
+        ], 'INSERT IGNORE');
 
         if ($ret)
             $this->cache->del($this->key . $uid);
+
+        return $ret;
+    }
+
+    public function del($uid, $ref_uid)
+    {
+        $ret = $this->table($uid)->where('uid = ? AND ref_uid = ?', [$uid, $ref_uid])->delete();
+
+        $ret = $this->cache->link->zRem($this->key . $uid, $ref_uid);
 
         return $ret;
     }

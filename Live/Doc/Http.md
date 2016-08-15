@@ -84,6 +84,7 @@ uid //删除谁
 
 参数:
 token 
+room_id //房间号,如果是主播传主播uid
 uid //禁言谁
 
 返回:
@@ -116,7 +117,44 @@ token
 /Map/getCity
 
 参数:
+token
 location 39.983424,116.322987
 
 返回:
 {"city":"北京市","c":0}
+
+
+###举报
+接口:
+/RoomAdmin/reportUser
+
+参数:
+token
+reason 举报理由, 举报理由有5种可选:广告欺诈、淫秽色情、骚扰谩骂、反动政治、其他内容
+uid 被举报人的uid
+
+返回:
+{"msg":"感谢您的举报，我们将尽快处理","c":0}
+
+
+###关注
+接口:
+/User/follow
+
+参数:
+token
+uid 被关注人的uid
+
+返回:
+{"msg":"关注成功","c":0}
+
+###取消关注
+接口:
+/User/unfollow
+
+参数:
+token
+uid 被关注人的uid
+
+返回:
+{"msg":"取消关注成功","c":0}

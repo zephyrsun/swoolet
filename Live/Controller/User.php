@@ -39,14 +39,30 @@ class User extends Basic
         return Response::data(['user' => $user]);
     }
 
+    /**
+     * 关注
+     * @param $request
+     * @return array
+     */
     public function follow($request)
     {
-        $data = parent::getValidator()->required('token')->ge('start', false)->getResult();
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->getResult();
         if (!$data)
             return $data;
+
+        $ret = (new Fan())->follow($data['token_uid'], $data['uid']);
+
+        return Response::msg('关注成功');
     }
 
-    public function fan($request)
+    public function unfollow($request)
     {
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->getResult();
+        if (!$data)
+            return $data;
+
+        $ret = (new Fan())->unfollow($data['token_uid'], $data['uid']);
+
+        return Response::msg('取消关注成功');
     }
 }

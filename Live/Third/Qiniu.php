@@ -32,7 +32,7 @@ class Qiniu
     public $auth;
 
     public $domain = [
-        'live-cover' => 'http://obs24956g.bkt.clouddn.com/',
+        'cover' => 'http://obw0kc5sy.bkt.clouddn.com/',
         'avatar' => 'http://obself92s.bkt.clouddn.com/',
     ];
 
@@ -41,7 +41,7 @@ class Qiniu
         $this->auth = new Auth(self::AK, self::SK);
     }
 
-    public function uploadCover($bucket, $filename, $key)
+    public function upload($bucket, $filename, $key)
     {
         $token = $this->auth->uploadToken($bucket);
 
