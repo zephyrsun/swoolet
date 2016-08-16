@@ -9,13 +9,11 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 //
 //$link->select(0);
 
-$db_user = new \Live\Database\User();
-$user = $db_user->getShowInfo(1, 'simple');
+//  $db_user = new \Live\Database\UserLevel();
+var_export(\Live\Database\UserLevel::q());
+//$user = $db_user->add(1, 1);
 
-var_dump($user);
-
-$user = $db_user->getShowInfo(2, 'simple');
-var_dump($user);
+//var_dump($user);
 
 
 /*

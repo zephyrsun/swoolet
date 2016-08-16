@@ -8,9 +8,6 @@
 
 namespace Live\Controller;
 
-
-use Live\Database\Live;
-use Live\Database\User;
 use Live\Response;
 use Live\Third\Qiniu;
 
@@ -18,8 +15,8 @@ class Upload extends Basic
 {
     public function cover($request)
     {
-        $this->_upload($request, 'cover', function ($uid, $img) {
-            (new Live())->updateLive($uid, [
+        $this->_upload($request, 'static', 'cover', function ($uid, $img) {
+            (new \Live\Database\Live())->updateLive($uid, [
                 'cover' => $img
             ]);
         });
@@ -27,22 +24,18 @@ class Upload extends Basic
 
     public function avatar($request)
     {
-        $this->_upload($request, 'avatar', function ($uid, $img) {
-            (new User())->updateUser($uid, [
+        $this->_upload($request, 'static', 'avatar', function ($uid, $img) {
+            (new \Live\Database\User())->updateUser($uid, [
                 'avatar' => $img
             ]);
         });
     }
 
-    private function _upload($request, $bucket, $cb)
+    private function _upload($request, $bucket, $prefix, $cb)
     {
-//        $data = parent::getValidator()->required('token')->getResult();
-//        if (!$data)
-//            return $data;
-
-        $data = [
-            'token_uid' => 1,
-        ];
+        $data = parent::getValidator()->required('token')->getResult();
+        if (!$data)
+            return $data;
 
         if (!isset($request->files))
             return Response::msg('参数错误', 10035);
@@ -56,7 +49,7 @@ class Upload extends Basic
         $arr = explode('.', $file['name']);
         $ext = end($arr);
 
-        $name = $token_uid . '_' . \Swoolet\App::$ts . ".{$ext}";
+        $name = "{$prefix}/{$token_uid}_" . \Swoolet\App::$ts . ".{$ext}";
 
         $img = (new Qiniu())->upload($bucket, $tmp_name, $name);
         if (!$img)

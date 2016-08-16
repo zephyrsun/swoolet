@@ -74,7 +74,7 @@ class Follow extends Basic
         } else {
             $count = 0;
 
-            $list = $this->table($uid)->where('uid = ? AND id > ?', [$uid, $start_id])->limit($this->limit)->fetchAll();
+            $list = $this->table($uid)->select('ref_uid')->where('uid = ? AND id > ?', [$uid, $start_id])->limit($this->limit)->fetchAll();
             if ($list) {
                 $n = 0;
                 $data = [$key];

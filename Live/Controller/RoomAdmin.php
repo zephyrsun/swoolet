@@ -34,7 +34,9 @@ class RoomAdmin extends Basic
         $ret = (new \Live\Database\RoomAdmin())->add($token_uid, $admin_uid);
 
         if ($ret) {
-            $this->conn->roomMsg($room_id, $token_uid, [
+            $this->conn->updateAdmin($room_id, $admin_uid, true);
+
+            $this->conn->sendToRoom($room_id, $token_uid, [
                 't' => Conn::TYPE_ROOM_BROADCAST,
                 'user' => (new User())->getShowInfo($admin_uid, 'simple'),
                 'msg' => ':nickname被任命为管理员',
@@ -51,11 +53,13 @@ class RoomAdmin extends Basic
             return $data;
 
         $admin_uid = $data['uid'];
-        $token_uid = $data['token_uid'];
+        $room_id = $token_uid = $data['token_uid'];
 
-        $ret = (new RoomAdmin())->del($token_uid, $admin_uid);
+        $ret = (new \Live\Database\RoomAdmin())->del($token_uid, $admin_uid);
         if ($ret) {
-            $this->conn->roomUserMsg($token_uid, $admin_uid, [
+            $this->conn->updateAdmin($room_id, $admin_uid, false);
+
+            $this->conn->sendToRoomUser($token_uid, $admin_uid, [
                 't' => Conn::TYPE_ROOM_ONE,
                 'uid' => $admin_uid,
                 'msg' => '主播取消了您的房管权限',
@@ -87,7 +91,7 @@ class RoomAdmin extends Basic
 
         $ret = (new \Live\Database\RoomAdmin())->silenceUser($room_id, $to_uid);
         if ($ret) {
-            $this->conn->roomUserMsg($room_id, $to_uid, [
+            $this->conn->sendToRoomUser($room_id, $to_uid, [
                 't' => Conn::TYPE_ROOM_ONE,
                 'uid' => $to_uid,
                 'msg' => '您已被禁言两小时，走正道，说人话!',

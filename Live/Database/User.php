@@ -63,9 +63,9 @@ class User extends Basic
         return $user;
     }
 
-    public function updateUser($data, $uid)
+    public function updateUser($uid, $data)
     {
-        $this->table($uid);
+        $this->table($uid)->where('uid', $uid);
 
         return parent::update($data);
     }

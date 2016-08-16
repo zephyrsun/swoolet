@@ -9,16 +9,17 @@
     websocket.onopen = function (evt) {
         console.log("Connected to WebSocket server.")
 
-        //dev
-        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"obofuw|p512ehxx4d8yTN4A\/kQmIY5qMSw5P5vFAeAeq5kwIZU="}')
+        var token = 'obzjw8|J6nDc48Hug95Ylc8An3f1\/efuibiQ19HJzhiWRWHfwk='
 
-        //test
-        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"obohrx|JRqm03RF4UlANIWrq0k6DE2FLDxOkxb+Ox3bsp8ZGtg="}')
-
-        websocket.send('{"m":"room_sendMsg","msg":"你好2"}')
-        //websocket.send('{"m":"room_follow"}')
-        //websocket.send('{"m":"room_start","token":"obki0a|rbjsYlXE2RdUDHEZmfwdsqXJg+XoHTJ0pXqSfC5XWjs="}')
-        //websocket.send('{"m":"room_quit","room_id":"1","uid":"10001"}')
+        websocket.send('{"m":"socket_init","token":"' + token + '"}')
+        websocket.send('{"m":"socket_chat","uid":"1","msg":"chat2"}')
+        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        //websocket.send('{"m":"room_sendMsg","msg":"你好2"}')
+        //websocket.send('{"m":"room_leave"}')
+        //return
+        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        //websocket.send('{"m":"room_sendMsg","msg":"第二次你好2"}')
+        //websocket.send('{"m":"room_leave"}')
     }
 
     websocket.onclose = function (evt) {

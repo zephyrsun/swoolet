@@ -54,14 +54,18 @@ class Room extends Basic
         $rank = new Rank();
         $room_admin = new RoomAdmin();
         if (!$room_admin->isSilence($room_id, $token_uid)) {
-            $this->conn->roomMsg($room_id, $token_uid, [
+            $this->conn->sendToRoom($room_id, $token_uid, [
                 't' => Conn::TYPE_ENTER,
                 'user' => $user,
             ]);
 
             $admin = $room_admin->isAdmin($room_id, $token_uid);
 
-            $this->conn->joinRoom($request->fd, $token_uid, $room_id, $user['nickname'], $user['avatar'], $admin);
+            $this->conn->join($request->fd, $token_uid, $room_id, [
+                'nickname' => $user['nickname'],
+                'avatar' => $user['avatar'],
+                'admin' => $admin,
+            ]);
 
             $rank->joinRoom($room_id, $token_uid);
         } else {
@@ -91,7 +95,7 @@ class Room extends Basic
 
     public function leave($request)
     {
-        $this->conn->quitConn($request->fd);
+        $this->conn->leaveRoom($request->fd);
 
         //todo:退出逻辑
 
@@ -104,16 +108,14 @@ class Room extends Basic
         if (!$data)
             return $data;
 
-        $conn = $this->conn->getConn($request->fd);
+        $conn = $this->conn->getInfo($request->fd);
 
         if ($conn) {
-            list($uid, $room_id, $nickname, $avatar, $admin) = $conn;
+            list($uid, $room_id, $user) = $conn;
 
-            $user = [
+            $user += [
                 'uid' => $uid,
-                'nickname' => $nickname,
                 'lv' => (new UserLevel())->getLv($uid),
-                'admin' => $admin,
             ];
 
             if ($data['horn']) {
@@ -123,14 +125,13 @@ class Room extends Basic
                 if (!$ret)
                     return $ret;
 
-                $user['avatar'] = $avatar;
-
                 $t = Conn::TYPE_HORN;
             } else {
                 $t = Conn::TYPE_MESSAGE;
+                unset($user['avatar']);
             }
 
-            $this->conn->roomMsg($room_id, $uid, [
+            $this->conn->sendToRoom($room_id, $uid, [
                 't' => $t,
                 'user' => $user,
                 'msg' => $data['msg'],
@@ -142,14 +143,14 @@ class Room extends Basic
 
     public function praise($request)
     {
-        $conn = $this->conn->getConn($request->fd);
+        $conn = $this->conn->getInfo($request->fd);
         if ($conn) {
             list($uid, $room_id, $nickname, $avatar) = $conn;
 
             //todo:点赞逻辑
 
             //$user = (new User())->getUser($uid);
-            $this->conn->roomMsg($room_id, $uid, [
+            $this->conn->sendToRoom($room_id, $uid, [
                 't' => Conn::TYPE_PRAISE,
                 'n' => 1,
                 'user' => [
@@ -164,14 +165,14 @@ class Room extends Basic
 
     public function follow($request)
     {
-        $conn = $this->conn->getConn($request->fd);
+        $conn = $this->conn->getInfo($request->fd);
         if ($conn) {
             list($uid, $room_id) = $conn;
 
             $follow_uid = $room_id;
             $ret = (new Fan())->follow($uid, $follow_uid);
             if ($ret) {
-                $this->conn->roomMsg($room_id, $uid, [
+                $this->conn->sendToRoom($room_id, $uid, [
                     't' => Conn::TYPE_FOLLOW,
                     'user' => [
                         'uid' => $uid,
@@ -191,7 +192,7 @@ class Room extends Basic
         if (!$data)
             return $data;
 
-        $conn = $this->conn->getConn($request->fd);
+        $conn = $this->conn->getInfo($request->fd);
         if ($conn) {
             list($uid, $room_id) = $conn;
 
@@ -204,7 +205,7 @@ class Room extends Basic
             if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id))
                 return $ret;
 
-            $this->conn->roomMsg($room_id, $uid, [
+            $this->conn->sendToRoom($room_id, $uid, [
                 't' => Conn::TYPE_GIFT,
                 'user' => [
                     'uid' => $uid,
@@ -242,12 +243,15 @@ class Room extends Basic
 
     public function stop($request)
     {
-        $conn = $this->conn->getConn($request->fd);
+        $conn = $this->conn->getInfo($request->fd);
 
         if ($conn) {
             list($uid, $room_id) = $conn;
 
-            $this->conn->destroyRoom($room_id, $request->fd);
+            $this->conn->sendToRoom($room_id, $request->fd, [
+                't' => Conn::TYPE_LIVE_STOP,
+                'msg' => '直播结束',
+            ]);
 
             $data = (new \Live\Lib\Live())->stop($uid);
 

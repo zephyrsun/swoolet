@@ -158,3 +158,26 @@ uid 被关注人的uid
 
 返回:
 {"msg":"取消关注成功","c":0}
+
+
+###关注列表
+接口:
+/My/follows
+
+参数:
+token
+key 翻页用,返回列表里的最后一个数据项的key值,第一次传0
+
+返回:
+{"list":[{"uid":1,"nickname":"nickname1","avatar":"","key":1}],"c":0}
+
+###粉丝列表
+接口:
+/My/fans
+
+参数:
+token
+key 翻页用,返回列表里的最后一个数据项的key值,第一次传0
+
+返回:
+{"list":[{"uid":1,"nickname":"nickname1","avatar":"","key":1}],"c":0}

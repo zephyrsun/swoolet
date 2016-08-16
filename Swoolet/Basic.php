@@ -206,6 +206,7 @@ abstract class Basic
     public function onTask($sw, $task_id, $from_id, $data)
     {
         //echo 'onTask' . PHP_EOL;
+        return true;
     }
 
     public function onFinish($sw, $task_id, $data)

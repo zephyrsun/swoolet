@@ -34,7 +34,7 @@ class Income extends Basic
     public function getIncome($uid)
     {
         return $this->cache->getWithCallback($uid, 'income', function () use ($uid) {
-            return $this->table($uid)->select('income')->where('uid', $uid)->fetchColumn();
+            return (int)$this->table($uid)->select('income')->where('uid', $uid)->fetchColumn();
         });
     }
 

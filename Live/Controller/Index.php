@@ -2,6 +2,7 @@
 
 namespace Live\Controller;
 
+use Live\Database\UserLevel;
 use Live\Response;
 use Swoolet\App;
 
@@ -16,6 +17,6 @@ class Index extends Basic
     {
         //$q = (new \Live\Third\Pili())->stop('test_1_1470301542', '1470301542', \Swoolet\App::$ts);
 
-        var_dump(11);
+        (new UserLevel())->add(1,1);
     }
 }

@@ -21,7 +21,31 @@ const TYPE_LIVE_STOP = 20;//停播
 > ws://test.camhow.com.cn:9502
 
 
-##直播间
+##socket
+``` 
+登录后调用socket_init, 
+进入房间调用room_join, 
+退出房间调用room_leave,
+程序退到后台调用socket_quit,
+切回来继续调用socket_init，如果断网重新握手
+```
+
+###私信
+```
+请求:
+{"m":"socket_chat","uid":"1","msg":"xxxxxxxx"}
+
+uid 接收人的uid
+
+返回:
+{"msg":"ok","c":0}
+
+房间消息(t值参考`房间消息类型`):
+{"uid":1,"msg":"xxxxxxxx"}
+
+拿到uid后,通过/User/getUserInfo取用户信息,并缓存起来(不要反复调用)
+```
+
 
 ###进入直播间
 ```
@@ -121,3 +145,4 @@ n:表示显示几个赞
 返回:
 {""}
 ```
+

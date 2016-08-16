@@ -10,6 +10,7 @@ namespace Live\Database;
 
 
 use Live\Response;
+use Swoolet\App;
 
 class UserLevel extends Basic
 {
@@ -19,46 +20,46 @@ class UserLevel extends Basic
     public $key_ext = 'user_ext:';
 
     static public $exp = [
-        1 => 10,
-        2 => 50,
-        3 => 100,
-        4 => 200,
-        5 => 400,
-        6 => 700,
-        7 => 1100,
-        8 => 1600,
-        9 => 2200,
-        10 => 2900,
-        11 => 3700,
-        12 => 4600,
-        13 => 5600,
-        14 => 6700,
-        15 => 7900,
-        16 => 9200,
-        17 => 10600,
-        18 => 12100,
-        19 => 13700,
-        20 => 15400,
-        21 => 17200,
-        22 => 19100,
-        23 => 21100,
-        24 => 23200,
-        25 => 25400,
-        26 => 27700,
-        27 => 30100,
-        28 => 32600,
-        29 => 35200,
-        30 => 40600,
-        31 => 46200,
-        32 => 52000,
-        33 => 58000,
-        34 => 64200,
-        35 => 70600,
-        36 => 77200,
-        37 => 84000,
-        38 => 91000,
-        39 => 98200,
-        40 => 105600,
+        1 => 0,
+        2 => 10,
+        3 => 50,
+        4 => 100,
+        5 => 200,
+        6 => 400,
+        7 => 700,
+        8 => 1100,
+        9 => 1600,
+        10 => 2200,
+        11 => 2900,
+        12 => 3700,
+        13 => 4600,
+        14 => 5600,
+        15 => 6700,
+        16 => 7900,
+        17 => 9200,
+        18 => 10600,
+        19 => 12100,
+        20 => 13700,
+        21 => 15400,
+        22 => 17560,
+        23 => 19840,
+        24 => 22240,
+        25 => 24760,
+        26 => 27400,
+        27 => 30160,
+        28 => 33040,
+        29 => 36040,
+        30 => 39160,
+        31 => 42400,
+        32 => 48000,
+        33 => 53800,
+        34 => 59800,
+        35 => 66000,
+        36 => 72400,
+        37 => 82300,
+        38 => 92500,
+        39 => 103000,
+        40 => 113800,
     ];
 
     public function __construct()
@@ -79,26 +80,17 @@ class UserLevel extends Basic
         if (!$new_exp)
             return Response::msg('服务器错误', 1030);
 
-        $lv = self::exp2lv($new_exp);
-        $this->cache->set($uid, 'lv', $lv);
-
-        if ($new_exp == $exp) {
-            //new
-            $ret = $this->table($uid)->insert([
+        App::$server->sw->task('task_exp', -1, function ($sw, $task_id, $data) use ($uid, $exp, $new_exp) {
+            $lv = self::exp2lv($new_exp);
+            $this->cache->set($uid, 'lv', $lv);
+            $ret = $this->table($uid)->replace([
                 'uid' => $uid,
                 'exp' => $new_exp,
                 'lv' => $lv,
             ]);
-        } elseif ($new_exp) {
-            $ret = $this->table($uid)->where('uid', $uid)->update([
-                'exp' => $new_exp,
-                'lv' => $lv,
-            ]);
-        } else {
-            return Response::msg('服务器错误', 1031);
-        }
+        });
 
-        return $ret;
+        return $new_exp;
     }
 
     public function getLv($uid)
@@ -145,7 +137,7 @@ class UserLevel extends Basic
 
     static public function q()
     {
-        $q = 3;
+        $q = 4;
         $i = 0;
         $n = 100;
         $f = 100;
@@ -154,10 +146,17 @@ class UserLevel extends Basic
 
             $a[$q++] = $n;
 
-            if ($q >= 30)
+            if ($q > 36)
+                $f = 300;
+            elseif ($q > 31)
                 $f = 200;
+            elseif ($q > 21) {
+                $f = 120;
+            }
 
             $n += $f * ++$i;
         }
+
+        return $a;
     }
 }

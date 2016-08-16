@@ -18,6 +18,8 @@ include BASE_DIR . 'Live/Third/Qiniu/Storage/FormUploader.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Client.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Request.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Response.php';
+include BASE_DIR . 'Live/Third/Qiniu/Http/Error.php';
+
 
 use Live\Response;
 use Qiniu\Auth;
@@ -32,8 +34,7 @@ class Qiniu
     public $auth;
 
     public $domain = [
-        'cover' => 'http://obw0kc5sy.bkt.clouddn.com/',
-        'avatar' => 'http://obself92s.bkt.clouddn.com/',
+        'static' => 'http://obzd2fzvx.bkt.clouddn.com/',
     ];
 
     public function __construct()

@@ -16,6 +16,7 @@ return [
     'swoole' => [
         'worker_num' => 1,
         'reactor_num' => 1,
+        'dispatch_mode' => 5,
 
         'open_tcp_keepalive' => 1,
         'tcp_keepidle' => 60,

@@ -33,7 +33,7 @@ class Balance extends Basic
     public function getSent($uid)
     {
         return $this->cache->getWithCallback($uid, 'sent', function () use ($uid) {
-            return $this->table($uid)->select('sent')->where('uid', $uid)->fetchColumn();
+            return (int)$this->table($uid)->select('sent')->where('uid', $uid)->fetchColumn();
         });
     }
 

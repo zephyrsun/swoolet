@@ -25,8 +25,10 @@ class Conn
     const TYPE_GIFT = 10;//送礼
     const TYPE_LIVE_STOP = 20;//停播
 
+    public $fds;
     public $ids;
-    public $room;
+    public $rooms;
+
     public $sub;
     public $pub;
     public $key_conn = 'conn';
@@ -74,72 +76,86 @@ class Conn
 
     public function &getRoom($room_id)
     {
-        $room = &$this->room[$room_id] or $room = [];
-        return $room;
+        return $this->rooms[$room_id];
     }
 
-    public function joinRoom($fd, $uid, $room_id, $nickname, $avatar, $admin)
+    public function &getInfo($fd)
     {
-        $room = &$this->getRoom($room_id);
+        return $this->fds[$fd];
+    }
 
-        //退出已经存在的房间
-        $this->quitConn($fd);
+    public function &getFd($uid)
+    {
+        return $this->ids[$uid];
+    }
 
-        //保存链接
-        $this->ids[$fd] = [$uid, $room_id, $nickname, $avatar, $admin];
+    public function &getRoomUser($room_id, $uid)
+    {
+        return $this->rooms[$room_id][$uid];
+    }
+
+    public function join($fd, $uid, $room_id, $user = [])
+    {
+        $this->fds[$fd] = [$uid, $room_id, $user];
+        $this->ids[$uid] = $fd;
+
+        var_dump('fds', json_encode($this->fds));
 
         //加入房间
-        $room[$uid] = $fd;
+        if ($room_id) {
+            //退出已经存在的房间
+            $this->leaveRoom($fd);
+            $room = &$this->getRoom($room_id) or $room = [];
+            $room[$uid] = $fd;
 
-        //var_dump('joinRoom', $this->room);
-
-        return $room;
+            var_dump('room', json_encode($this->rooms));
+        }
     }
 
-    public function &getConn($fd)
+    public function leave($fd)
     {
-        return $this->ids[$fd];
+        $conn = $this->leaveRoom($fd);
+        if ($conn) {
+            $uid = $conn[0];
+            unset($this->fds[$fd], $this->ids[$uid]);
+        }
     }
 
-    public function quitConn($fd)
+    public function leaveRoom($fd)
     {
-        $conn = $this->getConn($fd);
+        $conn = $this->getInfo($fd);
         if ($conn) {
             list($uid, $room_id) = $conn;
-            unset($this->room[$room_id][$uid], $this->ids[$fd]);
+            unset($this->rooms[$room_id][$uid]);
         }
 
-        //var_dump('quitConn', $this->room);
+        var_dump('leave_fds', json_encode($this->fds));
+        var_dump('leave_room', json_encode($this->rooms));
 
         return $conn;
     }
 
     public function kickRoomUser($room_id, $uid)
     {
-        if (isset($this->room[$room_id][$uid])) {
-            $fd = $this->room[$room_id][$uid];
-            $this->quitConn($fd);
+        if ($fd = $this->getRoomUser($room_id, $uid)) {
+            $this->leave($fd);
         }
     }
 
     public function createRoom($fd, $uid)
     {
-        $this->room[$uid] = [];
+        $this->rooms[$uid] = [];
 
         $user = (new User())->getShowInfo($uid, 'simple');
 
-        $this->joinRoom($fd, $uid, $uid, $user['nickname'], $user['avatar']);
-    }
-
-    public function destroyRoom($room_id, $fd)
-    {
-        $this->roomMsg($room_id, $fd, [
-            't' => Conn::TYPE_LIVE_STOP,
-            'msg' => '直播结束',
+        $this->join($fd, $uid, $uid, [
+            'nickname' => $user['nickname'],
+            'avatar' => $user['avatar'],
+            'admin' => true,
         ]);
     }
 
-    public function roomMsg($room_id, $uid, $msg, $action = 'pRoom')
+    public function sendToRoom($room_id, $uid, $msg, $action = 'toRoom')
     {
         $msg = [
             'a' => $action,
@@ -153,12 +169,33 @@ class Conn
         });
     }
 
-    public function roomUserMsg($room_id, $to_uid, $msg)
+    public function sendToRoomUser($room_id, $to_uid, $msg)
     {
-        $this->roomMsg($room_id, $to_uid, $msg, 'pRoomUser');
+        $this->sendToRoom($room_id, $to_uid, $msg, 'toRoomUser');
     }
 
-    public function pRoom($data)
+    public function updateAdmin($room_id, $admin_uid, $admin)
+    {
+        $this->sendToRoom($room_id, $admin_uid, $admin, 'pUpdateAdmin');
+    }
+
+    public function sendToUser($from_uid, $to_uid, $msg)
+    {
+        $msg = [
+            'a' => 'toUser',
+            'to' => $to_uid,
+            'msg' => [
+                'uid' => $from_uid,
+                'msg' => $msg,
+            ],
+        ];
+
+        $this->pub->publish($this->key_conn, \msgpack_pack($msg), function ($result, $success) {
+            //var_dump('publish', $result, $success);
+        });
+    }
+
+    protected function toRoom($data)
     {
         $room_id = $data['room_id'];
         $send_uid = $data['uid'];
@@ -169,27 +206,47 @@ class Conn
          * @var \swoole_websocket_server $sw
          */
         $sw = App::$server->sw;
-
         foreach ($this->getRoom($room_id) as $uid => $fd) {
-            if ($send_uid != $uid)
+            if ($send_uid != $uid) {
                 $sw->push($fd, $msg);
+            }
         }
     }
 
-    public function pRoomUser($data)
+    protected function toRoomUser($data)
     {
         $room_id = $data['room_id'];
         $to_uid = $data['uid'];
         $msg = json_encode($data['msg'], \JSON_UNESCAPED_UNICODE);
         //var_dump($this->room, $send_fd);
 
-        /**
-         * @var \swoole_websocket_server $sw
-         */
-        $sw = App::$server->sw;
+        $room = &$this->getRoom($room_id);
+        if ($room && $fd = &$room[$to_uid]) {
+            App::$server->sw->push($fd, $msg);
+        }
+    }
 
-        $room = $this->getRoom($room_id);
-        if ($fd = &$room[$to_uid])
-            $sw->push($fd, $msg);
+    /**
+     * 更新admin
+     * @param $data
+     */
+    protected function toUpdateAdmin($data)
+    {
+        $room_id = $data['room_id'];
+        $uid = $data['uid'];
+        $admin = $data['msg'];
+
+        if ($fd = $this->getRoomUser($room_id, $uid)) {
+            $this->fds[$fd][4] = $admin;
+        }
+    }
+
+    protected function toUser($data)
+    {
+        $to = $data['to'];
+        $msg = json_encode($data['msg'], \JSON_UNESCAPED_UNICODE);
+
+        if ($fd = $this->getFd($to))
+            App::$server->sw->push($fd, $msg);
     }
 }

@@ -1,7 +1,9 @@
 <html>
 <body>
-<form action="http://127.0.0.1:8080/upload/cover" method="post" enctype="multipart/form-data">
+<form action="http://test.camhow.com.cn/upload/cover" method="post" enctype="multipart/form-data">
     <input type="file" name="file"/>
+    <input type="hidden" name="token" value="oboi24|GVkwPzXRhNTLbcLFBX8tkrYI3t84BUNz7+a9yWpaBAU="/>
+
     <button type="submit">上传</button>
 </form>
 </body>
@@ -17,13 +19,23 @@
     websocket.onopen = function (evt) {
         console.log("Connected to WebSocket server.")
 
-        //dev
-        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"obofvt|eiypHAJxfm5kxjGjEbK7I6Ll8K37FuVc+SeNpsRYb5g="}')
+        var token = 'obzjte|tuKqA76VAk3CuqD1tD8IB3MCnGx01HQtoTa6dqNwnug=';
+
+        websocket.send('{"m":"socket_init","token":"' + token + '"}')
+        websocket.send('{"m":"socket_chat","uid":"2","msg":"chat"}')
+
+        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        //websocket.send('{"m":"room_sendMsg","msg":"你好"}')
+        //websocket.send('{"m":"room_leave"}')
+        //return
+        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        //websocket.send('{"m":"room_sendMsg","msg":"第二次你好"}')
+        //websocket.send('{"m":"room_leave"}')
+
 
         //test
         //websocket.send('{"m":"room_join","room_id":"1","token":"oboi24|GVkwPzXRhNTLbcLFBX8tkrYI3t84BUNz7+a9yWpaBAU="}')
 
-        websocket.send('{"m":"room_sendMsg","msg":"你好"}')
         //websocket.send('{"m":"room_follow"}')
         //websocket.send('{"m":"room_start","token":"obofvt|eiypHAJxfm5kxjGjEbK7I6Ll8K37FuVc+SeNpsRYb5g="}')
         //websocket.send('{"m":"room_quit","room_id":"1","uid":"10001"}')
