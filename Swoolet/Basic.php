@@ -167,7 +167,7 @@ abstract class Basic
 
     public function onWorkerStart($sw, $worker_id)
     {
-        //echo 'onWorkerStart' . PHP_EOL;
+        echo 'onWorkerStart' . PHP_EOL;
 
         function_exists('opcache_reset') && opcache_reset();
         function_exists('apc_clear_cache') && apc_clear_cache();
@@ -182,13 +182,11 @@ abstract class Basic
 
     public function onWorkerStop($sw, $worker_id)
     {
-        //var_dump(swoole_get_local_ip());
         echo 'onWorkerStop' . PHP_EOL;
     }
 
     public function onConnect($sw, $fd, $from_id)
     {
-        $this->fd = $fd;
         //echo 'onConnect' . PHP_EOL;
     }
 
@@ -232,13 +230,13 @@ abstract class Basic
     }
 
     /**
+     * @param $fd
      * @param $str
-     * @return null
      */
-    public function response($str)
+    public function response($fd, $str)
     {
         if ($str)
-            $this->sw->send($this->fd, $str);
+            $this->sw->send($fd, $str);
     }
 
     public function fatalHandler()

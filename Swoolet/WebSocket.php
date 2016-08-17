@@ -64,14 +64,14 @@ class WebSocket extends Basic
         } else {
         }
         */
-        $this->response("Receiced: {$frame->data}");
+        $this->response($frame->fd, "Receiced: {$frame->data}");
     }
 
-    public function response($str)
+    public function response($fd, $str)
     {
         //$str = \gzdeflate($str, 1);
         //$this->sw->push($this->fd, \implode("\r\n", $header) . "\r\n\r\n");
-        if ($this->fd)
-            $this->sw->push($this->fd, $str);
+
+        $this->sw->push($fd, $str);
     }
 }

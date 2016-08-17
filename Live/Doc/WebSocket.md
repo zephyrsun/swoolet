@@ -64,7 +64,7 @@ first:第一次进入需要传
 ###发消息
 ```
 请求:
-{"m":"room_sendMsg","msg":"一条消息","horn":1,"cb":"fadfad"}
+{"m":"room_sendMsg","msg":"一条消息","horn":1}
 
 horn这个值可传也不可传,传的话表示发弹幕
 

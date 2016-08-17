@@ -71,7 +71,7 @@ class Gift extends Basic
         $money = $gift['money'];
 
         $this->beginTransaction();
-        $ret = (new Balance())->sub($send_uid, $money);
+        $ret = (new Balance())->sub($send_uid, $money, $gift['exp']);
         if (!$ret) {
             $this->rollback();
             return $ret;
@@ -91,8 +91,6 @@ class Gift extends Basic
 
         if ($ret = $this->commit()) {
             (new Rank())->addRank($send_uid, $to_uid, $money);
-
-            (new UserLevel())->add($send_uid, $gift['exp']);
         }
 
         return $ret;
@@ -103,7 +101,7 @@ class Gift extends Basic
         $money = 20;
 
         $this->beginTransaction();
-        $ret = (new Balance())->sub($uid, $money);
+        $ret = (new Balance())->sub($uid, $money, $money);
         if (!$ret) {
             $this->rollback();
             return $ret;

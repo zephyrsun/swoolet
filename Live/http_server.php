@@ -26,14 +26,11 @@ class Server extends \Swoolet\Http
     {
         $this->resp = $response;
 
-        if ($request->server['path_info'] == '/favicon.ico')
-            return $this->response('');
-
         $_POST = isset($request->post) ? $request->post : array();
 
         $this->callRequest($request->server['path_info'], $request);
 
-        $this->response(self::$msg);
+        $this->response($request->fd, self::$msg);
     }
 }
 

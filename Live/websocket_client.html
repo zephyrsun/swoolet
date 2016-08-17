@@ -25,10 +25,10 @@
         //websocket.send('{"m":"socket_chat","uid":"2","msg":"chat"}')
         websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
         websocket.send('{"m":"room_sendMsg","msg":"你好"}')
-        //websocket.send('{"m":"room_leave"}')
+        websocket.send('{"m":"room_leave"}')
         //return
-        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
-        //websocket.send('{"m":"room_sendMsg","msg":"第二次你好"}')
+        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        websocket.send('{"m":"room_sendMsg","msg":"第二次你好"}')
         //websocket.send('{"m":"room_leave"}')
 
 

@@ -26,19 +26,16 @@ class Http extends Basic
     {
         $this->resp = $response;
 
-        if ($request->server['path_info'] == '/favicon.ico')
-            return $this->response('');
-
-        $this->response($this->callRequest($request->server['path_info'], $request));
+        $this->response($request->fd, $this->callRequest($request->server['path_info'], $request));
     }
 
     /**
+     * @param $fd
      * @param $str
-     * @return null
      */
-    public function response($str)
+    public function response($fd, $str)
     {
         $this->resp->header("Server", "swoolet");
-        $this->resp->end($str);
+        $this->resp->end($fd, $str);
     }
 }

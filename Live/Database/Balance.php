@@ -58,7 +58,7 @@ class Balance extends Basic
         return Response::msg('数据更新失败', 1014);
     }
 
-    public function sub($uid, $money)
+    public function sub($uid, $money, $exp)
     {
         if ($money < 0)
             $money = -$money;
@@ -70,6 +70,8 @@ class Balance extends Basic
 
         if ($ret) {
             $this->cache->del($uid, 'sent');
+
+            (new UserLevel())->add($uid, $exp);
             return $ret;
         }
 

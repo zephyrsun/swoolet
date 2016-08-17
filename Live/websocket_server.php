@@ -19,9 +19,17 @@ class Server extends \Swoolet\WebSocket
 
     public function onWorkerStart($sw, $worker_id)
     {
-        Server::$conn = new \Live\Lib\Conn();
-
         parent::onWorkerStart($sw, $worker_id);
+
+        Server::$conn = new \Live\Lib\Conn();
+        Server::$conn->onWorkerStart($sw, $worker_id);
+    }
+
+    public function onWorkerStop($sw, $worker_id)
+    {
+        parent::onWorkerStop($sw, $worker_id);
+
+        Server::$conn->onWorkerStop($sw, $worker_id);
     }
 
     public function onOpen($sw, $request)
@@ -64,7 +72,7 @@ class Server extends \Swoolet\WebSocket
             $this->callRequest($uri, $frame);
             \Swoolet\log($uri, $frame->fd);
 
-            $this->response(self::$msg);
+            $this->response($frame->fd, self::$msg);
         }
     }
 }

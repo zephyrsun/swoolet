@@ -12,6 +12,7 @@ namespace Live\Lib;
 use Live\Database\RoomAdmin;
 use Live\Database\User;
 use \Swoolet\App;
+use Swoolet\Lib\File;
 
 class Conn
 {
@@ -66,7 +67,7 @@ class Conn
     {
         $this->uid[$uid] = $fd;
 
-        $this->subscribe($this->key_user_chat . $uid, $uid, $fd);
+        $this->subscribe($this->key_user_chat . $uid, $uid);
 
         $this->joinRoom($fd, 0, $uid, []);
     }
@@ -114,6 +115,7 @@ class Conn
     public function subRoom()
     {
         if (!self::$subscribe) {
+            //var_dump(self::$subscribe);
             $this->subscribe($this->key_room_chat);
             self::$subscribe = true;
         }
@@ -143,12 +145,13 @@ class Conn
         $a = &$data['a'];
         if ($a == 'toRoom') {
             //$send_uid != $uid
+            var_dump('room', $this->getRoom($data['room_id']));
             foreach ($this->getRoom($data['room_id']) as $uid => $fd) {
-                if ($data['uid'] != $uid)
-                    $sw->push($fd, $data['msg']);
+                if ($data['uid'] != $uid && !$sw->push($fd, $data['msg'])) {
+                    unset($this->room[$data['room_id']][$uid]);
+                }
             }
         } elseif ($a == 'toUser') {
-            // if ($data['uid'] == $uid)
             $sw->push($this->getFd($sub_uid), $data['msg']);
 
         } elseif ($a == 'updateAdmin') {
@@ -176,7 +179,7 @@ class Conn
         $this->joinRoom($fd, $uid, $uid, [
             'nickname' => $user['nickname'],
             'avatar' => $user['avatar'],
-            'admin' => true,
+            'admin' => false,
         ]);
     }
 
@@ -208,7 +211,47 @@ class Conn
         ];
 
         $this->pub->publish($this->key_user_chat . $to_uid, \msgpack_pack($msg), function ($result, $err) {
-            var_dump('publish', $result);
+            //var_dump('publish', $result);
         });
+    }
+
+    public function onWorkerStart($sw, $worker_id)
+    {
+        $filename = "/tmp/worker_{$worker_id}.php";
+        $arr = File::get($filename, true);
+        if ($arr) {
+            list($this->uid, $this->conn, $this->room) = $arr;
+
+            //var_dump('start', $this->room);
+
+            //重新监听个人聊天
+            foreach ($this->uid as $uid => $fd) {
+                $this->subscribe($this->key_user_chat . $uid, $uid);
+            }
+
+            File::rm($filename);
+        }
+
+        return $this;
+    }
+
+    public function onWorkerStop($sw, $worker_id)
+    {
+        $data = [
+            $this->uid,
+            $this->conn,
+            $this->room,
+        ];
+
+        $this->unsubscribe($this->key_room_chat);
+
+//        foreach ($this->uid as $uid => $fd) {
+//            $this->unsubscribe($this->key_user_chat . $uid);
+//        }
+
+        //var_dump('stop', $this->room);
+        File::touch("/tmp/worker_{$worker_id}.php", $data, true);
+
+        return $this;
     }
 }
