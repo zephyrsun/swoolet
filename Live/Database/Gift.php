@@ -36,7 +36,7 @@ class Gift extends Basic
     public function getAllGift($force = false)
     {
         if ($force || !$ret = $this->cache->get($this->key_gift)) {
-            $data = $this->table(1)->fetchAll();
+            $data = $this->table(1)->orderBy('sort ASC')->fetchAll();
 
             $ret = [];
             foreach ($data as $row)
@@ -59,14 +59,16 @@ class Gift extends Basic
             return $gift;
         }
 
-        return null;
+        return [];
     }
 
     public function sendGift($send_uid, $to_uid, $gift_id)
     {
-        $money = $this->getGift($gift_id, 'money');
-        if (!$money)
+        $gift = $this->getGift($gift_id);
+        if (!$gift)
             return Response::msg('参数错误', 1010);
+
+        $money = $gift['money'];
 
         $this->beginTransaction();
         $ret = (new Balance())->sub($send_uid, $money);
@@ -89,6 +91,8 @@ class Gift extends Basic
 
         if ($ret = $this->commit()) {
             (new Rank())->addRank($send_uid, $to_uid, $money);
+
+            (new UserLevel())->add($send_uid, $gift['exp']);
         }
 
         return $ret;

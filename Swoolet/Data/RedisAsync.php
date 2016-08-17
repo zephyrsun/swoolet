@@ -97,7 +97,7 @@ class RedisAsync
      */
     protected function getConnection()
     {
-        if (count($this->pool) > 0) {
+        if ($this->pool) {
             /**
              * @var $connection RedisConnection
              */
@@ -224,6 +224,8 @@ class RedisConnection
         if ($this->redis->debug)
             $this->redis->trace($data);
 
+        //$this->redis->trace($data);
+
         $result = null;
         if ($this->wait_recv) {
 
@@ -243,7 +245,7 @@ class RedisConnection
 
         $this->clean();
         $this->redis->freeConnection($cli->sock, $this);
-        call_user_func($this->callback, $result, $result !== null);
+        call_user_func($this->callback, $result, $result === null);
     }
 
     public function read()

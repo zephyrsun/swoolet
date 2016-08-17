@@ -82,6 +82,8 @@ abstract class Basic
     {
         $this->namespace = $namespace;
         $this->env = $env;
+
+        App::setConfig($namespace, $env);
     }
 
     /**
@@ -134,7 +136,6 @@ abstract class Basic
 
         $sw = $this->runServer($host, $port);
 
-        App::setConfig($this->namespace, $this->env);
         $setting = App::getConfig('swoole') + $this->option;
         if (!$setting['log_file'])
             $setting['log_file'] = "/tmp/swoole_{$port}.log";
@@ -166,6 +167,8 @@ abstract class Basic
 
     public function onWorkerStart($sw, $worker_id)
     {
+        //echo 'onWorkerStart' . PHP_EOL;
+
         function_exists('opcache_reset') && opcache_reset();
         function_exists('apc_clear_cache') && apc_clear_cache();
 
@@ -179,7 +182,8 @@ abstract class Basic
 
     public function onWorkerStop($sw, $worker_id)
     {
-        //echo 'onWorkerStop' . PHP_EOL;
+        //var_dump(swoole_get_local_ip());
+        echo 'onWorkerStop' . PHP_EOL;
     }
 
     public function onConnect($sw, $fd, $from_id)

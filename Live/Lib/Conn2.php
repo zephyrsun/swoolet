@@ -13,7 +13,7 @@ use Live\Database\RoomAdmin;
 use Live\Database\User;
 use \Swoolet\App;
 
-class Conn
+class Conn2
 {
     const TYPE_MESSAGE = 1;//普通消息
     const TYPE_HORN = 2;//广播喇叭
@@ -27,12 +27,11 @@ class Conn
     const TYPE_GIFT = 10;//送礼
     const TYPE_LIVE_STOP = 20;//停播
 
-    public $uid;
-    public $conn;
-    public $room;
+    public $info;
 
     public $sub;
     public $pub;
+    public $key_conn = 'conn';
     public $key_room_chat = 'r_chat:';
     public $key_user_chat = 'u_chat:';
 
@@ -45,95 +44,74 @@ class Conn
         //$this->redis->debug = 1;
     }
 
-    public function &getFd($uid)
+    public function getUid($fd)
     {
-        return $this->uid[$uid];
+        $conn = App::$server->sw->connection_info($fd);
+        if ($conn && $uid = &$conn['uid'])
+            return $uid;
+
+        return 0;
     }
 
     public function &getConn($fd)
     {
-        return $this->conn[$fd];
-    }
+        if (!$ret = &$this->info[$fd] && $uid = $this->getUid($fd)) {
+            $user = (new User())->getUser($uid);
 
-    public function &getRoom($room_id)
-    {
-        $room = &$this->room[$room_id] or $room = [];
+            $ret = [$uid, 0, [
+                'nickname' => $user['nickname'],
+                'avatar' => $user['avatar'],
+                'admin' => false,
+            ]];
 
-        return $room;
+            var_dump($ret);
+        }
+
+        return $ret;
     }
 
     public function join($fd, $uid)
     {
-        $this->uid[$uid] = $fd;
-
+        //App::$server->sw->bind($fd, $uid);
         $this->subscribe($this->key_user_chat . $uid, $uid, $fd);
-
-        $this->joinRoom($fd, 0, $uid, []);
     }
 
     public function leave($fd)
     {
-        $conn = $this->getConn($fd);
-        if ($conn) {
-            $uid = $conn[0];
-            $user_fd = $this->getFd($uid);
-
-            //var_dump('conn', $conn, 'uid', $uid, 'user_fd', $user_fd, 'fd', $fd);
-            if ($user_fd == $fd) {
-                unset($this->conn[$fd], $this->uid[$uid]);
-                $this->unsubscribe($this->key_user_chat . $uid);
-            }
-        }
+        if ($uid = $this->getUid($fd))
+            $this->unsubscribe($this->key_user_chat . $uid);
     }
 
     public function joinRoom($fd, $room_id, $uid, $user)
     {
-        $this->conn[$fd] = [$uid, $room_id, $user];
-
         //退出已经存在的房间
-        if ($room_id) {
-            $this->leaveRoom($fd);
+        $this->leaveRoom($fd);
 
-            $this->room[$room_id][$uid] = $fd;
-
-            //$this->subscribe($this->key_room_chat . $room_id, $uid, $fd);
-        }
+        $this->info[$fd] = [$uid, $room_id, $user];
+        $this->subscribe($this->key_room_chat . $room_id, $uid, $fd);
     }
 
     public function leaveRoom($fd)
     {
-        $conn = $this->getConn($fd);
-        if ($conn) {
-            list($uid, $room_id) = $conn;
-            unset($this->room[$room_id][$uid]);
-        }
+        if ($room_id = &$this->rooms[$fd][1])
+            $this->unsubscribe($this->key_room_chat . $room_id);
 
-        return $conn;
+        unset($this->rooms[$fd]);
     }
 
-    public function subRoom()
+    public function subscribe($key, $uid, $fd)
     {
-        if (!self::$subscribe) {
-            $this->subscribe($this->key_room_chat);
-            self::$subscribe = true;
-        }
-
-        return $this;
-    }
-
-    public function subscribe($key, $uid = 0)
-    {
-        $this->sub->subscribe($key, function ($data, $err) use ($uid) {
+        $this->sub->subscribe($key, function ($data, $err) use ($uid, $fd) {
             if ($err)
                 return;
 
             $data = \msgpack_unpack($data[2]);
             if ($data && is_array($data))
-                $this->msgAction($data, $uid);
+                $this->msgAction($data, $uid, $fd);
         });
     }
 
-    public function msgAction($data, $sub_uid)
+    public function msgAction($data, $uid, $fd)
     {
         /**
          * @var \swoole_websocket_server $sw
@@ -141,23 +119,14 @@ class Conn
         $sw = App::$server->sw;
 
         $a = &$data['a'];
+        var_dump($a, $data);
         if ($a == 'toRoom') {
             //$send_uid != $uid
-            foreach ($this->getRoom($data['room_id']) as $uid => $fd) {
-                if ($data['uid'] != $uid)
-                    $sw->push($fd, $data['msg']);
-            }
+            if ($data['uid'] != $uid)
+                $sw->push($fd, $data['msg']);
         } elseif ($a == 'toUser') {
             // if ($data['uid'] == $uid)
-            $sw->push($this->getFd($sub_uid), $data['msg']);
-
-        } elseif ($a == 'updateAdmin') {
-
-            $fd = $this->getFd($data['uid']);
-            if ($fd && ($conn = $this->getConn($fd)) && $conn[0] == $data['uid']) {
-                $admin = $data['msg'];
-                $this->conn[$fd][4] = $admin;
-            }
+            $sw->push($fd, $data['msg']);
         }
     }
 
@@ -189,14 +158,14 @@ class Conn
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
         ];
 
-        $this->pub->publish($this->key_room_chat, \msgpack_pack($msg), function ($result, $err) {
+        $this->pub->publish($this->key_room_chat . $room_id, \msgpack_pack($msg), function ($result, $err) {
             //var_dump('publish', $result);
         });
     }
 
     public function updateAdmin($room_id, $admin_uid, $admin)
     {
-        $this->sendToRoom($room_id, $admin_uid, $admin, 'updateAdmin');
+        $this->sendToRoom($room_id, $admin_uid, $admin, 'toUpdateAdmin');
     }
 
     public function sendToUser($to_uid, $msg)
@@ -210,5 +179,20 @@ class Conn
         $this->pub->publish($this->key_user_chat . $to_uid, \msgpack_pack($msg), function ($result, $err) {
             var_dump('publish', $result);
         });
+    }
+
+    /**
+     * 更新admin
+     * @param $data
+     */
+    protected function toUpdateAdmin($data)
+    {
+        $room_id = $data['room_id'];
+        $uid = $data['uid'];
+        $admin = $data['msg'];
+
+        if ($fd = $this->getRoomUser($room_id, $uid)) {
+            $this->fds[$fd][4] = $admin;
+        }
     }
 }

@@ -4,13 +4,23 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 \Swoolet\App::setConfig('Live', 'dev');
 
+$a = array();
+
+$q = &$a[11];
+
+var_dump($a);
+
+unset($a[11]);
+
+var_dump($a);
+
 //$link = new \redisProxy();
 //$link->connect('127.0.0.1', 6366, 0);
 //
 //$link->select(0);
 
 //  $db_user = new \Live\Database\UserLevel();
-var_export(\Live\Database\UserLevel::q());
+//var_export(\Live\Database\UserLevel::q());
 //$user = $db_user->add(1, 1);
 
 //var_dump($user);

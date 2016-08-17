@@ -22,10 +22,9 @@
         var token = 'obzjte|tuKqA76VAk3CuqD1tD8IB3MCnGx01HQtoTa6dqNwnug=';
 
         websocket.send('{"m":"socket_init","token":"' + token + '"}')
-        websocket.send('{"m":"socket_chat","uid":"2","msg":"chat"}')
-
-        //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
-        //websocket.send('{"m":"room_sendMsg","msg":"你好"}')
+        //websocket.send('{"m":"socket_chat","uid":"2","msg":"chat"}')
+        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        websocket.send('{"m":"room_sendMsg","msg":"你好"}')
         //websocket.send('{"m":"room_leave"}')
         //return
         //websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')

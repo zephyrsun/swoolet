@@ -35,7 +35,6 @@ class Socket extends Basic
     public function __construct()
     {
         $this->conn = \Server::$conn;
-        $this->conn->subscribe();
     }
 
     public function init($request)
@@ -45,10 +44,11 @@ class Socket extends Basic
             return $data;
 
         $token_uid = $data['token_uid'];
-        //$ret = App::$server->sw->bind($request->fd, $token_uid);
-        //var_dump('aaaa', $request->fd, $ret, App::$server->sw->connection_info($request->fd));
 
-        $this->conn->join($request->fd, $token_uid, 0, []);
+//        $ret = App::$server->sw->bind($request->fd, $token_uid);
+//        var_dump('aaaa', $request->fd, $ret, App::$server->sw->connection_info($request->fd));
+
+        $this->conn->join($request->fd, $token_uid);
 
         return Response::msg('ok');
     }
@@ -66,10 +66,16 @@ class Socket extends Basic
         if (!$data)
             return $data;
 
-        $conn = $this->conn->getInfo($request->fd);
+        $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($from_uid) = $conn;
-            $this->conn->sendToUser($from_uid, $data['uid'], $data['msg']);
+            list($fd_uid) = $conn;
+            $this->conn->sendToUser($data['uid'], [
+                't' => Conn::TYPE_CHAT,
+                'msg' => [
+                    'uid' => $fd_uid,
+                    'msg' => $data['msg'],
+                ],
+            ]);
         }
 
         return Response::msg('ok');

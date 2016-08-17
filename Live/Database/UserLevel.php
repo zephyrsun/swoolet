@@ -22,7 +22,7 @@ class UserLevel extends Basic
     static public $exp = [
         1 => 0,
         2 => 10,
-        3 => 50,
+        3 => 40,
         4 => 100,
         5 => 200,
         6 => 400,

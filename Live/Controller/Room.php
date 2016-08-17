@@ -33,8 +33,7 @@ class Room extends Basic
      */
     public function __construct()
     {
-        $this->conn = \Server::$conn;
-        $this->conn->subscribe();
+        $this->conn = \Server::$conn->subRoom();
     }
 
     public function join($request)
@@ -61,7 +60,7 @@ class Room extends Basic
 
             $admin = $room_admin->isAdmin($room_id, $token_uid);
 
-            $this->conn->join($request->fd, $token_uid, $room_id, [
+            $this->conn->joinRoom($request->fd, $room_id, $token_uid, [
                 'nickname' => $user['nickname'],
                 'avatar' => $user['avatar'],
                 'admin' => $admin,
@@ -108,7 +107,7 @@ class Room extends Basic
         if (!$data)
             return $data;
 
-        $conn = $this->conn->getInfo($request->fd);
+        $conn = $this->conn->getConn($request->fd);
 
         if ($conn) {
             list($uid, $room_id, $user) = $conn;
@@ -143,9 +142,9 @@ class Room extends Basic
 
     public function praise($request)
     {
-        $conn = $this->conn->getInfo($request->fd);
+        $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid, $room_id, $nickname, $avatar) = $conn;
+            list($uid, $room_id, $user) = $conn;
 
             //todo:点赞逻辑
 
@@ -155,7 +154,7 @@ class Room extends Basic
                 'n' => 1,
                 'user' => [
                     'uid' => $uid,
-                    'nickname' => $nickname,
+                    'nickname' => $user['nickname'],
                 ],
             ]);
         }
@@ -165,7 +164,7 @@ class Room extends Basic
 
     public function follow($request)
     {
-        $conn = $this->conn->getInfo($request->fd);
+        $conn = $this->conn->getConn($request->fd);
         if ($conn) {
             list($uid, $room_id) = $conn;
 
@@ -188,11 +187,11 @@ class Room extends Basic
 
     public function sendGift($request)
     {
-        $data = parent::getValidator()->required('gift_id')->getResult();
+        $data = parent::getValidator()->required('gift_id')->ge('num', 1)->getResult();
         if (!$data)
             return $data;
 
-        $conn = $this->conn->getInfo($request->fd);
+        $conn = $this->conn->getConn($request->fd);
         if ($conn) {
             list($uid, $room_id) = $conn;
 
@@ -243,7 +242,7 @@ class Room extends Basic
 
     public function stop($request)
     {
-        $conn = $this->conn->getInfo($request->fd);
+        $conn = $this->conn->getConn($request->fd);
 
         if ($conn) {
             list($uid, $room_id) = $conn;

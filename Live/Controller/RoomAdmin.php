@@ -59,9 +59,8 @@ class RoomAdmin extends Basic
         if ($ret) {
             $this->conn->updateAdmin($room_id, $admin_uid, false);
 
-            $this->conn->sendToRoomUser($token_uid, $admin_uid, [
+            $this->conn->sendToUser($admin_uid, [
                 't' => Conn::TYPE_ROOM_ONE,
-                'uid' => $admin_uid,
                 'msg' => '主播取消了您的房管权限',
             ]);
         }
@@ -87,13 +86,10 @@ class RoomAdmin extends Basic
         if ($token_uid != $room_id || !(new \Live\Database\RoomAdmin())->isAdmin($room_id, $token_uid))
             return Response::msg('没有权限', 1031);
 
-        $this->conn->kickRoomUser($room_id, $to_uid);
-
         $ret = (new \Live\Database\RoomAdmin())->silenceUser($room_id, $to_uid);
         if ($ret) {
-            $this->conn->sendToRoomUser($room_id, $to_uid, [
+            $this->conn->sendToUser($to_uid, [
                 't' => Conn::TYPE_ROOM_ONE,
-                'uid' => $to_uid,
                 'msg' => '您已被禁言两小时，走正道，说人话!',
             ]);
         }

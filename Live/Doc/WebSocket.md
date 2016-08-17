@@ -117,7 +117,7 @@ n:表示显示几个赞
 ###送礼
 ```
 请求:
-{"m":"room_sendGift","gift_id":1}
+{"m":"room_sendGift","gift_id":1,"num":1}
 
 返回:
 无
