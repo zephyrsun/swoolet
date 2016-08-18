@@ -13,10 +13,7 @@ class Index extends Basic
         return Response::msg('Hello world!');
     }
 
-    public function _test()
+    public function userAgreement()
     {
-        //$q = (new \Live\Third\Pili())->stop('test_1_1470301542', '1470301542', \Swoolet\App::$ts);
-
-        (new UserLevel())->add(1,1);
     }
 }

@@ -9,7 +9,6 @@
 namespace Live\Controller;
 
 use Live\Database\ReportUser;
-use Live\Database\User;
 use \Live\Response;
 use \Live\Lib\Conn;
 
@@ -38,7 +37,7 @@ class RoomAdmin extends Basic
 
             $this->conn->sendToRoom($room_id, $token_uid, [
                 't' => Conn::TYPE_ROOM_BROADCAST,
-                'user' => (new User())->getShowInfo($admin_uid, 'simple'),
+                'user' => (new \Live\Database\User())->getShowInfo($admin_uid, 'simple'),
                 'msg' => ':nickname被任命为管理员',
             ]);
         }
@@ -113,7 +112,9 @@ class RoomAdmin extends Basic
         if (!$data)
             return $data;
 
-        (new ReportUser())->add($data['token_uid'], $data['uid'], $data['reason']);
+        $ret = (new ReportUser())->add($data['token_uid'], $data['uid'], $data['reason']);
+        if (!$ret)
+            return $ret;
 
         return Response::msg('感谢您的举报，我们将尽快处理');
     }

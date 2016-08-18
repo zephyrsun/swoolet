@@ -1,3 +1,10 @@
+
+<form action="http://test.camhow.com.cn/upload/cover" method="post" enctype="multipart/form-data">
+    <input type="file" name="file"/>
+    <input type="hidden" name="token" value="oboi24|GVkwPzXRhNTLbcLFBX8tkrYI3t84BUNz7+a9yWpaBAU="/>
+
+    <button type="submit">上传</button>
+</form>
 <script>
     "use strict"
 
@@ -12,14 +19,14 @@
         var token = 'obzjw8|J6nDc48Hug95Ylc8An3f1\/efuibiQ19HJzhiWRWHfwk='
 
         websocket.send('{"m":"socket_init","token":"' + token + '"}')
-        //websocket.send('{"m":"socket_chat","uid":"1","msg":"chat2"}')
         websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
         websocket.send('{"m":"room_sendMsg","msg":"你好2"}')
         websocket.send('{"m":"room_leave"}')
-        //return
         websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
         websocket.send('{"m":"room_sendMsg","msg":"第二次你好2"}')
         //websocket.send('{"m":"room_leave"}')
+        //websocket.send('{"m":"socket_chat","uid":"1","msg":"chat2"}')
+
     }
 
     websocket.onclose = function (evt) {

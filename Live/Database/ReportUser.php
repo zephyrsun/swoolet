@@ -35,6 +35,9 @@ class ReportUser extends Basic
 
     public function add($uid, $to_uid, $reason)
     {
+        if ($uid == $to_uid)
+            return Response::msg('自己举报自己是一种怎样的体验？', 1037);
+
         return $this->table($uid)->insert([
             'uid' => $uid,
             'to_uid' => $to_uid,

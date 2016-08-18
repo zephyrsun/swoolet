@@ -111,24 +111,27 @@ class Room extends Basic
         if ($conn) {
             list($uid, $room_id, $user) = $conn;
 
-            $lv = (new UserLevel())->getLv($uid);
-
             $user += [
                 'uid' => $uid,
-                'lv' => $lv,
             ];
 
             if ($data['horn']) {
+
+                $t = Conn::TYPE_HORN;
 
                 $to_uid = $room_id;
                 $ret = (new Gift())->sendHorn($uid, $to_uid);
                 if (!$ret)
                     return $ret;
 
-                $t = Conn::TYPE_HORN;
+                $lv = (new UserLevel())->getLv($uid);
+                $user['lv'] = $lv;
+
             } else {
                 $t = Conn::TYPE_MESSAGE;
                 unset($user['avatar']);
+
+                $lv = 0;
             }
 
             $this->conn->sendToRoom($room_id, $uid, [
@@ -137,9 +140,8 @@ class Room extends Basic
                 'msg' => $data['msg'],
             ]);
 
-            return Response::data([
-                'lv' => $lv,
-            ]);
+            if ($lv)
+                return Response::data(['lv' => $lv]);
         }
 
         return Response::msg('ok');

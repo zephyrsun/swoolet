@@ -35,8 +35,8 @@ class Socket extends Basic
 
         $token_uid = $data['token_uid'];
 
-       $ret = \Swoolet\App::$server->sw->bind($request->fd, '11423_432141324');
-       var_dump('aaaa', $request->fd, $ret, \Swoolet\App::$server->sw->connection_info($request->fd));
+       //$ret = \Swoolet\App::$server->sw->bind($request->fd, '11423_432141324');
+       //var_dump('aaaa', $request->fd, $ret, \Swoolet\App::$server->sw->connection_info($request->fd));
 
         $this->conn->join($request->fd, $token_uid);
 

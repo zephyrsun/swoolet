@@ -17,31 +17,25 @@ use \Swoolet\App;
  */
 class RedisAsync
 {
-    public $crlf = "\r\n";
-
-    public $debug = false;
-
-    /**
-     * 空闲连接池
-     * @var array
-     */
-    public $pool = array();
-
-    public $cfg_key = '';
+    static public $ins;
 
     public $option = ['host' => '127.0.0.1', 'port' => 6379, 'password' => ''];
 
-    public function __construct($cfg_key = '')
+    public $link;
+
+    public $cfg_key = '';
+    public $db_index = 0;
+
+    public $cache_key = '';
+
+    public $debug = false;
+
+    public function __construct($cfg_key = '', $cache_key = '')
     {
         if ($cfg_key || $cfg_key = $this->cfg_key)
             $this->option = App::getConfig($cfg_key) + $this->option;
-    }
 
-    public function trace($msg)
-    {
-        echo "-----------------------------------------" . PHP_EOL;
-        echo trim($msg) . PHP_EOL;
-        echo "-----------------------------------------" . PHP_EOL;
+        $this->cache_key = $cache_key;
     }
 
     public function stats()
@@ -59,7 +53,7 @@ class RedisAsync
             $lines[] = $v;
         }
         $connection = $this->getConnection();
-        $cmd = $this->parseRequest($lines);
+        $cmd = $connection->parseRequest($lines);
         $connection->command($cmd, $callback);
     }
 
@@ -69,25 +63,16 @@ class RedisAsync
         $connection->fields = $value;
 
         array_unshift($value, 'hmget', $key);
-        $cmd = $this->parseRequest($value);
+        $cmd = $connection->parseRequest($value);
         $connection->command($cmd, $callback);
-    }
-
-    public function parseRequest($array)
-    {
-        $cmd = '*' . count($array) . $this->crlf;
-        foreach ($array as $item) {
-            $cmd .= '$' . strlen($item) . $this->crlf . $item . $this->crlf;
-        }
-        return $cmd;
     }
 
     public function __call($method, array $args)
     {
         $callback = array_pop($args);
         array_unshift($args, $method);
-        $cmd = $this->parseRequest($args);
         $connection = $this->getConnection();
+        $cmd = $connection->parseRequest($args);
         $connection->command($cmd, $callback);
     }
 
@@ -97,28 +82,24 @@ class RedisAsync
      */
     protected function getConnection()
     {
-        if ($this->pool) {
-            /**
-             * @var $connection RedisConnection
-             */
-            foreach ($this->pool as $k => $connection) {
-                unset($this->pool[$k]);
-                break;
-            }
-            return $connection;
-        } else {
-            return new RedisConnection($this);
+        if ($ins = &self::$ins[$this->cache_key])
+            return $ins;
+
+        $cfg = $this->option;
+
+        $link = new RedisConnection();
+        $link->connect($cfg['host'], $cfg['port']);
+
+        if ($this->option['password']) {
+            $link->command('auth', $cfg['password'], function () {
+            });
         }
-    }
 
-    public function lockConnection($id)
-    {
-        unset($this->pool[$id]);
-    }
+        $link->command('select', $this->db_index, function () {
 
-    public function freeConnection($id, RedisConnection $connection)
-    {
-        $this->pool[$id] = $connection;
+        });
+
+        return $ins = $link;
     }
 }
 
@@ -126,10 +107,6 @@ class RedisConnection
 {
     public $crlf = "\r\n";
 
-    /**
-     * @var RedisAsync
-     */
-    protected $redis;
     protected $buffer = '';
     /**
      * @var \swoole_client
@@ -144,23 +121,24 @@ class RedisConnection
     protected $wait_recv = false;
     public $fields;
 
-    public function __construct(RedisAsync $redis)
+    public $debug = false;
+
+    public function __construct()
+    {
+    }
+
+    public function connect($host, $port)
     {
         $client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
         $client->on('connect', [$this, 'onConnect']);
         $client->on('error', [$this, 'onError']);
         $client->on('receive', [$this, 'onReceive']);
         $client->on('close', [$this, 'onClose']);
-        $client->connect($redis->option['host'], $redis->option['port']);
+        $client->connect($host, $port);
 
         $this->client = $client;
-        $redis->pool[$client->sock] = $this;
-        $this->redis = $redis;
 
-        if ($redis->option['password']) {
-            $this->command('auth', $redis->option['password'], function () {
-            });
-        }
+        return $this;
     }
 
     /**
@@ -195,7 +173,6 @@ class RedisConnection
         }
         $this->callback = $callback;
         //从空闲连接池中移除，避免被其他任务使用
-        $this->redis->lockConnection($this->client->sock);
     }
 
     public function onConnect(\swoole_client $client)
@@ -214,17 +191,14 @@ class RedisConnection
     public function onClose(\swoole_client $cli)
     {
         if ($this->wait_send) {
-            $this->redis->freeConnection($cli->sock, $this);
             call_user_func($this->callback, 'timeout', false);
         }
     }
 
     public function onReceive($cli, $data)
     {
-        if ($this->redis->debug)
-            $this->redis->trace($data);
-
-        //$this->redis->trace($data);
+        if ($this->debug)
+            $this->trace($data);
 
         $result = null;
         if ($this->wait_recv) {
@@ -244,17 +218,12 @@ class RedisConnection
         }
 
         $this->clean();
-        $this->redis->freeConnection($cli->sock, $this);
         call_user_func($this->callback, $result, $result === null);
     }
 
     public function read()
     {
         $chunk = $this->readLine();
-
-//        if ($chunk === false || $chunk === '') {
-//            $this->onConnectionError('Error while reading line from the server.');
-//        }
 
         $prefix = $chunk[0];
         $payload = substr($chunk, 1);
@@ -316,4 +285,21 @@ class RedisConnection
 
         return $chunk;
     }
+
+    public function parseRequest($array)
+    {
+        $cmd = '*' . count($array) . $this->crlf;
+        foreach ($array as $item) {
+            $cmd .= '$' . strlen($item) . $this->crlf . $item . $this->crlf;
+        }
+        return $cmd;
+    }
+
+    public function trace($msg)
+    {
+        echo "-----------------------------------------" . PHP_EOL;
+        echo trim($msg) . PHP_EOL;
+        echo "-----------------------------------------" . PHP_EOL;
+    }
+
 }

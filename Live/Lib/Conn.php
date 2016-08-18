@@ -41,8 +41,8 @@ class Conn
 
     public function __construct()
     {
-        $this->sub = new \Swoolet\Data\RedisAsync('redis_async');
-        $this->pub = new \Swoolet\Data\RedisAsync('redis_async');
+        $this->sub = new \Swoolet\Data\RedisAsync('redis_async','sub');
+        $this->pub = new \Swoolet\Data\RedisAsync('redis_async','pub');
         //$this->redis->debug = 1;
     }
 
@@ -114,11 +114,13 @@ class Conn
 
     public function subRoom()
     {
-        if (!self::$subscribe) {
-            //var_dump(self::$subscribe);
-            $this->subscribe($this->key_room_chat);
-            self::$subscribe = true;
-        }
+//        if (!self::$subscribe) {
+//            //var_dump(self::$subscribe);
+//            $this->subscribe($this->key_room_chat);
+//            self::$subscribe = true;
+//        }
+
+        $this->subscribe($this->key_room_chat);
 
         return $this;
     }
@@ -193,7 +195,7 @@ class Conn
         ];
 
         $this->pub->publish($this->key_room_chat, \msgpack_pack($msg), function ($result, $err) {
-            //var_dump('publish', $result);
+            var_dump('publish', $result);
         });
     }
 
@@ -234,6 +236,8 @@ class Conn
             File::rm($filename);
         }
 
+        //$this->subRoom();
+
         return $this;
     }
 
@@ -251,6 +255,7 @@ class Conn
 //        }
 
         //var_dump('stop', $this->room);
+
         File::touch("/tmp/worker_{$worker_id}.php", $data, true);
 
         return $this;

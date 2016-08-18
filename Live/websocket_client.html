@@ -22,21 +22,20 @@
         var token = 'obzjte|tuKqA76VAk3CuqD1tD8IB3MCnGx01HQtoTa6dqNwnug=';
 
         websocket.send('{"m":"socket_init","token":"' + token + '"}')
-        //websocket.send('{"m":"socket_chat","uid":"2","msg":"chat"}')
         websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
-//        websocket.send('{"m":"room_sendMsg","msg":"你好"}')
-//        websocket.send('{"m":"room_leave"}')
-//        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
-//        websocket.send('{"m":"room_sendMsg","msg":"第二次你好"}')
+        websocket.send('{"m":"room_sendMsg","msg":"你好"}')
+        websocket.send('{"m":"room_leave"}')
+        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        websocket.send('{"m":"room_sendMsg","msg":"第二次你好"}')
         //websocket.send('{"m":"room_leave"}')
-
+        //websocket.send('{"m":"socket_chat","uid":"2","msg":"chat"}')
 
         //test
         //websocket.send('{"m":"room_join","room_id":"1","token":"oboi24|GVkwPzXRhNTLbcLFBX8tkrYI3t84BUNz7+a9yWpaBAU="}')
 
         //websocket.send('{"m":"room_follow"}')
         //websocket.send('{"m":"room_start","token":"' + token + '"}')
-        websocket.send('{"m":"room_praise","token":"' + token + '"}')
+        //websocket.send('{"m":"room_praise","token":"' + token + '"}')
         //websocket.send('{"m":"room_stop"}')
         //websocket.send('{"m":"room_quit","room_id":"1","uid":"10001"}')
     }

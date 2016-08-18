@@ -36,8 +36,6 @@ class Server extends \Swoolet\WebSocket
     {
         $fd = $request->fd;
 
-        //self::$conn->subscribe($fd);
-
         //没有成功登陆,踢出去
         swoole_timer_after(1500, function () use ($fd) {
             if (self::$conn && !self::$conn->getConn($fd)) {
@@ -51,7 +49,6 @@ class Server extends \Swoolet\WebSocket
     {
         \Swoolet\log('onClose', $fd);
         if (Server::$conn) {
-            //self::$conn->unsubscribe($fd);
             self::$conn->leave($fd);
         }
     }

@@ -12,7 +12,7 @@ return [
         'worker_num' => 2,
         'reactor_num' => 2,
         'dispatch_mode' => 5,
-        //'max_request' => 6,
+        'max_request' => 5,
 
         'open_tcp_keepalive' => 1,
         'tcp_keepidle' => 60,
