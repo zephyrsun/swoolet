@@ -8,18 +8,8 @@
 
 namespace Live\Controller;
 
-use Live\Database\Fan;
-use Live\Database\Follow;
-use Live\Database\Gift;
-use Live\Database\Income;
-use Live\Database\Live;
-use Live\Database\User;
-use Live\Database\RoomAdmin;
-use Live\Database\UserLevel;
-use Live\Redis\Rank;
 use \Live\Response;
 use \Live\Lib\Conn;
-use Swoolet\App;
 
 class Socket extends Basic
 {
@@ -45,8 +35,8 @@ class Socket extends Basic
 
         $token_uid = $data['token_uid'];
 
-//        $ret = App::$server->sw->bind($request->fd, $token_uid);
-//        var_dump('aaaa', $request->fd, $ret, App::$server->sw->connection_info($request->fd));
+       $ret = \Swoolet\App::$server->sw->bind($request->fd, '11423_432141324');
+       var_dump('aaaa', $request->fd, $ret, \Swoolet\App::$server->sw->connection_info($request->fd));
 
         $this->conn->join($request->fd, $token_uid);
 
@@ -69,6 +59,10 @@ class Socket extends Basic
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
             list($fd_uid) = $conn;
+
+            if($fd_uid == $data['uid'])
+               return Response::msg('自己和自己聊天是一种什么感受?');
+
             $this->conn->sendToUser($data['uid'], [
                 't' => Conn::TYPE_CHAT,
                 'msg' => [

@@ -11,8 +11,8 @@ return [
     'swoole' => [
         'worker_num' => 2,
         'reactor_num' => 2,
-        'dispatch_mode' => 2,
-        'max_request' => 1000,
+        'dispatch_mode' => 5,
+        //'max_request' => 6,
 
         'open_tcp_keepalive' => 1,
         'tcp_keepidle' => 60,

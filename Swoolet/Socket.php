@@ -5,7 +5,7 @@ namespace Swoolet;
 use Swoolet\Data\PDO;
 use Swoolet\Data\Redis;
 
-abstract class Basic
+class Socket
 {
     public $events = [
         'Start',
@@ -84,13 +84,14 @@ abstract class Basic
         $this->env = $env;
 
         App::setConfig($namespace, $env);
+        App::$ts = \time();
     }
 
     /**
      * a shortcut
      *
      * @param $namespace
-     * @return Basic
+     * @return Socket
      */
     static function createServer($namespace, $env)
     {

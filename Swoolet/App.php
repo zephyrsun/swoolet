@@ -17,7 +17,7 @@ define('BASE_DIR', dirname(__DIR__) . \DIRECTORY_SEPARATOR);
 class App
 {
     /**
-     * @var Basic $server
+     * @var Socket $server
      */
     static public $ins, $server, $config, $ts = 0;
 

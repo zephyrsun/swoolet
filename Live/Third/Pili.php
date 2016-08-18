@@ -21,15 +21,22 @@ class Pili
 
     public function __construct()
     {
-        $credentials = new \Qiniu\Credentials(self::AK, self::SK); #=> Credentials Object
+        $credentials = new \Qiniu\Credentials(self::AK, self::SK); # => Credentials Object
         $this->hub = new \Pili\Hub($credentials, self::HUB); # => Hub Object
     }
 
     public function start($key)
     {
-        //$stream = $this->hub->stream($key);
-
-        $stream = $this->hub->createStream($key, null, 'static');
+        $result = @$this->hub->listStreams(null, 1, $key);
+        $items = &$result['items'];
+        if ($items && ($stream = \current($items)) && $key == $stream->title) {
+            /**
+             * @var \Pili\Stream $stream
+             */
+            $stream->enable();
+        } else {
+            $stream = $this->hub->createStream($key, null, 'static');
+        }
 
         $publish_url = $stream->rtmpPublishUrl();
         $play_url = $stream->rtmpLiveUrls()['ORIGIN'];
@@ -39,26 +46,27 @@ class Pili
             'publish_url' => $publish_url,
             'play_url' => $play_url,
             'hls_url' => $hls_url,
+            'third' => $stream->id,
         ];
     }
 
-    public function stop($key, $start_ts, $end_ts)
+    public function stop($key, $stream_id, $start_ts, $end_ts)
     {
-        $stream = $this->hub->createStream($key, null, 'static');
+        $stream = $this->hub->getStream($stream_id);
+        $stream->disable();
 
         try {
             $ret = $stream->saveAs("{$key}_{$start_ts}.mp4", null, (int)$start_ts, (int)$end_ts);
+
+            $ret = [
+                'play_url' => $ret['url'],
+                'duration' => $ret['duration'],
+            ];
+
         } catch (\Exception $e) {
-            $ret = null;
+            $ret = false;
         }
 
-        if (!$ret)
-            return $ret;
-
-        return [
-            'play_url' => $ret['targetUrl'],
-            'hls_url' => $ret['url'],
-            'duration' => $end_ts - $start_ts,
-        ];
+        return $ret;
     }
 }

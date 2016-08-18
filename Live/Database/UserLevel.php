@@ -80,9 +80,10 @@ class UserLevel extends Basic
         if (!$new_exp)
             return Response::msg('服务器错误', 1030);
 
-        App::$server->sw->task('task_exp', -1, function ($sw, $task_id, $data) use ($uid, $exp, $new_exp) {
-            $lv = self::exp2lv($new_exp);
-            $this->cache->set($uid, 'lv', $lv);
+        $lv = self::exp2lv($new_exp);
+        $this->cache->set($uid, 'lv', $lv);
+
+        App::$server->sw->task('task_exp', -1, function ($sw, $task_id, $data) use ($uid, $new_exp, $lv) {
             $ret = $this->table($uid)->replace([
                 'uid' => $uid,
                 'exp' => $new_exp,
@@ -96,7 +97,6 @@ class UserLevel extends Basic
     public function getLv($uid)
     {
         if (!$lv = $this->cache->get($uid, 'lv')) {
-
             $data = $this->table($uid)->select('exp,lv')->where('uid', $uid)->fetch();
             if ($data) {
                 $this->cache->mSet($uid, $data);

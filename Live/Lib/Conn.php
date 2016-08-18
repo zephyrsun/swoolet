@@ -225,8 +225,10 @@ class Conn
             //var_dump('start', $this->room);
 
             //重新监听个人聊天
-            foreach ($this->uid as $uid => $fd) {
-                $this->subscribe($this->key_user_chat . $uid, $uid);
+            if ($this->uid) {
+                foreach ($this->uid as $uid => $fd) {
+                    $this->subscribe($this->key_user_chat . $uid, $uid);
+                }
             }
 
             File::rm($filename);
@@ -243,8 +245,7 @@ class Conn
             $this->room,
         ];
 
-        $this->unsubscribe($this->key_room_chat);
-
+//        $this->unsubscribe($this->key_room_chat);
 //        foreach ($this->uid as $uid => $fd) {
 //            $this->unsubscribe($this->key_user_chat . $uid);
 //        }

@@ -77,7 +77,6 @@ class Room extends Basic
         $first = $data['first'];
         if ($first)
             return Response::data([
-                'm' => $_POST['m'],
                 'live' => (new Live())->getLive($room_id, 'app'),
                 'msg' => '欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。',
                 'user' => $user,
@@ -112,9 +111,11 @@ class Room extends Basic
         if ($conn) {
             list($uid, $room_id, $user) = $conn;
 
+            $lv = (new UserLevel())->getLv($uid);
+
             $user += [
                 'uid' => $uid,
-                'lv' => (new UserLevel())->getLv($uid),
+                'lv' => $lv,
             ];
 
             if ($data['horn']) {
@@ -134,6 +135,10 @@ class Room extends Basic
                 't' => $t,
                 'user' => $user,
                 'msg' => $data['msg'],
+            ]);
+
+            return Response::data([
+                'lv' => $lv,
             ]);
         }
 
@@ -157,6 +162,8 @@ class Room extends Basic
                     'nickname' => $user['nickname'],
                 ],
             ]);
+
+            return Response::msg('ok');
         }
 
         return Response::msg('ok');
@@ -193,7 +200,7 @@ class Room extends Basic
 
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid, $room_id) = $conn;
+            list($uid, $room_id, $user) = $conn;
 
             $gift_id = $data['gift_id'];
             $to_uid = $room_id;
@@ -204,14 +211,21 @@ class Room extends Basic
             if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id))
                 return $ret;
 
+            $lv = (new UserLevel())->getLv($uid);
+
             $this->conn->sendToRoom($room_id, $uid, [
                 't' => Conn::TYPE_GIFT,
                 'user' => [
                     'uid' => $uid,
-                    'nickname' => "nickname{$uid}",
+                    'nickname' => $user['nickname'],
+                    'lv' => $lv,
                 ],
                 'msg' => '送给主播',
                 'gift_id' => $gift_id,
+            ]);
+
+            return Response::data([
+                'lv' => $lv,
             ]);
         }
 
@@ -235,7 +249,6 @@ class Room extends Basic
         (new RoomAdmin())->getRoomAdmin($token_uid);
 
         return Response::data([
-            'm' => $_POST['m'],
             'publish_url' => $data['publish_url'],
         ]);
     }

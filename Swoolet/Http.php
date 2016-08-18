@@ -2,7 +2,7 @@
 
 namespace Swoolet;
 
-class Http extends Basic
+class Http extends Socket
 {
     /**
      * @var \swoole_http_response $resp
@@ -36,6 +36,6 @@ class Http extends Basic
     public function response($fd, $str)
     {
         $this->resp->header("Server", "swoolet");
-        $this->resp->end($fd, $str);
+        $this->resp->end($str);
     }
 }

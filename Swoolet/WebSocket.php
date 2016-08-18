@@ -2,7 +2,7 @@
 
 namespace Swoolet;
 
-class WebSocket extends Basic
+class WebSocket extends Socket
 {
     /**
      * @var \swoole_websocket_server

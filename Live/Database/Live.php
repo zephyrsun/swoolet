@@ -17,6 +17,7 @@ class Live extends Basic
     public $cfg_key = 'db_1';
     public $table_prefix = 'live';
     public $key_live = 'live:';
+    public $key_home = 'home';
 
     public function __construct()
     {
@@ -34,6 +35,51 @@ class Live extends Basic
         return $this;
     }
 
+    public function getHome($start_id, $limit = 20)
+    {
+        $key = $this->key_home;
+        $list = $this->cache->revRange($key, $start_id, $limit, true);
+        if (!$list) {
+            $this->cacheHome();
+            $list = $this->cache->revRange($key, $start_id, $limit, true);
+        }
+
+        $ret = [];
+        foreach ($list as $data => $key) {
+            $ret[] = \msgpack_unpack($data) + ['key' => $key];
+        }
+
+        return $ret;
+    }
+
+    public function cacheHome()
+    {
+        $key = $this->key_home;
+
+        $list = $this->table(0)->select('uid,title,city,cover,play_url')->where('status', 1)->limit($this->limit)->fetchAll();
+
+        $db_user = new User();
+        $n = 0;
+        $data = [$key];
+        foreach ($list as $row) {
+            $user = $db_user->getUser($row['uid']);
+
+            $row += [
+                'nickname' => $user['nickname'],
+                'zodiac' => $user['zodiac'],
+            ];
+
+            $data[] = $n++;
+            $data[] = \msgpack_pack($row);
+        }
+
+        //缓存列表
+        call_user_func_array([$this->cache->link, 'zAdd'], $data);
+        $this->cache->expire($key, 5);//3600
+
+        return $data;
+    }
+
     public function updateLive($uid, $new_data)
     {
         $data = $this->getLive($uid);
@@ -47,7 +93,7 @@ class Live extends Basic
         if (!$ret)
             return Response::msg('开播失败', 1025);
 
-        return $ret;
+        return $data;
     }
 
     public function stop($uid)
