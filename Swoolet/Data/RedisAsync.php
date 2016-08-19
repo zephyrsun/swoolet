@@ -32,22 +32,15 @@ class RedisAsync
 
     public function __construct($cfg_key = '', $cache_key = '')
     {
-        if ($cfg_key || $cfg_key = $this->cfg_key)
+        if ($cfg_key || $cfg_key = $this->cfg_key) {
             $this->option = App::getConfig($cfg_key) + $this->option;
-
-        $this->cache_key = $cache_key;
-    }
-
-    public function stats()
-    {
-        $stats = 'Idle connection: ' . count($this->pool) . '<br />' . PHP_EOL;
-        return $stats;
+            $this->cache_key = $cache_key ? $cache_key : $cfg_key;
+        }
     }
 
     public function hmset($key, array $value, $callback)
     {
-        $lines[] = 'hmset';
-        $lines[] = $key;
+        $lines = ['hmset', $key];
         foreach ($value as $k => $v) {
             $lines[] = $k;
             $lines[] = $v;
@@ -200,6 +193,8 @@ class RedisConnection
         if ($this->debug)
             $this->trace($data);
 
+        $this->trace($data);
+
         $result = null;
         if ($this->wait_recv) {
 
@@ -207,18 +202,24 @@ class RedisConnection
 
             if (strlen($this->buffer) >= $this->wait_recv) {
                 $result = substr($this->buffer, 0, -2);
+
+                call_user_func($this->callback, $result, $result === null);
             } else
                 return;
 
         } else {
             $this->buffer = $data;
-            $result = $this->read();
-            if ($this->wait_recv)
-                return;
+
+            while($this->buffer){
+                $result = $this->read();
+                if ($this->wait_recv)
+                    return;
+
+                call_user_func($this->callback, $result, $result === null);
+            }
         }
 
         $this->clean();
-        call_user_func($this->callback, $result, $result === null);
     }
 
     public function read()
@@ -244,7 +245,6 @@ class RedisConnection
                     $this->buffer = $chunk;
                     return null;
                 }
-
                 return $chunk;
 
             case '*':

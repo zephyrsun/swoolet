@@ -90,7 +90,7 @@ class Rank extends Common
         $db_user = new \Live\Database\User();
         foreach ($data as $uid => $money) {
 
-            $user = $db_user->getShowInfo($uid, 'more');
+            $user = $db_user->getShowInfo($uid, 'lv');
             $user['money'] = $money;
 
             $ret[] = $user;

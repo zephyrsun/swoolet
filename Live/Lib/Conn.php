@@ -34,6 +34,8 @@ class Conn
 
     public $sub;
     public $pub;
+    public $sub_user;
+
     public $key_room_chat = 'r_chat:';
     public $key_user_chat = 'u_chat:';
 
@@ -41,9 +43,8 @@ class Conn
 
     public function __construct()
     {
-        $this->sub = new \Swoolet\Data\RedisAsync('redis_async','sub');
-        $this->pub = new \Swoolet\Data\RedisAsync('redis_async','pub');
-        //$this->redis->debug = 1;
+        $this->sub = new \Swoolet\Data\RedisAsync('redis_async', 'sub');
+        $this->pub = new \Swoolet\Data\RedisAsync('redis_async', 'pub');
     }
 
     public function &getFd($uid)
@@ -67,7 +68,7 @@ class Conn
     {
         $this->uid[$uid] = $fd;
 
-        $this->subscribe($this->key_user_chat . $uid, $uid);
+        $this->subUser($uid);
 
         $this->joinRoom($fd, 0, $uid, []);
     }
@@ -75,15 +76,9 @@ class Conn
     public function leave($fd)
     {
         $conn = $this->getConn($fd);
-        if ($conn) {
-            $uid = $conn[0];
-            $user_fd = $this->getFd($uid);
-
-            //var_dump('conn', $conn, 'uid', $uid, 'user_fd', $user_fd, 'fd', $fd);
-            if ($user_fd == $fd) {
-                unset($this->conn[$fd], $this->uid[$uid]);
-                $this->unsubscribe($this->key_user_chat . $uid);
-            }
+        if ($conn && ($uid = $conn[0]) && $this->getFd($uid) == $fd) {
+            unset($this->conn[$fd], $this->uid[$uid]);
+            $this->unsubscribe($this->key_user_chat . $uid);
         }
     }
 
@@ -112,33 +107,36 @@ class Conn
         return $conn;
     }
 
+    public function subUser($uid)
+    {
+        $sub = new \Swoolet\Data\RedisAsync('redis_async', $uid);
+        $sub->subscribe($this->key_user_chat . $uid, function ($data, $err) use ($uid) {
+            var_dump($data);
+            if ($err)
+                return;
+
+            $this->msgAction($data, $uid);
+        });
+    }
+
     public function subRoom()
     {
-//        if (!self::$subscribe) {
-//            //var_dump(self::$subscribe);
-//            $this->subscribe($this->key_room_chat);
-//            self::$subscribe = true;
-//        }
+        $this->sub->subscribe($this->key_room_chat, function ($data, $err) {
+            if ($err)
+                return;
 
-        $this->subscribe($this->key_room_chat);
+            $this->msgAction($data);
+        });
 
         return $this;
     }
 
-    public function subscribe($key, $uid = 0)
+    public function msgAction($data, $sub_uid = 0)
     {
-        $this->sub->subscribe($key, function ($data, $err) use ($uid) {
-            if ($err)
-                return;
+        $data = \msgpack_unpack($data[2]);
+        if (!$data || !is_array($data))
+            return;
 
-            $data = \msgpack_unpack($data[2]);
-            if ($data && is_array($data))
-                $this->msgAction($data, $uid);
-        });
-    }
-
-    public function msgAction($data, $sub_uid)
-    {
         /**
          * @var \swoole_websocket_server $sw
          */
@@ -147,14 +145,17 @@ class Conn
         $a = &$data['a'];
         if ($a == 'toRoom') {
             //$send_uid != $uid
-            var_dump('room', $this->getRoom($data['room_id']));
+            //var_dump('room', $this->getRoom($data['room_id']));
             foreach ($this->getRoom($data['room_id']) as $uid => $fd) {
                 if ($data['uid'] != $uid && !$sw->push($fd, $data['msg'])) {
                     unset($this->room[$data['room_id']][$uid]);
                 }
             }
         } elseif ($a == 'toUser') {
-            $sw->push($this->getFd($sub_uid), $data['msg']);
+            if ($fd = $this->getFd($sub_uid)) {
+                //var_dump($sub_uid, $fd);
+                $sw->push($fd, $data['msg']);
+            }
 
         } elseif ($a == 'updateAdmin') {
 
@@ -195,7 +196,7 @@ class Conn
         ];
 
         $this->pub->publish($this->key_room_chat, \msgpack_pack($msg), function ($result, $err) {
-            var_dump('publish', $result);
+            //var_dump('sendToRoom', $result);
         });
     }
 
@@ -213,7 +214,7 @@ class Conn
         ];
 
         $this->pub->publish($this->key_user_chat . $to_uid, \msgpack_pack($msg), function ($result, $err) {
-            //var_dump('publish', $result);
+            var_dump('sendToUser', $result);
         });
     }
 
@@ -229,7 +230,7 @@ class Conn
             //重新监听个人聊天
             if ($this->uid) {
                 foreach ($this->uid as $uid => $fd) {
-                    $this->subscribe($this->key_user_chat . $uid, $uid);
+                    $this->subUser($uid);
                 }
             }
 

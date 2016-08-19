@@ -83,10 +83,13 @@ class User extends Basic
                 'avatar' => $user['avatar'],
                 //'height' => $user['height'],
             ];
-        } else {
-            $ret = $user + [
-                    'lv' => (new UserLevel())->getLv($uid)
-                ];
+        } elseif ($type == 'lv') {
+            $ret = [
+                'uid' => $user['uid'],
+                'nickname' => $user['nickname'],
+                'avatar' => $user['avatar'],
+                'lv' => (new UserLevel())->getLv($uid)
+            ];
         }
 
         return $ret;

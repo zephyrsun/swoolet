@@ -101,7 +101,7 @@ class Live extends Basic
         return $this->table($uid)->where('uid = ? AND status = 1', $uid)->update(['status' => 0]);
     }
 
-    public function getLive($uid, $type = 'app')
+    public function getLive($uid, $type = 'all')
     {
         $live = $this->getWithCache($this->key_live . $uid, function () use ($uid) {
             return $this->table($uid)->where('uid', $uid)->fetch();

@@ -4,8 +4,6 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 \Swoolet\App::setConfig('Live', 'dev');
 
-$redis = new \Swoolet\Data\RedisAsync('redis_async');
-
 $redis->debug = 1;
 $data = str_repeat('1234567890', 50000);
 
@@ -20,11 +18,13 @@ $data = str_repeat('1234567890', 50000);
 
 
 for ($i = 0; $i < 3; $i++) {
-    $redis->subscribe('test', function ($result, $success) {
+
+    $redis = new \Swoolet\Data\RedisAsync('redis_async',$i);
+    $redis->subscribe('test' . $i, function ($result, $success) {
         var_dump('subscribe', $result, $success);
     });
 }
 
-//$redis->publish('test', '111', function ($result, $success) {
-//    var_dump('publish', $result, $success);
-//});
+$redis->publish('test1', '111', function ($result, $success) {
+    var_dump('publish', $result, $success);
+});
