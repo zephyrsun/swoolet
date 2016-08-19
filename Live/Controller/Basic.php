@@ -2,7 +2,6 @@
 
 namespace Live\Controller;
 
-use \Swoolet\App;
 use \Live\Validator;
 
 class Basic extends \Swoolet\Controller
@@ -17,6 +16,11 @@ namespace Live;
 
 use \Swoolet\App;
 use Swoolet\Lib\Crypt;
+
+function isProduction()
+{
+    return \Swoolet\App::$server->env == 'live';
+}
 
 class Response
 {

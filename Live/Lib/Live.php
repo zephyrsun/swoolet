@@ -25,7 +25,7 @@ class Live
         $this->sdk = new \Live\Third\Pili();
         $this->db = new \Live\Database\Live();
 
-        $this->prefix = \Swoolet\App::$server->env == 'live' ? 'live-' : 'test-';
+        $this->prefix = \Live\isProduction() ? 'live-' : 'test-';
     }
 
     public function getKey($uid)

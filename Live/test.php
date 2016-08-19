@@ -3,7 +3,7 @@
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 $app = \Swoolet\Socket::createServer('Live', 'dev');
-
+new \Live\Controller\Basic();
 $push = new \Live\Third\JPush();
 
 $ret = $push->push('测试消息', 'all');
