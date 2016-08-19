@@ -18,16 +18,12 @@ class JPush
     const APP_KEY = '118a3ec296f6193665bdf95c';
     const MASTER_SECRET = 'f9c3c00704c1924d1ff62844';
 
-    public $header, $curl, $url = 'https://api.jpush.cn/v3';
+    public $option = [], $curl, $url = 'https://api.jpush.cn/v3';
 
     public function __construct()
     {
-        $this->header = [
-            CURLOPT_HTTPHEADER => [
-                'Authorization: ' . base64_encode(self::APP_KEY . ':' . self::MASTER_SECRET),
-                'Content-Type: application/json',
-                'Accept: application/json',
-            ]
+        $this->option = [
+            CURLOPT_USERPWD => self::APP_KEY . ':' . self::MASTER_SECRET
         ];
 
         $this->curl = new CURL();
@@ -53,15 +49,18 @@ class JPush
                 'badge' => '+1',
                 //'sound' => 'sound.caf',
             ],
+            'options' => [
+                'apns_production' => false,
+            ]
         ], \JSON_UNESCAPED_UNICODE);
 
-        $this->curl->post("{$this->url}/push", $data);
+        return $this->curl->post("{$this->url}/push", $data, $this->option);
     }
 
     public function bind($registration_id, $uid)
     {
         return $this->curl->post("{$this->url}/devices/{$registration_id}", [
             'alias' => $uid,
-        ], $this->header);
+        ], $this->option);
     }
 }

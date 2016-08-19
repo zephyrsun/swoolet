@@ -4,6 +4,12 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 $app = \Swoolet\Socket::createServer('Live', 'dev');
 
+$push = new \Live\Third\JPush();
+
+$ret = $push->push('测试消息', 'all');
+var_dump($ret);
+
+
 //$data = (new \Live\Lib\Live())->stop(1);
 //var_dump($data);
 

@@ -12,7 +12,7 @@ class CURL
         CURLOPT_HEADER => false,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 10,
-        CURLOPT_CONNECTTIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 10,
     );
 
     public function __construct(array $options = array())
