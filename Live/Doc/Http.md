@@ -221,15 +221,3 @@ token
 返回:
 {"0":"user","1":{"uid":2,"nickname":"15921258182","height":0,"birthday":"0000-00-00","zodiac":null,"sign":"","avatar":""},"c":0,"m":null}
 ```
-
-###个人信息(自己)
-```
-接口:
-/My/info
-
-参数:
-token
-
-返回:
-{"0":"user","1":{"uid":2,"nickname":"15921258182","height":0,"birthday":"0000-00-00","zodiac":null,"sign":"","avatar":""},"c":0,"m":null}
-```

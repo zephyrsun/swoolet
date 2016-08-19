@@ -34,19 +34,6 @@ class My extends Basic
         Response::data(['user' => $user]);
     }
 
-    public function info()
-    {
-        $data = parent::getValidator()->required('token')->getResult();
-        if (!$data)
-            return $data;
-
-        $uid = $data['token_uid'];
-
-        $user = (new User())->getUser($uid);
-
-        Response::data(['user' => $user]);
-    }
-
     public function follows($request, $modal = '')
     {
         $data = parent::getValidator()->required('token')->required('key', false)->getResult();
