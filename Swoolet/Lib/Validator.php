@@ -88,7 +88,7 @@ class Validator
     public function email($key, $required = true)
     {
         $val = $this->get($key);
-        $result = filter_var($val, FILTER_VALIDATE_EMAIL);
+        $result = \filter_var($val, FILTER_VALIDATE_EMAIL);
 
         return $this->checkResult($key, $val, $result, $required);
     }
@@ -103,7 +103,7 @@ class Validator
     public function ip($key, $required = true)
     {
         $val = $this->get($key);
-        $result = filter_var($val, FILTER_VALIDATE_IP);
+        $result = \filter_var($val, FILTER_VALIDATE_IP);
 
         return $this->checkResult($key, $val, $result, $required);
     }
@@ -118,7 +118,7 @@ class Validator
     public function url($key, $required = true)
     {
         $val = $this->get($key);
-        $result = filter_var($val, FILTER_VALIDATE_URL);
+        $result = \filter_var($val, FILTER_VALIDATE_URL);
 
         return $this->checkResult($key, $val, $result, $required);
     }
@@ -215,10 +215,9 @@ class Validator
     {
         $val = $this->get($key);
 
-        if ($length)
-            $val = \mb_strlen($val);
+        $n = $length ? \mb_strlen($val) : $val;
 
-        $result = is_numeric($val) && $val <= $ref;
+        $result = \is_numeric($n) && $n <= $ref;
 
         return $this->checkResult($key, $val, $result, $required);
     }
@@ -236,10 +235,9 @@ class Validator
     {
         $val = $this->get($key);
 
-        if ($length)
-            $val = \mb_strlen($val);
+        $n = $length ? \mb_strlen($val) : $val;
 
-        $result = is_numeric($val) && $val >= $ref;
+        $result = \is_numeric($n) && $n >= $ref;
 
         return $this->checkResult($key, $val, $result, $required);
     }
@@ -257,10 +255,9 @@ class Validator
     {
         $val = $this->get($key);
 
-        if ($length)
-            $val = \mb_strlen($val);
+        $n = $length ? \mb_strlen($val) : $val;
 
-        $result = is_numeric($val) && $val >= $min && $val <= $max;
+        $result = \is_numeric($n) && $n >= $min && $n <= $max;
 
         return $this->checkResult($key, $val, $result, $required);
     }

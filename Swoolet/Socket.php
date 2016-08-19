@@ -4,6 +4,7 @@ namespace Swoolet;
 
 use Swoolet\Data\PDO;
 use Swoolet\Data\Redis;
+use Swoolet\Lib\File;
 
 class Socket
 {
@@ -75,6 +76,8 @@ class Socket
     public $sw;
     public $fd;
 
+    public $pid_file = '';
+
     public $namespace = 'App';
     public $env = 'test';
 
@@ -122,6 +125,32 @@ class Socket
     }
 
     /**
+     * start / stop / reload / restart
+     */
+    public function service()
+    {
+        $pid = File::get($this->pid_file);
+
+        $cmd = &$_SERVER['argv'][1];
+        if ($cmd == 'stop') {
+            if ($pid)
+                exec("kill $pid");
+
+            exit(1);
+        } elseif ($cmd == 'reload') {
+            if ($pid)
+                exec("kill -usr1 $pid");
+
+            exit(1);
+        } elseif ($cmd == 'restart') {
+            if ($pid) {
+                exec("kill $pid");
+                sleep(1);
+            }
+        }
+    }
+
+    /**
      * @param $address
      *        - :9501
      *        - 127.0.0.1:9501
@@ -129,17 +158,21 @@ class Socket
      */
     public function run($address)
     {
-        register_shutdown_function([$this, 'fatalHandler']);
-
         list($host, $port) = explode(':', $address);
         if (!$host)
             $host = '0.0.0.0';
 
+        register_shutdown_function([$this, 'fatalHandler']);
+
+        $prefix = "/tmp/swoole_{$port}";
+        $this->pid_file = "$prefix.pid";
+
+        $this->service();
+
         $sw = $this->runServer($host, $port);
 
         $setting = App::getConfig('swoole') + $this->option;
-        if (!$setting['log_file'])
-            $setting['log_file'] = "/tmp/swoole_{$port}.log";
+        $setting['log_file'] or $setting['log_file'] = "$prefix.log";
 
         $sw->set($setting);
 
@@ -156,8 +189,12 @@ class Socket
         return new \swoole_server($host, $port, $this->mode, $this->sock_type);
     }
 
+    /**
+     * @param \swoole_server $sw
+     */
     public function onStart($sw)
     {
+        File::touch($this->pid_file, $sw->master_pid);
         //echo 'onStart' . PHP_EOL;
     }
 

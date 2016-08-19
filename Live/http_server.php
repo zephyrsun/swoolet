@@ -1,6 +1,8 @@
 <?php
 
-if (!$env = &$argv[1]) {
+// php websocket_server.php start dev
+
+if (!$env = &$argv[2]) {
     echo 'Please input ENV' . PHP_EOL;
     return;
 }
@@ -17,9 +19,9 @@ class Server extends \Swoolet\Http
 
     public function onWorkerStart($sw, $worker_id)
     {
-        Server::$conn = new \Live\Lib\Conn();
-
         parent::onWorkerStart($sw, $worker_id);
+
+        Server::$conn = new \Live\Lib\Conn();
     }
 
     public function onRequest($request, $response)

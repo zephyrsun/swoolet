@@ -1,13 +1,13 @@
 <?php
 
-if (!$env = &$argv[1]) {
+// php websocket_server.php start dev
+
+if (!$env = &$argv[2]) {
     echo 'Please input ENV' . PHP_EOL;
     return;
 }
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
-
-use \Live\Lib\Conn;
 
 class Server extends \Swoolet\WebSocket
 {

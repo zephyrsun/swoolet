@@ -9,9 +9,8 @@
 
 namespace Live\Lib;
 
-use Live\Database\RoomAdmin;
-use Live\Database\User;
-use \Swoolet\App;
+use Swoolet\App;
+use Swoolet\Data\RedisAsync;
 use Swoolet\Lib\File;
 
 class Conn
@@ -43,8 +42,8 @@ class Conn
 
     public function __construct()
     {
-        $this->sub = new \Swoolet\Data\RedisAsync('redis_async', 'sub');
-        $this->pub = new \Swoolet\Data\RedisAsync('redis_async', 'pub');
+        $this->sub = new RedisAsync('redis_async', 'sub');
+        $this->pub = new RedisAsync('redis_async', 'pub');
     }
 
     public function &getFd($uid)
@@ -78,7 +77,11 @@ class Conn
         $conn = $this->getConn($fd);
         if ($conn && ($uid = $conn[0]) && $this->getFd($uid) == $fd) {
             unset($this->conn[$fd], $this->uid[$uid]);
-            $this->unsubscribe($this->key_user_chat . $uid);
+
+            if ($redis = RedisAsync::getInstance($uid)) {
+                $this->sub->unsubscribe($this->key_user_chat . $uid, function ($data, $err) {
+                });
+            }
         }
     }
 
@@ -109,9 +112,8 @@ class Conn
 
     public function subUser($uid)
     {
-        $sub = new \Swoolet\Data\RedisAsync('redis_async', $uid);
+        $sub = new RedisAsync('redis_async', $uid);
         $sub->subscribe($this->key_user_chat . $uid, function ($data, $err) use ($uid) {
-            var_dump($data);
             if ($err)
                 return;
 
@@ -167,17 +169,9 @@ class Conn
         }
     }
 
-    public function unsubscribe($key)
-    {
-        $this->sub->unsubscribe($key, function ($data, $err) {
-        });
-    }
-
-    public function createRoom($fd, $uid)
+    public function createRoom($fd, $uid, $user)
     {
         $this->rooms[$uid] = [];
-
-        $user = (new User())->getShowInfo($uid, 'simple');
 
         $this->joinRoom($fd, $uid, $uid, [
             'nickname' => $user['nickname'],
@@ -249,11 +243,6 @@ class Conn
             $this->conn,
             $this->room,
         ];
-
-//        $this->unsubscribe($this->key_room_chat);
-//        foreach ($this->uid as $uid => $fd) {
-//            $this->unsubscribe($this->key_user_chat . $uid);
-//        }
 
         //var_dump('stop', $this->room);
 

@@ -45,28 +45,28 @@ class RedisAsync
             $lines[] = $k;
             $lines[] = $v;
         }
-        $connection = $this->getConnection();
-        $cmd = $connection->parseRequest($lines);
-        $connection->command($cmd, $callback);
+        $conn = $this->getConnection();
+        $cmd = $conn->parseRequest($lines);
+        $conn->command($cmd, $callback);
     }
 
     public function hmget($key, array $value, $callback)
     {
-        $connection = $this->getConnection();
-        $connection->fields = $value;
+        $conn = $this->getConnection();
+        $conn->fields = $value;
 
         array_unshift($value, 'hmget', $key);
-        $cmd = $connection->parseRequest($value);
-        $connection->command($cmd, $callback);
+        $cmd = $conn->parseRequest($value);
+        $conn->command($cmd, $callback);
     }
 
     public function __call($method, array $args)
     {
         $callback = array_pop($args);
         array_unshift($args, $method);
-        $connection = $this->getConnection();
-        $cmd = $connection->parseRequest($args);
-        $connection->command($cmd, $callback);
+        $conn = $this->getConnection();
+        $cmd = $conn->parseRequest($args);
+        $conn->command($cmd, $callback);
     }
 
     /**
@@ -89,10 +89,14 @@ class RedisAsync
         }
 
         $link->command('select', $this->db_index, function () {
-
         });
 
         return $ins = $link;
+    }
+
+    static public function &getInstance($key)
+    {
+        return self::$ins[$key];
     }
 }
 
@@ -183,9 +187,8 @@ class RedisConnection
 
     public function onClose(\swoole_client $cli)
     {
-        if ($this->wait_send) {
+        if ($this->wait_send)
             call_user_func($this->callback, 'timeout', false);
-        }
     }
 
     public function onReceive($cli, $data)
@@ -210,7 +213,7 @@ class RedisConnection
         } else {
             $this->buffer = $data;
 
-            while($this->buffer){
+            while ($this->buffer) {
                 $result = $this->read();
                 if ($this->wait_recv)
                     return;
@@ -286,12 +289,12 @@ class RedisConnection
         return $chunk;
     }
 
-    public function parseRequest($array)
+    public function parseRequest($arr)
     {
-        $cmd = '*' . count($array) . $this->crlf;
-        foreach ($array as $item) {
+        $cmd = '*' . count($arr) . $this->crlf;
+        foreach ($arr as $item)
             $cmd .= '$' . strlen($item) . $this->crlf . $item . $this->crlf;
-        }
+
         return $cmd;
     }
 

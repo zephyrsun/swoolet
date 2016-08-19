@@ -11,7 +11,6 @@ namespace Live\Controller;
 use Live\Database\Fan;
 use Live\Database\Follow;
 use Live\Database\Live;
-use Live\Database\User;
 use Live\Response;
 
 class My extends Basic
@@ -24,7 +23,7 @@ class My extends Basic
 
         $uid = $data['token_uid'];
 
-        //$user = (new User())->getUser($uid);
+        //$user = (new \Live\Database\User())->getUser($uid);
         $user = [];
 
         $user['cover'] = '';

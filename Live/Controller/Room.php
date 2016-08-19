@@ -236,16 +236,21 @@ class Room extends Basic
 
     public function start($request)
     {
-        $data = parent::getValidator()->lengthLE('title', 12)->lengthLE('city', 2)->required('token')->getResult();
+        $data = parent::getValidator()->lengthLE('title', 12, false)->lengthLE('city', 10, false)->required('token')->getResult();
         if (!$data)
             return $data;
 
         $token_uid = $data['token_uid'];
 
+        $user = (new User())->getUser($token_uid);
+
+        $data['title'] or $data['title'] = "{$user['nickname']}正在直播";
+        $data['city'] or $data['city'] = "看好空间";
+
         if (!$data = (new \Live\Lib\Live())->start($token_uid, $data))
             return $data;
 
-        $this->conn->createRoom($request->fd, $token_uid);
+        $this->conn->createRoom($request->fd, $token_uid, $user);
 
         //重新加载管理员
         (new RoomAdmin())->getRoomAdmin($token_uid);

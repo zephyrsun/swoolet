@@ -4,8 +4,9 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 $app = \Swoolet\Socket::createServer('Live', 'dev');
 
-$data = (new \Live\Lib\Live())->stop(1);
-var_dump($data);
+//$data = (new \Live\Lib\Live())->stop(1);
+//var_dump($data);
+
 
 //$link = new \redisProxy();
 //$link->connect('127.0.0.1', 6366, 0);
