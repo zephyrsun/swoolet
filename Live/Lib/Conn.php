@@ -78,10 +78,7 @@ class Conn
         if ($conn && ($uid = $conn[0]) && $this->getFd($uid) == $fd) {
             unset($this->conn[$fd], $this->uid[$uid]);
 
-            if ($redis = RedisAsync::getInstance($uid)) {
-                $this->sub->unsubscribe($this->key_user_chat . $uid, function ($data, $err) {
-                });
-            }
+            RedisAsync::release($uid, $this->key_user_chat . $uid);
         }
     }
 

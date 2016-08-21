@@ -22,6 +22,18 @@ return [
         'heartbeat_check_interval' => 60,
         'heartbeat_idle_time' => 600,
     ],
+
+    'qiniu' => [
+        'key' => 'uk_JgveWYYcNXE730vQdHyRaAV86DplixzERLRy-',
+        'secret' => 'EHNf0jpUcLa8iVRO47aL178lF_zcPnsEwTE4LD-c',
+        'hub' => 'kanhao',
+    ],
+
+    'jpush' => [
+        'key' => '118a3ec296f6193665bdf95c',
+        'secret' => 'f9c3c00704c1924d1ff62844',
+    ],
+
     'crypt' => ['key' => 'BKeVxo9IKu+k', 'secret' => 'KoP9FIPy+SVaE4F'],
     'redis_1' => ['host' => '127.0.0.1', 'port' => 6366, 'timeout' => 0.0, 'password' => ''],
     'redis_async' => ['host' => '127.0.0.1', 'port' => 6366, 'timeout' => 0.0, 'password' => ''],

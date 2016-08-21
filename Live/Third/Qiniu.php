@@ -24,13 +24,10 @@ include BASE_DIR . 'Live/Third/Qiniu/Http/Error.php';
 use Live\Response;
 use Qiniu\Auth;
 use Qiniu\Storage\UploadManager;
+use Swoolet\App;
 
 class Qiniu
 {
-    const AK = 'uk_JgveWYYcNXE730vQdHyRaAV86DplixzERLRy-';
-    const SK = 'EHNf0jpUcLa8iVRO47aL178lF_zcPnsEwTE4LD-c';
-    const HUB = 'kanhao';
-
     public $auth;
 
     public $domain = [
@@ -39,7 +36,9 @@ class Qiniu
 
     public function __construct()
     {
-        $this->auth = new Auth(self::AK, self::SK);
+        $cfg = App::getConfig('qiniu');
+
+        $this->auth = new Auth($cfg['key'], $cfg['secret']);
     }
 
     public function upload($bucket, $filename, $key)

@@ -26,6 +26,12 @@ return [
         'heartbeat_check_interval' => 60,
         'heartbeat_idle_time' => 600,
     ],
+
+    'qiniu' => [
+        'access_key' => 'uk_JgveWYYcNXE730vQdHyRaAV86DplixzERLRy-',
+        'secret_key' => 'EHNf0jpUcLa8iVRO47aL178lF_zcPnsEwTE4LD-c',
+    ],
+
     'crypt' => ['key' => 'BKeVxo9IKu+k', 'secret' => 'KoP9FIPy+SVaE4F'],
     'redis_1' => ['host' => '127.0.0.1', 'port' => 6399, 'timeout' => 0.0, 'password' => $redis_pass],
     'redis_async' => ['host' => '127.0.0.1', 'port' => 6399, 'timeout' => 0.0, 'password' => $redis_pass],

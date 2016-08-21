@@ -9,7 +9,6 @@
 
 namespace Live\Third;
 
-use Live\Lib\Live;
 use Swoolet\App;
 use Swoolet\Lib\CURL;
 
@@ -17,15 +16,14 @@ include BASE_DIR . 'Live/Third/pili/Pili.php';
 
 class JPush
 {
-    const APP_KEY = '118a3ec296f6193665bdf95c';
-    const MASTER_SECRET = 'f9c3c00704c1924d1ff62844';
-
     public $curl, $url = 'https://api.jpush.cn/v3';
 
     public function __construct()
     {
+        $cfg = App::getConfig('jpush');
+
         $this->curl = new CURL([
-            CURLOPT_USERPWD => self::APP_KEY . ':' . self::MASTER_SECRET
+            CURLOPT_USERPWD => $cfg['key'] . ':' . $cfg['secret']
         ]);
     }
 

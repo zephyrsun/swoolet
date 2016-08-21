@@ -9,20 +9,20 @@
 
 namespace Live\Third;
 
+use Swoolet\App;
+
 include BASE_DIR . 'Live/Third/pili/Pili.php';
 
 class Pili
 {
-    const AK = 'uk_JgveWYYcNXE730vQdHyRaAV86DplixzERLRy-';
-    const SK = 'EHNf0jpUcLa8iVRO47aL178lF_zcPnsEwTE4LD-c';
-    const HUB = 'kanhao';
-
     public $hub;
 
     public function __construct()
     {
-        $credentials = new \Qiniu\Credentials(self::AK, self::SK); # => Credentials Object
-        $this->hub = new \Pili\Hub($credentials, self::HUB); # => Hub Object
+        $cfg = App::getConfig('qiniu');
+
+        $credentials = new \Qiniu\Credentials($cfg['key'], $cfg['secret']); # => Credentials Object
+        $this->hub = new \Pili\Hub($credentials, $cfg['hub']); # => Hub Object
     }
 
     public function start($key)

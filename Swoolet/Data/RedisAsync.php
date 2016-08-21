@@ -45,14 +45,14 @@ class RedisAsync
             $lines[] = $k;
             $lines[] = $v;
         }
-        $conn = $this->getConnection();
+        $conn = $this->connect();
         $cmd = $conn->parseRequest($lines);
         $conn->command($cmd, $callback);
     }
 
     public function hmget($key, array $value, $callback)
     {
-        $conn = $this->getConnection();
+        $conn = $this->connect();
         $conn->fields = $value;
 
         array_unshift($value, 'hmget', $key);
@@ -64,7 +64,7 @@ class RedisAsync
     {
         $callback = array_pop($args);
         array_unshift($args, $method);
-        $conn = $this->getConnection();
+        $conn = $this->connect();
         $cmd = $conn->parseRequest($args);
         $conn->command($cmd, $callback);
     }
@@ -73,7 +73,7 @@ class RedisAsync
      * 从连接池中取出一个连接资源
      * @return RedisConnection
      */
-    protected function getConnection()
+    protected function connect()
     {
         if ($ins = &self::$ins[$this->cache_key])
             return $ins;
@@ -94,9 +94,32 @@ class RedisAsync
         return $ins = $link;
     }
 
-    static public function &getInstance($key)
+    /**
+     * @param $key
+     * @return \Swoolet\Data\RedisConnection
+     */
+    static public function &getConnection($key)
     {
         return self::$ins[$key];
+    }
+
+    /**
+     * @param $key
+     * @param string $uk unsubscribe key
+     */
+    static public function release($key, $uk = '')
+    {
+        if ($ins = self::getConnection($key)) {
+            $ins->command('close', function () {
+            });
+
+            if ($uk) {
+                $ins->command('unsubscribe', $uk, function ($data, $err) {
+                });
+            }
+
+            unset(self::$ins[$key]);
+        }
     }
 }
 
