@@ -33,7 +33,7 @@ class RoomAdmin extends Basic
         $ret = (new \Live\Database\RoomAdmin())->add($token_uid, $admin_uid);
 
         if ($ret) {
-            $this->conn->updateAdmin($room_id, $admin_uid, true);
+            $this->conn->updateUser($admin_uid, ['admin' => true]);
 
             $this->conn->sendToRoom($room_id, $token_uid, [
                 't' => Conn::TYPE_ROOM_BROADCAST,
@@ -56,7 +56,7 @@ class RoomAdmin extends Basic
 
         $ret = (new \Live\Database\RoomAdmin())->del($token_uid, $admin_uid);
         if ($ret) {
-            $this->conn->updateAdmin($room_id, $admin_uid, false);
+            $this->conn->updateUser($admin_uid, ['admin' => false]);
 
             $this->conn->sendToUser($admin_uid, [
                 't' => Conn::TYPE_ROOM_ONE,

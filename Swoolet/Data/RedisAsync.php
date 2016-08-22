@@ -180,15 +180,11 @@ class RedisConnection
      */
     public function command($cmd, $callback)
     {
-        /**
-         * 如果已经连接，直接发送数据
-         */
         if ($this->client->isConnected()) {
+            //如果已经连接，直接发送数据
             $this->client->send($cmd);
-        } /**
-         * 未连接，等待连接成功后发送数据
-         */
-        else {
+        } else {
+            //未连接，等待连接成功后发送数据
             $this->wait_send = $cmd;
         }
         $this->callback = $callback;
@@ -219,7 +215,7 @@ class RedisConnection
         if ($this->debug)
             $this->trace($data);
 
-        $this->trace($data);
+       // $this->trace($data);
 
         $result = null;
         if ($this->wait_recv) {

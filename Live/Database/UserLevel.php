@@ -104,7 +104,7 @@ class UserLevel extends Basic
             }
         }
 
-        return (int)$lv;
+        return $lv ? (int)$lv : 1;
     }
 
     /**

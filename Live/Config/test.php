@@ -28,8 +28,14 @@ return [
     ],
 
     'qiniu' => [
-        'access_key' => 'uk_JgveWYYcNXE730vQdHyRaAV86DplixzERLRy-',
-        'secret_key' => 'EHNf0jpUcLa8iVRO47aL178lF_zcPnsEwTE4LD-c',
+        'key' => 'uk_JgveWYYcNXE730vQdHyRaAV86DplixzERLRy-',
+        'secret' => 'EHNf0jpUcLa8iVRO47aL178lF_zcPnsEwTE4LD-c',
+        'hub' => 'kanhao',
+    ],
+
+    'jpush' => [
+        'key' => '118a3ec296f6193665bdf95c',
+        'secret' => 'f9c3c00704c1924d1ff62844',
     ],
 
     'crypt' => ['key' => 'BKeVxo9IKu+k', 'secret' => 'KoP9FIPy+SVaE4F'],

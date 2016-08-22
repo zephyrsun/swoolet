@@ -155,32 +155,24 @@ class Conn
                 //var_dump($sub_uid, $fd);
                 $sw->push($fd, $data['msg']);
             }
-
-        } elseif ($a == 'updateAdmin') {
-
-            $fd = $this->getFd($data['uid']);
-            if ($fd && ($conn = $this->getConn($fd)) && $conn[0] == $data['uid']) {
-                $admin = $data['msg'];
-                $this->conn[$fd][4] = $admin;
+        } elseif ($a == 'updateUser') {
+            if ($fd = $this->getFd($sub_uid)) {
+                $this->conn[$fd][2] = $data['user'] + $this->conn[$fd][2];
             }
         }
     }
 
     public function createRoom($fd, $uid, $user)
     {
-        $this->rooms[$uid] = [];
+        $this->room[$uid] = [];
 
-        $this->joinRoom($fd, $uid, $uid, [
-            'nickname' => $user['nickname'],
-            'avatar' => $user['avatar'],
-            'admin' => false,
-        ]);
+        $this->joinRoom($fd, $uid, $uid, $user);
     }
 
-    public function sendToRoom($room_id, $uid, $msg, $action = 'toRoom')
+    public function sendToRoom($room_id, $uid, $msg)
     {
         $msg = [
-            'a' => $action,
+            'a' => 'toRoom',
             'room_id' => $room_id,
             'uid' => $uid,
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
@@ -191,20 +183,28 @@ class Conn
         });
     }
 
-    public function updateAdmin($room_id, $admin_uid, $admin)
+    public function updateUser($uid, $user)
     {
-        $this->sendToRoom($room_id, $admin_uid, $admin, 'updateAdmin');
+        $msg = [
+            'a' => 'updateUser',
+            'uid' => $uid,
+            'user' => $user,
+        ];
+
+        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg), function ($result, $err) {
+            var_dump('updateUser', $result);
+        });
     }
 
-    public function sendToUser($to_uid, $msg)
+    public function sendToUser($uid, $msg)
     {
         $msg = [
             'a' => 'toUser',
-            'uid' => $to_uid,
+            'uid' => $uid,
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
         ];
 
-        $this->pub->publish($this->key_user_chat . $to_uid, \msgpack_pack($msg), function ($result, $err) {
+        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg), function ($result, $err) {
             var_dump('sendToUser', $result);
         });
     }
@@ -244,6 +244,9 @@ class Conn
         //var_dump('stop', $this->room);
 
         File::touch("/tmp/worker_{$worker_id}.php", $data, true);
+
+        RedisAsync::release('sub', $this->key_room_chat);
+        RedisAsync::release('pub');
 
         return $this;
     }

@@ -46,7 +46,7 @@ class Room extends Basic
         $token_uid = $data['token_uid'];
 
         $db_user = new User();
-        $user = $db_user->getShowInfo($token_uid, 'simple');
+        $user = $db_user->getShowInfo($token_uid, 'lv');
         if (!$user)
             return Response::msg('登录失败', 1032);
 
@@ -58,13 +58,9 @@ class Room extends Basic
                 'user' => $user,
             ]);
 
-            $admin = $room_admin->isAdmin($room_id, $token_uid);
+            $user['admin'] = $admin = $room_admin->isAdmin($room_id, $token_uid);
 
-            $this->conn->joinRoom($request->fd, $room_id, $token_uid, [
-                'nickname' => $user['nickname'],
-                'avatar' => $user['avatar'],
-                'admin' => $admin,
-            ]);
+            $this->conn->joinRoom($request->fd, $room_id, $token_uid, $user);
 
             $rank->joinRoom($room_id, $token_uid);
         } else {
@@ -124,14 +120,9 @@ class Room extends Basic
                 if (!$ret)
                     return $ret;
 
-                $lv = (new UserLevel())->getLv($uid);
-                $user['lv'] = $lv;
-
             } else {
                 $t = Conn::TYPE_MESSAGE;
                 unset($user['avatar']);
-
-                $lv = 0;
             }
 
             $this->conn->sendToRoom($room_id, $uid, [
@@ -140,8 +131,7 @@ class Room extends Basic
                 'msg' => $data['msg'],
             ]);
 
-            if ($lv)
-                return Response::data(['lv' => $lv]);
+            return Response::data(['lv' => $user['lv']]);
         }
 
         return Response::msg('ok');
@@ -242,7 +232,8 @@ class Room extends Basic
 
         $token_uid = $data['token_uid'];
 
-        $user = (new User())->getUser($token_uid);
+        $user = (new User())->getShowInfo($token_uid, 'lv');
+        $user['admin'] = true;
 
         $data['title'] or $data['title'] = "{$user['nickname']}正在直播";
         $data['city'] or $data['city'] = "看好空间";
@@ -282,4 +273,10 @@ class Room extends Basic
 
         return Response::msg('ok');
     }
+
+    public function updateUser()
+    {
+        $this->conn->updateUser(1, ['lv' => 100]);
+    }
+
 }

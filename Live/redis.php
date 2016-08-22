@@ -19,12 +19,12 @@ $data = str_repeat('1234567890', 50000);
 
 for ($i = 0; $i < 3; $i++) {
 
-    $redis = new \Swoolet\Data\RedisAsync('redis_async',$i);
-    $redis->subscribe('test' . $i, function ($result, $success) {
-        var_dump('subscribe', $result, $success);
+    $redis = new \Swoolet\Data\RedisAsync('redis_async', $i);
+    $redis->subscribe('test' . $i, function ($result, $err) use ($i) {
+        var_dump('subscribe:' . $i, $result, $err);
     });
 }
 
-$redis->publish('test1', '111', function ($result, $success) {
-    var_dump('publish', $result, $success);
+$redis->publish('test1', '111', function ($result, $err) {
+    var_dump('publish', $result, $err);
 });
