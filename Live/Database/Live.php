@@ -19,6 +19,8 @@ class Live extends Basic
     public $key_live = 'live:';
     public $key_home = 'home';
 
+    const PIC_LARGE = '!pl';
+
     public function __construct()
     {
         $this->option['dbname'] = 'live';
@@ -62,6 +64,9 @@ class Live extends Basic
         $n = 0;
         $data = [$key];
         foreach ($list as $row) {
+
+            $row['cover'] .= self::PIC_LARGE;
+
             $user = $db_user->getUser($row['uid']);
 
             $row += [

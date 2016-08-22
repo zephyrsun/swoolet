@@ -45,7 +45,8 @@ class Response
     static public function data(array $data = array(), $code = 0)
     {
         $data['c'] = $code;
-        $data['m'] = &$_POST['m'];
+        if ($m = &$_POST['m'])
+            $data['m'] = $m;
 
         \Server::$msg = json_encode($data, \JSON_UNESCAPED_UNICODE);
 

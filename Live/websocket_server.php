@@ -11,7 +11,7 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 class Server extends \Swoolet\WebSocket
 {
-    static public $msg;
+    static public $msg = '';
     /**
      * @var \Live\Lib\Conn
      */
@@ -63,12 +63,13 @@ class Server extends \Swoolet\WebSocket
         if (!$frame->finish)
             return;
 
+        self::$msg = '';
         $_POST = \json_decode($frame->data, true);
         if ($_POST && $uri = &$_POST['m']) {
 
-            $this->callRequest($uri, $frame);
             \Swoolet\log($uri, $frame->fd);
 
+            $this->callRequest($uri, $frame);
             $this->response($frame->fd, self::$msg);
         }
     }

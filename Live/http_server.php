@@ -11,7 +11,7 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 class Server extends \Swoolet\Http
 {
-    static public $msg;
+    static public $msg = '';
     /**
      * @var \Live\Lib\Conn
      */
@@ -28,10 +28,10 @@ class Server extends \Swoolet\Http
     {
         $this->resp = $response;
 
+        self::$msg = '';
         $_POST = isset($request->post) ? $request->post : array();
 
         $this->callRequest($request->server['path_info'], $request);
-
         $this->response($request->fd, self::$msg);
     }
 }

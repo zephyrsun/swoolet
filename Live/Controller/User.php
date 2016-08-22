@@ -39,6 +39,43 @@ class User extends Basic
         return Response::data(['user' => $user]);
     }
 
+    public function updateUserInfo()
+    {
+        $data = parent::getValidator()->required('token')
+            ->length('nickname', 1, 8, false)
+            ->length('sex', 1, 1, false)
+            ->between('height', 150, 240, false)
+            ->required('birthday', false)
+            ->required('zodiac', false)
+            ->lengthLE('sign', 50, false)
+            ->getResult();
+        if (!$data)
+            return $data;
+
+        $uid = $data['token_uid'];
+
+        $user_fields = ['nickname', 'sex', 'height', 'birthday', 'zodiac', 'sign'];
+
+        $data = [];
+        foreach ($_POST as $k => $v) {
+            if (in_array($k, $user_fields, true)) {
+                $data[$k] = $v;
+            }
+        }
+
+        $db_user = new \Live\Database\User();
+
+        if ($data)
+            $ret = $db_user->updateUser($uid, $data);
+        else
+            $ret = 0;
+
+        if ($ret)
+            return Response::data(['user' => $db_user->getUser($uid)]);
+
+        return Response::msg('更新失败', 1041);
+    }
+
     /**
      * 关注
      * @param $request

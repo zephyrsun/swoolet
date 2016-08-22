@@ -31,7 +31,7 @@ class Qiniu
     public $auth;
 
     public $domain = [
-        'static' => 'http://obzd2fzvx.bkt.clouddn.com/',
+        'static' => 'http://static.camhow.com.cn/',
     ];
 
     public function __construct()
