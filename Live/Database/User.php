@@ -29,7 +29,7 @@ class User extends Basic
         $this->cache = new \Live\Redis\User();
     }
 
-    public function login($pf, $username, $nickname = '', $avatar = '')
+    public function login($pf, $username, $user = [])
     {
         $user_map = $this->getByUsername($pf, $username);
         if ($user_map) {
@@ -47,17 +47,17 @@ class User extends Basic
             $uid = $this->getUID($pf, $username);
 
             $this->table($uid);
-            $this->insert([
-                'uid' => $uid,
-                'username' => $username,
-                'nickname' => $nickname,
-                'height' => 0,
-                'birthday' => '0000-00-00',
-                'zodiac' => '',
-                'sign' => '',
-                'avatar' => $avatar,
-                'create_ts' => \Swoolet\App::$ts,
-            ]);
+            $this->insert($user + [
+                    'uid' => $uid,
+                    'username' => $username,
+                    'nickname' => '',
+                    'height' => 0,
+                    'birthday' => '0000-00-00',
+                    'zodiac' => '',
+                    'sign' => '',
+                    'avatar' => '',
+                    'create_ts' => \Swoolet\App::$ts,
+                ]);
         }
 
         return $this->getUser($uid);

@@ -19,7 +19,7 @@ class Login extends Basic
 
     public function mobile($request)
     {
-        $data = parent::getValidator()->mobileNumberCN('mobile')->required('code')->getResult();
+        $data = parent::getValidator()->mobileNumberCN('mobile')->required('code')->lengthLE('city', 10)->getResult();
         if (!$data)
             return;
 
@@ -31,7 +31,9 @@ class Login extends Basic
             return Response::msg('验证码错误', 1001);
 
         $db_user = new \Live\Database\User();
-        $user = $db_user->login($db_user::PF_MOBILE, $mobile);
+        $user = $db_user->login($db_user::PF_MOBILE, $mobile, [
+            'city' => $data['city']
+        ]);
 
         Response::data([
             'user' => $user,

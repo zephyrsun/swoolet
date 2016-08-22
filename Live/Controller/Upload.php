@@ -13,10 +13,25 @@ use Live\Third\Qiniu;
 
 class Upload extends Basic
 {
+    public $sdk;
+
+    public function __construct()
+    {
+        $this->sdk = new Qiniu();
+    }
+
     public function cover($request)
     {
-        $this->_upload($request, 'static', 'cover', function ($uid, $img) {
-            (new \Live\Database\Live())->updateLive($uid, [
+        $bucket = 'static';
+
+        $this->_upload($request, $bucket, 'cover', function ($uid, $img) use ($bucket) {
+            $db_live = new \Live\Database\Live();
+            $live = $db_live->getLive($uid);
+            if ($live['cover']) {
+                $this->sdk->delete($bucket, $live['cover']);
+            }
+
+            $db_live->updateLive($uid, [
                 'cover' => $img
             ]);
         });
@@ -24,8 +39,17 @@ class Upload extends Basic
 
     public function avatar($request)
     {
-        $this->_upload($request, 'static', 'avatar', function ($uid, $img) {
-            (new \Live\Database\User())->updateUser($uid, [
+        $bucket = 'static';
+
+        $this->_upload($request, $bucket, 'avatar', function ($uid, $img) use ($bucket) {
+
+            $db_user = new \Live\Database\User();
+            $user = $db_user->getUser($uid);
+            if ($user['avatar']) {
+                $this->sdk->delete($bucket, $user['avatar']);
+            }
+
+            $db_user->updateUser($uid, [
                 'avatar' => $img
             ]);
         });
@@ -41,7 +65,7 @@ class Upload extends Basic
             return Response::msg('参数错误', 10035);
 
         $file = current($request->files);
-        if (!$file || !$tmp_name = &$file['tmp_name'])
+        if (!$file || !$src = &$file['tmp_name'])
             return Response::msg('参数错误', 10036);
 
         $token_uid = $data['token_uid'];
@@ -51,7 +75,7 @@ class Upload extends Basic
 
         $name = "{$prefix}/{$token_uid}_" . \Swoolet\App::$ts . ".{$ext}";
 
-        $img = (new Qiniu())->upload($bucket, $tmp_name, $name);
+        $img = $this->sdk->upload($bucket, $name, $src);
         if (!$img)
             return $img;
 

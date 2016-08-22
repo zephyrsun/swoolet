@@ -48,13 +48,14 @@ class User extends Basic
             ->required('birthday', false)
             ->required('zodiac', false)
             ->lengthLE('sign', 50, false)
+            ->lengthLE('city', 10, false)
             ->getResult();
         if (!$data)
             return $data;
 
         $uid = $data['token_uid'];
 
-        $user_fields = ['nickname', 'sex', 'height', 'birthday', 'zodiac', 'sign'];
+        $user_fields = ['nickname', 'sex', 'height', 'birthday', 'zodiac', 'sign', 'city'];
 
         $data = [];
         foreach ($_POST as $k => $v) {

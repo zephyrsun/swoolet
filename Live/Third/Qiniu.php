@@ -23,6 +23,7 @@ include BASE_DIR . 'Live/Third/Qiniu/Http/Error.php';
 
 use Live\Response;
 use Qiniu\Auth;
+use Qiniu\Storage\BucketManager;
 use Qiniu\Storage\UploadManager;
 use Swoolet\App;
 
@@ -41,17 +42,29 @@ class Qiniu
         $this->auth = new Auth($cfg['key'], $cfg['secret']);
     }
 
-    public function upload($bucket, $filename, $key)
+    public function upload($bucket, $key, $src)
     {
         $token = $this->auth->uploadToken($bucket);
 
-        $uploadMgr = new UploadManager();
+        $manger = new UploadManager();
 
-        list($ret, $err) = $uploadMgr->putFile($token, $key, $filename);
+        list($ret, $err) = $manger->putFile($token, $key, $src);
 
         if ($err)
             return Response::msg('上传失败', 1033);
 
         return $this->domain[$bucket] . $key;
+    }
+
+    public function delete($bucket, $key)
+    {
+        $manager = new BucketManager($this->auth);
+
+        $key = explode('/', $key);
+        $key = \end($key);
+
+        $err = $manager->delete($bucket, $key);
+
+        return !$err;
     }
 }
