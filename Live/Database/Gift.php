@@ -62,13 +62,13 @@ class Gift extends Basic
         return [];
     }
 
-    public function sendGift($send_uid, $to_uid, $gift_id)
+    public function sendGift($send_uid, $to_uid, $gift_id, $num)
     {
         $gift = $this->getGift($gift_id);
         if (!$gift)
             return Response::msg('参数错误', 1010);
 
-        $money = $gift['money'];
+        $money = $gift['money'] * $num;
 
         $this->beginTransaction();
         $ret = (new Balance())->sub($send_uid, $money, $gift['exp']);

@@ -186,7 +186,10 @@ class Room extends Basic
 
     public function sendGift($request)
     {
-        $data = parent::getValidator()->required('gift_id')->ge('num', 1)->getResult();
+        $data = parent::getValidator()->required('gift_id')
+            ->ge('num', 1)//当前数量
+            ->ge('total', 1)//总数
+            ->getResult();
         if (!$data)
             return $data;
 
@@ -196,11 +199,13 @@ class Room extends Basic
 
             $gift_id = $data['gift_id'];
             $to_uid = $room_id;
+            $num = $data['num'];
+            $total = $data['total'];
 
             if ($uid == $to_uid)
                 return Response::msg('礼物不能送给自己', 1023);
 
-            if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id))
+            if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id, $num))
                 return $ret;
 
             $lv = (new UserLevel())->getLv($uid);
@@ -213,6 +218,8 @@ class Room extends Basic
                     'lv' => $lv,
                 ],
                 'msg' => '送给主播',
+                'num' => $num,
+                'total' => $total,
                 'gift_id' => $gift_id,
             ]);
 

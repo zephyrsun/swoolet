@@ -5,8 +5,8 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 $app = \Swoolet\Socket::createServer('Live', 'dev');
 new \Live\Controller\Basic();
 
-
-
+$str = substr('15921258787', -4);
+var_dump($str);
 //$data = (new \Live\Lib\Live())->stop(1);
 //var_dump($data);
 

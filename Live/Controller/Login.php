@@ -31,8 +31,10 @@ class Login extends Basic
             return Response::msg('验证码错误', 1001);
 
         $db_user = new \Live\Database\User();
+
         $user = $db_user->login($db_user::PF_MOBILE, $mobile, [
-            'city' => $data['city']
+            'city' => $data['city'],
+            'nickname' => '手机尾号' . substr($mobile, -4),
         ]);
 
         Response::data([
