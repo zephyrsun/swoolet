@@ -31,6 +31,7 @@ mobile //手机号码
 参数:
 mobile //手机号码
 code //验证码
+city //城市
 
 返回:
 {"uid":2,"avatar":"","birthday":"0000-00-00","full":false,"token":"xxxxx","c":0}

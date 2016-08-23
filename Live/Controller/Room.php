@@ -78,7 +78,7 @@ class Room extends Basic
                 'user' => $user,
                 'rank' => $rank->getRankInRoom($room_id, 0),
                 'admin' => $admin,
-                'follow' => (new Fan())->isFollow($token_uid, $room_id),
+                'is_follow' => (new Fan())->isFollow($token_uid, $room_id),
                 'num' => $rank->getRoomUserNum($room_id),
                 'money' => (new Income())->getIncome($room_id),
             ]);

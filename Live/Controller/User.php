@@ -25,15 +25,25 @@ class User extends Basic
             return $data;
 
         $uid = $data['uid'];
+        $token_uid = $data['token_uid'];
 
         $user = (new \Live\Database\User())->getUser($uid);
+
+        $db_fan = new Fan();
+
+        if ($uid == $data['token_uid']) {
+            $is_follow = false;
+        } else {
+            $is_follow = $db_fan->isFollow($token_uid, $uid);
+        }
 
         $user += [
             'lv' => (new UserLevel())->getLv($uid),
             'income' => (new Income())->getIncome($uid),
             'sent' => (new Balance())->getSent($uid),
             'follow' => (new Follow())->getCount($uid),
-            'fan' => (new Fan())->getCount($uid),
+            'fan' => $db_fan->getCount($uid),
+            'is_follow' => $is_follow,
         ];
 
         return Response::data(['user' => $user]);
