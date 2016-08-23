@@ -205,8 +205,8 @@ class Room extends Basic
             if ($uid == $to_uid)
                 return Response::msg('礼物不能送给自己', 1023);
 
-            if (!$ret = (new Gift())->sendGift($uid, $to_uid, $gift_id, $num))
-                return $ret;
+            if (!$gift_name = (new Gift())->sendGift($uid, $to_uid, $gift_id, $num))
+                return $gift_name;
 
             $lv = (new UserLevel())->getLv($uid);
 
@@ -215,9 +215,10 @@ class Room extends Basic
                 'user' => [
                     'uid' => $uid,
                     'nickname' => $user['nickname'],
+                    'avatar' => $user['avatar'],
                     'lv' => $lv,
                 ],
-                'msg' => '送给主播',
+                'msg' => "送给主播{$gift_name}",
                 'num' => $num,
                 'total' => $total,
                 'gift_id' => $gift_id,

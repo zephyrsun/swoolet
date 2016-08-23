@@ -47,7 +47,7 @@ class Income extends Basic
         if (!$ret) {
             $ret = $this->table($uid)->insert([
                 'uid' => $uid,
-                'money' => $money,
+                'income' => $money,
                 'total' => $money,
             ]);
         }

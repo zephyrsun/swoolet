@@ -82,6 +82,7 @@ class RedisAsync
 
         $link = new RedisConnection();
         $link->connect($cfg['host'], $cfg['port']);
+        $link->debug = $this->debug;
 
         if ($this->option['password']) {
             $link->command('auth', $cfg['password'], function () {
@@ -215,7 +216,7 @@ class RedisConnection
         if ($this->debug)
             $this->trace($data);
 
-       // $this->trace($data);
+        // $this->trace($data);
 
         $result = null;
         if ($this->wait_recv) {

@@ -93,7 +93,7 @@ class Gift extends Basic
             (new Rank())->addRank($send_uid, $to_uid, $money);
         }
 
-        return $ret;
+        return $gift['name'];
     }
 
     public function sendHorn($uid, $to_uid)
