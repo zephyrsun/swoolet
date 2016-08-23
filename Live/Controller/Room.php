@@ -236,7 +236,7 @@ class Room extends Basic
         $user['admin'] = true;
 
         $data['title'] or $data['title'] = "{$user['nickname']}正在直播";
-        $data['city'] or $data['city'] = '看好空间';
+        $data['city'] or $data['city'] = '看好星球';
 
         if (!$data = (new \Live\Lib\Live())->start($token_uid, $data))
             return $data;

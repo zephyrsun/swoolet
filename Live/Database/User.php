@@ -98,8 +98,11 @@ class User extends Basic
     public function getUser($uid)
     {
         $user = $this->getWithCache($this->key_user . $uid, function () use ($uid) {
-            if ($user = $this->table($uid)->where('uid', $uid)->fetch())
+            if ($user = $this->table($uid)->where('uid', $uid)->fetch()) {
                 unset($user['username'], $user['create_ts']);
+
+                $user['city'] or $user['city'] = '看好星球';
+            }
 
             return $user ? $user : [];
         });

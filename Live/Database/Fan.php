@@ -17,18 +17,19 @@ class Fan extends Follow
     public $limit = 5000;
 
     /**
-     * @param $uid
-     * @param $follow_uid 被关注人的uid
+     * @param int $uid
+     * @param int $follow_uid 被关注人的uid
      * @return bool
      */
     public function follow($uid, $follow_uid)
     {
-        if ($uid == $follow_uid || $this->isFollow($uid, $follow_uid) !== false)
+        if ($uid == $follow_uid)
             return false;
 
         $fan = $this->add($uid, $follow_uid);
 
-        $follow = (new Follow())->add($follow_uid, $uid);
+        if ($fan)
+            $follow = (new Follow())->add($follow_uid, $uid);
 
         return $fan;
     }
@@ -47,7 +48,7 @@ class Fan extends Follow
 
     public function isFollow($uid, $follow_uid)
     {
-        $this->getList($uid, 0);
-        return $this->cache->link->zScore($this->key . $uid, $follow_uid);
+        $this->getList($uid, 0, 1);
+        return false !== $this->cache->link->zScore($this->key . $uid, $follow_uid);
     }
 }

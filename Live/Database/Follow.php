@@ -91,7 +91,7 @@ class Follow extends Basic
                 call_user_func_array([$this->cache->link, 'zAdd'], $data);
                 $this->cache->expire($key, $this->timeout);
 
-                $list = $this->cache->revRange($key, $start_id, $this->limit, true);
+                $list = $this->cache->revRange($key, $start_id, $limit, true);
             }
         }
 
