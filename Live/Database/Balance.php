@@ -43,14 +43,14 @@ class Balance extends Basic
 
         $coin = $goods['coin'];
         $exp = $goods['exp'];
-        $money = $goods['money'];//充值总额
+        $charge = $goods['money'];//充值总额
 
-        $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $coin, charge = charge + $money");
+        $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $coin, charge = charge + $charge");
         if (!$ret) {
             $ret = $this->table($uid)->insert([
                 'uid' => $uid,
                 'balance' => $coin,
-                'charge' => $money,
+                'charge' => $charge,
             ]);
         }
 
@@ -65,7 +65,6 @@ class Balance extends Basic
 
             $vip_day = $goods['vip_day'];
             $tycoon_day = $goods['tycoon_day'];
-            $award_key = '';
 
             //额外奖励加成：
             //充值满98元，奖励15天会员，查看会员特权
@@ -73,10 +72,10 @@ class Balance extends Basic
             //充值满598元，奖励90天会员，查看会员特权
             $award_vip = [598 => 90, 298 => 45, 98 => 15];
             foreach ($award_vip as $threshold => $award_day) {
-                if ($money >= $threshold) {
-                    $award_key = 'charge_award_' . $threshold;
-                    if (!$this->cache->get($uid, $award_key))
-                        $vip_day = $award_day;
+                if ($money >= $threshold && $money - $charge < $threshold) {
+                    // $award_key = 'charge_award_' . $threshold;
+                    // if (!$this->cache->get($uid, $award_key))
+                    $vip_day = $award_day;
 
                     break;
                 }
@@ -84,8 +83,8 @@ class Balance extends Basic
 
             if ($vip_day) {
                 $db_user->incrExpire($uid, 'vip_expire', $vip_day);
-                if ($award_key)
-                    $this->cache->set($uid, $award_key, $award_day);
+                //if ($award_key)
+                //    $this->cache->set($uid, $award_key, $award_day);
             }
 
             if ($tycoon_day) {
