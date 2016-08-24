@@ -70,6 +70,21 @@ class User extends Basic
         return parent::update($data);
     }
 
+    public function incrExpire($uid, $field, $day)
+    {
+        $data = $this->getUser($uid);
+        $day *= 86400;
+
+        $old_num = $data[$field];
+        if ($old_num) {
+            $day += $old_num;
+        } else {
+            $day += \Swoolet\App::$ts;
+        }
+
+        return $this->updateUser($uid, [$field => $day]);
+    }
+
     public function getShowInfo($uid, $type = 'simple')
     {
         $user = $this->getUser($uid);

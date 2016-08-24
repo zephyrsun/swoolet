@@ -41,25 +41,25 @@ class UserLevel extends Basic
         19 => 12100,
         20 => 13700,
         21 => 15400,
-        22 => 17560,
-        23 => 19840,
-        24 => 22240,
-        25 => 24760,
-        26 => 27400,
-        27 => 30160,
-        28 => 33040,
-        29 => 36040,
-        30 => 39160,
-        31 => 42400,
-        32 => 48000,
-        33 => 53800,
-        34 => 59800,
-        35 => 66000,
-        36 => 72400,
-        37 => 82300,
-        38 => 92500,
-        39 => 103000,
-        40 => 113800,
+        22 => 19000,
+        23 => 22800,
+        24 => 26800,
+        25 => 31000,
+        26 => 35400,
+        27 => 44600,
+        28 => 54200,
+        29 => 64200,
+        30 => 74600,
+        31 => 85400,
+        32 => 107800,
+        33 => 131000,
+        34 => 155000,
+        35 => 179800,
+        36 => 205400,
+        37 => 311000,
+        38 => 419800,
+        39 => 531800,
+        40 => 647000,
     ];
 
     public function __construct()
@@ -83,13 +83,11 @@ class UserLevel extends Basic
         $lv = self::exp2lv($new_exp);
         $this->cache->set($uid, 'lv', $lv);
 
-        App::$server->sw->task('task_exp', -1, function ($sw, $task_id, $data) use ($uid, $new_exp, $lv) {
-            $ret = $this->table($uid)->replace([
-                'uid' => $uid,
-                'exp' => $new_exp,
-                'lv' => $lv,
-            ]);
-        });
+        $ret = $this->table($uid)->replace([
+            'uid' => $uid,
+            'exp' => $new_exp,
+            'lv' => $lv,
+        ]);
 
         return $new_exp;
     }
@@ -120,7 +118,7 @@ class UserLevel extends Basic
         $high = count($arr);
 
         while ($low <= $high) {
-            $mid = floor(($low + $high) / 2);
+            $mid = (int)(($low + $high) / 2);
             $mid_exp = $arr[$mid];
 
             if ($mid_exp > $exp)
@@ -147,11 +145,13 @@ class UserLevel extends Basic
             $a[$q++] = $n;
 
             if ($q > 36)
-                $f = 300;
+                $f = 3200;
             elseif ($q > 31)
+                $f = 800;
+            elseif ($q > 26) {
+                $f = 400;
+            } elseif ($q > 21) {
                 $f = 200;
-            elseif ($q > 21) {
-                $f = 120;
             }
 
             $n += $f * ++$i;

@@ -30,48 +30,84 @@ class Balance extends Basic
         $this->cache = new UserExt();
     }
 
-    public function getSent($uid)
+    public function get($uid, $key = 'sent')
     {
-        return $this->cache->getWithCallback($uid, 'sent', function () use ($uid) {
-            return (int)$this->table($uid)->select('sent')->where('uid', $uid)->fetchColumn();
+        return $this->cache->getWithCallback($uid, $key, function () use ($uid) {
+            return $this->table($uid)->select('sent,charge')->where('uid', $uid)->fetch();
         });
     }
 
-    public function add($uid, $money)
+    public function add($uid, $goods_id, $pf)
     {
-        if ($money <= 0)
-            return Response::msg('参数错误', 1011);
+        $goods = (new Goods())->getGoods($goods_id, $pf);
 
-        $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $money");
+        $coin = $goods['coin'];
+        $exp = $goods['exp'];
+        $money = $goods['money'];//充值总额
+
+        $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $coin, charge = charge + $money");
         if (!$ret) {
             $ret = $this->table($uid)->insert([
                 'uid' => $uid,
-                'balance' => $money,
+                'balance' => $coin,
+                'charge' => $money,
             ]);
         }
 
         if ($ret) {
-            $this->cache->del($uid, 'sent');
+
+            (new UserLevel())->add($uid, $exp);
+
+            $this->cache->del($uid, 'sent', 'charge');
+            $money = $this->get($uid, 'charge');
+
+            $db_user = (new User());
+
+            $vip_day = $goods['vip_day'];
+            $tycoon_day = $goods['tycoon_day'];
+            $award_key = '';
+
+            //额外奖励加成：
+            //充值满98元，奖励15天会员，查看会员特权
+            //充值满298元，奖励45天会员，查看会员特权
+            //充值满598元，奖励90天会员，查看会员特权
+            $award_vip = [598 => 90, 298 => 45, 98 => 15];
+            foreach ($award_vip as $threshold => $award_day) {
+                if ($money >= $threshold) {
+                    $award_key = 'charge_award_' . $threshold;
+                    if (!$this->cache->get($uid, $award_key))
+                        $vip_day = $award_day;
+
+                    break;
+                }
+            }
+
+            if ($vip_day) {
+                $db_user->incrExpire($uid, 'vip_expire', $vip_day);
+                if ($award_key)
+                    $this->cache->set($uid, $award_key, $award_day);
+            }
+
+            if ($tycoon_day) {
+                $db_user->incrExpire($uid, 'tycoon_expire', $tycoon_day);
+            }
+
             return $ret;
         }
 
         return Response::msg('数据更新失败', 1014);
     }
 
-    public function sub($uid, $money, $exp)
+    public function sub($uid, $balance, $exp)
     {
-        if ($money < 0)
-            $money = -$money;
-        elseif ($money == 0)
+        if ($balance <= 0)
             return Response::msg('参数错误', 1016);
 
-        $ret = $this->table($uid)->where('uid = ? AND balance >= ?', [$uid, $money])
-            ->update("balance = balance - $money, sent = sent + $money");
+        $ret = $this->table($uid)->where('uid = ? AND balance >= ?', [$uid, $balance])
+            ->update("balance = balance - $balance, sent = sent + $balance");
 
         if ($ret) {
             $this->cache->del($uid, 'sent');
-
-            (new UserLevel())->add($uid, $exp);
             return $ret;
         }
 

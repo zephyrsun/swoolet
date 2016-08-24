@@ -32,9 +32,14 @@ class UserExt extends Redis
         return $this->link->hGet($this->key_ext . $uid, $k);
     }
 
-    public function del($uid, $k)
+    public function getAll($uid)
     {
-        return $this->link->hDel($this->key_ext . $uid, $k);
+        return $this->link->hGetAll($this->key_ext . $uid);
+    }
+
+    public function del($uid, $k1, $k2 = null)
+    {
+        return $this->link->hDel($this->key_ext . $uid, $k1, $k2);
     }
 
     public function mSet($uid, $v)
@@ -45,8 +50,14 @@ class UserExt extends Redis
     public function getWithCallback($uid, $k, $callback)
     {
         if (!$ret = $this->get($uid, $k)) {
-            if ($ret = (string)$callback())
-                $this->set($uid, 'sent', $ret);
+            if ($ret = $callback()) {
+                if (is_array($ret)) {
+                    $this->mSet($uid, $ret);
+                    $ret = $ret[$k];
+                } else {
+                    $this->set($uid, $k, $ret);
+                }
+            }
         }
 
         return $ret;

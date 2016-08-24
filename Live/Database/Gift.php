@@ -33,7 +33,7 @@ class Gift extends Basic
         return PDO::table('gift');
     }
 
-    public function getAllGift($force = false)
+    public function getAll($force = false)
     {
         if ($force || !$ret = $this->cache->get($this->key_gift)) {
             $data = $this->table(1)->orderBy('sort ASC')->fetchAll();
@@ -50,7 +50,7 @@ class Gift extends Basic
 
     public function getGift($gift_id, $key = '')
     {
-        $all = $this->getAllGift();
+        $all = $this->getAll();
         $gift = &$all[$gift_id];
         if ($gift && $gift['status'] == 1) {
             if ($key)
