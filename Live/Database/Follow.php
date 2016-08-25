@@ -85,7 +85,8 @@ class Follow extends Basic
 
                 //缓存人数
                 $count = $this->fetchCount();
-                $this->cache->incrCount($key_count, $count, $this->timeout);
+                // $this->cache->incrCount($key_count, $count, $this->timeout);
+                $this->cache->link->set($key_count, $count, $this->timeout);
 
                 //缓存列表
                 call_user_func_array([$this->cache->link, 'zAdd'], $data);
