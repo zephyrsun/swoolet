@@ -9,47 +9,28 @@
 namespace Live\Controller;
 
 
+use Live\Database\Album;
 use Live\Database\Balance;
 use Live\Database\Fan;
 use Live\Database\Follow;
 use Live\Database\Income;
+use Live\Database\Replay;
 use Live\Database\UserLevel;
 use Live\Response;
 
 class User extends Basic
 {
-    public function getUserInfo()
+    public function getUserInfo($request)
     {
         $data = parent::getValidator()->required('token')->ge('uid', 1)->getResult();
         if (!$data)
             return $data;
 
-        $uid = $data['uid'];
-        $token_uid = $data['token_uid'];
-
-        $user = (new \Live\Database\User())->getUser($uid);
-
-        $db_fan = new Fan();
-
-        if ($uid == $data['token_uid']) {
-            $is_follow = false;
-        } else {
-            $is_follow = $db_fan->isFollow($token_uid, $uid);
-        }
-
-        $user += [
-            'lv' => (new UserLevel())->getLv($uid),
-            'income' => (new Income())->getIncome($uid),
-            'sent' => (new Balance())->get($uid, 'sent'),
-            'follow' => (new Follow())->getCount($uid),
-            'fan' => $db_fan->getCount($uid),
-            'is_follow' => $is_follow,
-        ];
-
+        $user = (new \Live\Database\User())->getUserInfo($data['uid'], $data['token_uid']);
         return Response::data(['user' => $user]);
     }
 
-    public function updateUserInfo()
+    public function updateUserInfo($request)
     {
         $data = parent::getValidator()->required('token')
             ->length('nickname', 1, 8, false)
@@ -112,5 +93,78 @@ class User extends Basic
         $ret = (new Fan())->unfollow($data['token_uid'], $data['uid']);
 
         return Response::msg('取消关注成功');
+    }
+
+    public function home($request)
+    {
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->getResult();
+        if (!$data)
+            return $data;
+
+        $uid = $data['uid'];
+
+        $ds_user = new \Live\Database\User();
+
+        $user = $ds_user->getUserInfo($uid, $data['token_uid']);
+        $visit = $ds_user->getVisit($uid, 0, 5);
+        $album = (new Album())->getList($uid, 0, 8);
+        $replay = (new Replay())->getList($uid, 0, 8);
+        return Response::data([
+            'user' => $user,
+            'visit' => $visit,
+            'album' => $album,
+            'replay' => $replay,
+        ]);
+    }
+
+    public function getVisit($request)
+    {
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 1)->getResult();
+        if (!$data)
+            return $data;
+
+        $uid = $data['uid'];
+
+        $start = (int)$data['key'];
+
+        $visit = (new \Live\Database\User())->getVisit($uid, $start, 20);
+
+        return Response::data([
+            'list' => $visit,
+        ]);
+    }
+
+    public function getAlbum($request)
+    {
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 1)->getResult();
+        if (!$data)
+            return $data;
+
+        $uid = $data['uid'];
+
+        $start = (int)$data['key'];
+
+        $album = (new Album())->getList($uid, $start, 20);
+
+        return Response::data([
+            'list' => $album,
+        ]);
+    }
+
+    public function getReplay($request)
+    {
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 1)->getResult();
+        if (!$data)
+            return $data;
+
+        $uid = $data['uid'];
+
+        $start = (int)$data['key'];
+
+        $replay = (new Replay())->getList($uid, $start, 20);
+
+        return Response::data([
+            'list' => $replay,
+        ]);
     }
 }

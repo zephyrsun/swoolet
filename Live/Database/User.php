@@ -18,6 +18,8 @@ class User extends Basic
 
     public $key_user = 'user:';
 
+    public $key_home_visit = 'home_visit:';
+
     CONST PF_MOBILE = 1;
 
     public function __construct()
@@ -105,9 +107,33 @@ class User extends Basic
                 'avatar' => $user['avatar'],
                 'lv' => (new UserLevel())->getLv($uid)
             ];
+        } elseif ($type == 'more') {
+            $ts = \Swoolet\App::$ts;
+            $user += [
+                'is_vip' => $user['vip_expire'] > $ts,
+                'is_tycoon' => $user['tycoon_expire'] > $ts,
+                'lv' => (new UserLevel())->getLv($uid),
+            ];
+
+            unset($user['vip_expire'], $user['tycoon_expire']);
         }
 
         return $user;
+    }
+
+    public function getUserInfo($uid, $follow_uid)
+    {
+        $user = $this->getShowInfo($uid, 'more');
+
+        $db_fan = new Fan();
+
+        return $user + [
+            'income' => (new Income())->getIncome($uid),
+            'sent' => (new Balance())->get($uid, 'sent'),
+            'follow' => (new Follow())->getCount($uid),
+            'fan' => $db_fan->getCount($uid),
+            'is_follow' => $db_fan->isFollow($follow_uid, $uid),
+        ];
     }
 
     public function isVip($uid)
@@ -145,5 +171,23 @@ class User extends Basic
             'pf' => $pf,
             'username' => $username,
         ]);
+    }
+
+    public function addVisit($uid, $visit_uid)
+    {
+        return $this->cache->link->rPush($this->key_home_visit . $uid, $visit_uid);
+    }
+
+    public function getVisit($uid, $start, $limit)
+    {
+        $list = $this->cache->link->lRange($this->key_home_visit . $uid, $start, $limit - 1);
+
+        $i = 0;
+        foreach ($list as &$uid) {
+            $uid = $this->getShowInfo($uid, 'simple');
+            $uid['key'] = $start + $i++;
+        }
+
+        return $list;
     }
 }

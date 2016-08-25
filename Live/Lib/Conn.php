@@ -196,7 +196,7 @@ class Conn
         });
     }
 
-    public function sendToUser($uid, $msg)
+    public function sendToUser($uid, $msg, $chat = false)
     {
         $msg = [
             'a' => 'toUser',
@@ -204,8 +204,12 @@ class Conn
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
         ];
 
-        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg), function ($result, $err) {
-            var_dump('sendToUser', $result);
+        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg), function ($result, $err) use ($chat) {
+            //var_dump('sendToUser', $result);
+            if ($chat && $result == 0) {
+                //发送未成功
+
+            }
         });
     }
 

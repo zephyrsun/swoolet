@@ -36,7 +36,7 @@ namespace Swoolet\Data {
         public $table_name = '';
 
         public $clause = [], $last_clause = [];
-        public $param = [], $last_param = [];
+        public $sql, $param = [], $last_param = [];
 
         public $pdo_option = [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -436,7 +436,6 @@ namespace Swoolet\Data {
         public function exec()
         {
             $this->sth = $this->link->prepare($this->sql);
-
             $ret = $this->sth->execute($this->param);
 
             $this->initial();

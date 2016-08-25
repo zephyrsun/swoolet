@@ -266,3 +266,69 @@ token
 返回:
 {"list":[{"uid":3,"nickname":"15951208387","avatar":"","lv":1}],"c":0}
 ```
+
+###上传相册照片
+```
+接口:
+/Upload/photo
+
+参数:
+token
+表单图片流
+
+返回:
+{"img":"http:\/\/obs24956g.bkt.clouddn.com\/1_1470988982.jpg","c":0}
+```
+
+###查看别人的个人主页
+```
+接口:
+/User/home
+
+参数:
+token
+uid 查看谁
+
+返回:
+{"user":{"uid":1,"nickname":"15921258181","sex":"男","height":0,"birthday":"0000-00-00","zodiac":null,"city":"看好星球","sign":"","avatar":"","is_vip":true,"is_tycoon":false,"lv":27,"income":"40","sent":0,"follow":0,"fan":1,"is_follow":false},"visit":[],"album":[],"replay":[{"key":1,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471494338.m3u8"},{"key":2,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"},{"key":3,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"},{"key":4,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"}],"c":0}
+```
+
+
+###查看更多访客
+```
+接口:
+/User/getVisit
+
+参数:
+token
+uid 查看谁
+key 最后一个数据的key值
+
+返回:
+```
+
+###查看更多相册
+```
+接口:
+/User/getAlbum
+
+参数:
+token
+uid 查看谁
+key 最后一个数据的key值
+
+返回:
+```
+
+###查看更多回放
+```
+接口:
+/User/getReplay
+
+参数:
+token
+uid 查看谁
+key 最后一个数据的key值
+
+返回:
+```

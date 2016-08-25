@@ -66,6 +66,7 @@ class Live
             $data = $stream_data + [
                     'title' => $live_data['title'],
                     'city' => $live_data['city'],
+                    'cover' => $live_data['cover'],
                 ];
 
             (new \Live\Database\Replay())->saveReplay($uid, $data);

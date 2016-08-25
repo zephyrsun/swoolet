@@ -25,13 +25,13 @@ class Upload extends Basic
         $bucket = 'static';
 
         $this->_upload($request, $bucket, 'cover', function ($uid, $img) use ($bucket) {
-            $db_live = new \Live\Database\Live();
-            $live = $db_live->getLive($uid);
+            $db = new \Live\Database\Live();
+            $live = $db->getLive($uid);
             if ($live['cover']) {
                 $this->sdk->delete($bucket, $live['cover']);
             }
 
-            $db_live->updateLive($uid, [
+            $db->updateLive($uid, [
                 'cover' => $img
             ]);
         });
@@ -43,15 +43,27 @@ class Upload extends Basic
 
         $this->_upload($request, $bucket, 'avatar', function ($uid, $img) use ($bucket) {
 
-            $db_user = new \Live\Database\User();
-            $user = $db_user->getUser($uid);
+            $db = new \Live\Database\User();
+            $user = $db->getUser($uid);
             if ($user['avatar']) {
                 $this->sdk->delete($bucket, $user['avatar']);
             }
 
-            $db_user->updateUser($uid, [
+            $db->updateUser($uid, [
                 'avatar' => $img
             ]);
+        });
+    }
+
+    public function photo($request)
+    {
+        $bucket = 'static';
+
+        $this->_upload($request, $bucket, 'photo', function ($uid, $img) use ($bucket) {
+
+            $db = new \Live\Database\Album();
+
+            $db->add($uid, $img, '');
         });
     }
 

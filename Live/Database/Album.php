@@ -8,37 +8,36 @@
 
 namespace Live\Database;
 
-
-class Replay extends Basic
+class Album extends Basic
 {
     public $cfg_key = 'db_1';
     public $table_prefix = 'user_';
 
     public function __construct()
     {
-        $this->option['dbname'] = 'live_replay';
+        $this->option['dbname'] = 'live_album';
 
         parent::__construct();
-
-        //$this->cache = new \Live\Redis\User();
     }
 
-    public function saveReplay($uid, $data)
+    public function add($uid, $photo, $title)
     {
-        $data += [
+        $this->table($uid);
+
+        return parent::insert([
             'uid' => $uid,
+            'title' => $title,
+            'photo' => $photo,
             'status' => 1,
             'create_ts' => \Swoolet\App::$ts,
-        ];
-
-        return $this->table($uid)->insert($data);
+        ]);
     }
 
     public function getList($uid, $start, $limit = 8)
     {
         $this->table($uid)->limit($limit);
 
-        $this->select('id AS `key`,title,cover,play_url')->where('uid = ? AND id > ?', [$uid, $start]);
+        $this->select('id AS `key`,title,photo')->where('uid = ? AND id > ?', [$uid, $start]);
 
         return $this->fetchAll();
     }

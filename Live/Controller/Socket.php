@@ -69,7 +69,7 @@ class Socket extends Basic
                     'uid' => $fd_uid,
                     'msg' => $data['msg'],
                 ],
-            ]);
+            ], true);
         }
 
         return Response::msg('ok');
