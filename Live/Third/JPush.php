@@ -27,7 +27,7 @@ class JPush
         ]);
     }
 
-    public function push($msg, $audience)
+    public function push($msg, $audience, $extras = [])
     {
         $audience == 'all' or $audience = ['alias' => [$audience]];//此时$audience为已经alias过的uid
 
@@ -36,7 +36,7 @@ class JPush
             'audience' => $audience,
             'notification' => [
                 'alert' => $msg,
-                'extras' => [],
+                'extras' => $extras,
             ],
             'ios' => [
                 'badge' => '+1',
@@ -47,17 +47,22 @@ class JPush
             ]
         ], \JSON_UNESCAPED_UNICODE);
 
-        App::$server->sw->task('task_push', -1, function () use ($json) {
-            return $this->curl->post("{$this->url}/push", $json);
-        });
+//        App::$server->sw->task('task_push', -1, function () use ($json) {
+//            return $this->curl->post("{$this->url}/push", $json);
+//        });
+        return $this->curl->post("{$this->url}/push", $json);
     }
 
     public function bind($registration_id, $uid)
     {
-        App::$server->sw->task('task_push', -1, function () use ($registration_id, $uid) {
-            return $this->curl->post("{$this->url}/devices/{$registration_id}", [
-                'alias' => $uid,
-            ]);
-        });
+//        App::$server->sw->task('task_push', -1, function () use ($registration_id, $uid) {
+//            return $this->curl->post("{$this->url}/devices/{$registration_id}", [
+//                'alias' => $uid,
+//            ]);
+//        });
+
+        return $this->curl->post("{$this->url}/devices/{$registration_id}", [
+            'alias' => $uid,
+        ]);
     }
 }

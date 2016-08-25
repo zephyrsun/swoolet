@@ -9,7 +9,9 @@
 
 namespace Live\Lib;
 
+use Live\Redis\RedisPub;
 use Swoolet\App;
+use Swoolet\Data\Redis;
 use Swoolet\Data\RedisAsync;
 use Swoolet\Lib\File;
 
@@ -27,6 +29,8 @@ class Conn
     const TYPE_GIFT = 10;//送礼
     const TYPE_LIVE_STOP = 20;//停播
 
+    const TYPE_OFFLINE_CHAT_MSG = 'offlineMsg';
+
     public $uid;
     public $conn;
     public $room;
@@ -43,7 +47,7 @@ class Conn
     public function __construct()
     {
         $this->sub = new RedisAsync('redis_async', 'sub');
-        $this->pub = new RedisAsync('redis_async', 'pub');
+        $this->pub = new RedisPub('redis_async');
     }
 
     public function &getFd($uid)
@@ -196,20 +200,17 @@ class Conn
         });
     }
 
-    public function sendToUser($uid, $msg, $chat = false)
+    public function sendToUser($uid, $msg, callable $cb = null)
     {
-        $msg = [
+        $data = [
             'a' => 'toUser',
             'uid' => $uid,
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
         ];
 
-        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg), function ($result, $err) use ($chat) {
+        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($data), function ($result, $err) use ($cb) {
             //var_dump('sendToUser', $result);
-            if ($chat && $result == 0) {
-                //发送未成功
-
-            }
+            $cb && $cb($result, $err);
         });
     }
 

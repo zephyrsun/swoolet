@@ -50,10 +50,21 @@ class My extends Basic
         $start_id = (int)$data['key'];
 
         list($raw) = $modal->getList($data['token_uid'], $start_id);
-        $db_user = new \Live\Database\User();
+        $ds_user = new \Live\Database\User();
+        $ds_level = new UserLevel();
         $list = [];
         foreach ($raw as $uid => $key) {
-            $list[] = $db_user->getShowInfo($uid, 'simple') + ['key' => $key];
+            $user = $ds_user->getUser($uid);
+
+            $list[] = [
+                'uid' => $user['uid'],
+                'nickname' => $user['nickname'],
+                'avatar' => $user['avatar'],
+                'zodiac' => $user['zodiac'],
+                'city' => $user['city'],
+                'key' => $key,
+                'lv' => $ds_level->getLv($uid),
+            ];
         }
 
         Response::data([

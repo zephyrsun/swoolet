@@ -8,8 +8,10 @@
 
 namespace Live\Controller;
 
+use Live\Database\ChatMsg;
 use \Live\Response;
 use \Live\Lib\Conn;
+use Live\Third\JPush;
 
 class Socket extends Basic
 {
@@ -58,18 +60,33 @@ class Socket extends Basic
 
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($fd_uid) = $conn;
+            list($from_uid, $room_id, $user) = $conn;
 
-            if ($fd_uid == $data['uid'])
+            $to_uid = $data['uid'];
+            $msg = $data['msg'];
+
+            if ($from_uid == $to_uid)
                 return Response::msg('自己和自己聊天是一种什么感受?');
 
-            $this->conn->sendToUser($data['uid'], [
+            $cb = function ($result, $err) use ($from_uid, $to_uid, $user, $msg) {
+                if ($result)
+                    return;
+
+                //发送未成功
+                (new JPush())->push("{$user['nickname']}：$msg", $to_uid, [
+                    't' => Conn::TYPE_OFFLINE_CHAT_MSG,
+                ]);
+
+                (new ChatMsg())->add($to_uid, $from_uid, $msg);
+            };
+
+            $this->conn->sendToUser($to_uid, [
                 't' => Conn::TYPE_CHAT,
                 'msg' => [
-                    'uid' => $fd_uid,
-                    'msg' => $data['msg'],
+                    'uid' => $from_uid,
+                    'msg' => $msg,
                 ],
-            ], true);
+            ], $cb);
         }
 
         return Response::msg('ok');

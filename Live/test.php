@@ -7,18 +7,17 @@ new \Live\Controller\Basic();
 
 \Swoolet\App::$ts = time();
 
-$vip = new Live\Redis\Vip();
-$q = $vip->couldAward(12);
-var_dump($q);
-exit;
+
+$ret = (new \Live\Database\Fan())->isFollow(11, 12);
+var_dump($ret);
 //$vip = new Live\Redis\Vip();
 //$uid = 1;
 //$vip->addWait($uid, 686);
 //
 //var_dump($vip->getWait($uid));
 //exit;
-$my = new \Live\Controller\My();
-$my->checkIn();
+//$my = new \Live\Controller\My();
+//$my->checkIn();
 //$db_balance = new \Live\Database\Balance();
 //$ret = $db_balance->addByGoods(1, 5, 'ios');
 //var_dump($ret);
