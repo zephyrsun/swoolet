@@ -77,7 +77,7 @@ class Gift extends Basic
             return $ret;
         }
 
-        $ret = (new MoneyLog())->add($send_uid, $to_uid, $money, 1, "gift:{$gift_id}");
+        $ret = (new MoneyLog())->add($send_uid, $to_uid, -$money, 1, "gift:{$gift_id}");
         if (!$ret) {
             $this->rollback();
             return Response::msg('送礼失败', 1015);

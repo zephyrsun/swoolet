@@ -92,14 +92,14 @@ class User extends Basic
             return false;
 
         if ($type == 'simple') {
-            $ret = [
+            $user = [
                 'uid' => $user['uid'],
                 'nickname' => $user['nickname'],
                 'avatar' => $user['avatar'],
                 //'height' => $user['height'],
             ];
         } elseif ($type == 'lv') {
-            $ret = [
+            $user = [
                 'uid' => $user['uid'],
                 'nickname' => $user['nickname'],
                 'avatar' => $user['avatar'],
@@ -107,7 +107,14 @@ class User extends Basic
             ];
         }
 
-        return $ret;
+        return $user;
+    }
+
+    public function isVip($uid)
+    {
+        $user = $this->getUser($uid);
+
+        return $user['vip_expire'] > \Swoolet\App::$ts;
     }
 
     public function getUser($uid)

@@ -40,7 +40,7 @@ class User extends Basic
         $user += [
             'lv' => (new UserLevel())->getLv($uid),
             'income' => (new Income())->getIncome($uid),
-            'sent' => (new Balance())->getSent($uid),
+            'sent' => (new Balance())->get($uid, 'sent'),
             'follow' => (new Follow())->getCount($uid),
             'fan' => $db_fan->getCount($uid),
             'is_follow' => $is_follow,

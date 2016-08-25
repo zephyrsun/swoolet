@@ -13,6 +13,9 @@ use Swoolet\Data\PDO;
 
 class Goods extends Basic
 {
+    const TYPE_CHARGE = 1;
+    const TYPE_VIP = 2;
+
     public $cfg_key = 'db_1';
 
     public $key_goods = 'goods:';

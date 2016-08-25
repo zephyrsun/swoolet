@@ -9,6 +9,7 @@
 namespace Live\Database;
 
 use Live\Redis\UserExt;
+use Live\Redis\Vip;
 use Live\Response;
 use Swoolet\Data\PDO;
 
@@ -33,11 +34,34 @@ class Balance extends Basic
     public function get($uid, $key = 'sent')
     {
         return $this->cache->getWithCallback($uid, $key, function () use ($uid) {
-            return $this->table($uid)->select('sent,charge')->where('uid', $uid)->fetch();
+            $ret = $this->table($uid)->select('sent,charge')->where('uid', $uid)->fetch();
+
+            return $ret ? $ret : ['sent' => 0, 'charge' => 0];
         });
     }
 
-    public function add($uid, $goods_id, $pf)
+    public function add($uid, $balance, $charge)
+    {
+        $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $balance, charge = charge + $charge");
+        if (!$ret) {
+            $ret = $this->table($uid)->insert([
+                'uid' => $uid,
+                'balance' => $balance,
+                'charge' => $charge,
+            ]);
+        }
+
+        if (!$ret)
+            return Response::msg('数据更新失败', 1014);
+
+        $ret = (new MoneyLog())->add($uid, $uid, $balance, 1, "charge:{$charge}");
+        if (!$ret)
+            return Response::msg('数据插入失败', 1015);
+
+        return $ret;
+    }
+
+    public function addByGoods($uid, $goods_id, $pf)
     {
         $goods = (new Goods())->getGoods($goods_id, $pf);
 
@@ -45,14 +69,7 @@ class Balance extends Basic
         $exp = $goods['exp'];
         $charge = $goods['money'];//充值总额
 
-        $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $coin, charge = charge + $charge");
-        if (!$ret) {
-            $ret = $this->table($uid)->insert([
-                'uid' => $uid,
-                'balance' => $coin,
-                'charge' => $charge,
-            ]);
-        }
+        $ret = $this->add($uid, $coin, $charge);
 
         if ($ret) {
 
@@ -72,11 +89,10 @@ class Balance extends Basic
             //充值满598元，奖励90天会员，查看会员特权
             $award_vip = [598 => 90, 298 => 45, 98 => 15];
             foreach ($award_vip as $threshold => $award_day) {
-                if ($money >= $threshold && $money - $charge < $threshold) {
+                if (($money >= $threshold) && ($money - $charge < $threshold)) {
                     // $award_key = 'charge_award_' . $threshold;
                     // if (!$this->cache->get($uid, $award_key))
                     $vip_day = $award_day;
-
                     break;
                 }
             }
@@ -85,16 +101,19 @@ class Balance extends Basic
                 $db_user->incrExpire($uid, 'vip_expire', $vip_day);
                 //if ($award_key)
                 //    $this->cache->set($uid, $award_key, $award_day);
+
+                //充值vip有机会抽取100看币
+                if ($charge >= 98) {
+                    (new Vip())->addWait($uid, $charge);
+                }
             }
 
             if ($tycoon_day) {
                 $db_user->incrExpire($uid, 'tycoon_expire', $tycoon_day);
             }
-
-            return $ret;
         }
 
-        return Response::msg('数据更新失败', 1014);
+        return $ret;
     }
 
     public function sub($uid, $balance, $exp)

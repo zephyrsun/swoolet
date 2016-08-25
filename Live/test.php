@@ -5,9 +5,23 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 $app = \Swoolet\Socket::createServer('Live', 'dev');
 new \Live\Controller\Basic();
 
-$db_balance = new \Live\Database\Balance();
-$ret = $db_balance->add(1, 5, 'ios');
-var_dump($ret);
+\Swoolet\App::$ts = time();
+
+$vip = new Live\Redis\Vip();
+$q = $vip->couldAward(12);
+var_dump($q);
+exit;
+//$vip = new Live\Redis\Vip();
+//$uid = 1;
+//$vip->addWait($uid, 686);
+//
+//var_dump($vip->getWait($uid));
+//exit;
+$my = new \Live\Controller\My();
+$my->checkIn();
+//$db_balance = new \Live\Database\Balance();
+//$ret = $db_balance->addByGoods(1, 5, 'ios');
+//var_dump($ret);
 //$data = (new \Live\Lib\Live())->stop(1);
 //var_dump($data);
 

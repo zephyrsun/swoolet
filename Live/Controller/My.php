@@ -8,9 +8,14 @@
 
 namespace Live\Controller;
 
+use Live\Database\Balance;
 use Live\Database\Fan;
 use Live\Database\Follow;
 use Live\Database\Live;
+use Live\Database\RoomAdmin;
+use Live\Database\User;
+use Live\Database\UserLevel;
+use Live\Redis\Vip;
 use Live\Response;
 
 class My extends Basic
@@ -60,5 +65,67 @@ class My extends Basic
     public function fans($request)
     {
         $this->follows($request, new Fan());
+    }
+
+    public function admins()
+    {
+        $data = parent::getValidator()->required('token')->getResult();
+        if (!$data)
+            return $data;
+
+        $token_uid = $data['token_uid'];
+
+        $list = (new RoomAdmin())->getRoomAdmin($token_uid);
+        $ds_user = new User();
+        foreach ($list as &$uid) {
+            $uid = $ds_user->getShowInfo($uid, 'lv');
+        }
+
+        Response::data(['list' => $list]);
+    }
+
+    public function checkIn()
+    {
+        $data = parent::getValidator()->required('token')->getResult();
+        if (!$data)
+            return $data;
+
+        $token_uid = $data['token_uid'];
+
+        $money = 2;
+        $exp = 10;
+        if ((new User())->isVip($token_uid)) {
+
+            $exp = 20;
+            $ds_vip = new Vip();
+
+            if ($ds_vip->couldAward($token_uid) && ($rest = $ds_vip->getWait($token_uid))) {
+                //vip抽奖
+
+                $j = date('j', \Swoolet\App::$ts);
+                if ($j % 2 == $token_uid % 2) {
+                    //余数相同,暴击
+                    $money = mt_rand(1, $rest);
+
+                    if ($money == 1 || $ds_vip->decrWait($token_uid, $money) < 0) {
+                        $money = 2;
+                        $ds_vip->delWait($token_uid);
+                    } else {
+                        $ds_vip->addAward($token_uid, $money);
+                    }
+                }
+            }
+        }
+
+        if (!$ret = (new Balance())->add($token_uid, $money, 0))
+            return $ret;
+
+        if (!$ret = (new UserLevel())->add($token_uid, $exp))
+            return $ret;
+
+        Response::data([
+            'money' => $money,
+            'exp' => $exp,
+        ]);
     }
 }

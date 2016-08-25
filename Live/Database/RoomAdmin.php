@@ -66,12 +66,12 @@ class RoomAdmin extends Basic
         return $ret;
     }
 
-    public function silenceUser($room_id,$uid)
+    public function silenceUser($room_id, $uid)
     {
         return $this->cache->link->set($this->key_silence . "{$uid}_{$room_id}", 1, 7200);
     }
 
-    public function isSilence($room_id,$uid)
+    public function isSilence($room_id, $uid)
     {
         return $this->cache->link->get($this->key_silence . "{$uid}_{$room_id}");
     }
@@ -81,6 +81,12 @@ class RoomAdmin extends Basic
         return $this->cache->link->sIsMember($this->key_admin . $uid, $admin_uid);
     }
 
+    /**
+     * 获取我的管理员
+     *
+     * @param $uid
+     * @return array
+     */
     public function getRoomAdmin($uid)
     {
         $key = $this->key_admin . $uid;
