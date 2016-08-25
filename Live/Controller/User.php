@@ -102,10 +102,15 @@ class User extends Basic
             return $data;
 
         $uid = $data['uid'];
+        $token_uid = $data['token_uid'];
 
         $ds_user = new \Live\Database\User();
 
-        $user = $ds_user->getUserInfo($uid, $data['token_uid']);
+        $user = $ds_user->getUserInfo($uid, $token_uid);
+
+        //访问记录
+        $ds_user->addVisit($uid, $token_uid);
+
         $visit = $ds_user->getVisit($uid, 0, 5);
         $album = (new Album())->getList($uid, 0, 8);
         $replay = (new Replay())->getList($uid, 0, 8);
