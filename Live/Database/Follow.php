@@ -18,8 +18,6 @@ class Follow extends Basic
     public $key = 'follow:';
     public $key_count = 'follow_n:';
 
-    public $limit = 500;
-
     public function __construct()
     {
         $this->option['dbname'] = 'live_follow';
@@ -42,7 +40,7 @@ class Follow extends Basic
         ], 'INSERT IGNORE');
 
         if ($ret)
-            $this->cache->del($this->key . $uid);
+            $this->cache->link->del($this->key . $uid, $this->key_count . $uid);
 
         return $ret;
     }
@@ -52,6 +50,8 @@ class Follow extends Basic
         $ret = $this->table($uid)->where('uid = ? AND ref_uid = ?', [$uid, $ref_uid])->delete();
 
         $ret = $this->cache->link->zRem($this->key . $uid, $ref_uid);
+        if($ret)
+            $this->cache->link->del($this->key . $uid, $this->key_count . $uid);
 
         return $ret;
     }
@@ -62,19 +62,17 @@ class Follow extends Basic
         return $arr[1];
     }
 
-    public function getList($uid, $start_id, $limit = 0)
+    public function getList($uid, $start_id, $limit = 500)
     {
         $key = $this->key . $uid;
         $key_count = $this->key_count . $uid;
-
-        $limit or $limit = $this->limit;
 
         if ($list = $this->cache->revRange($key, $start_id, $limit, true)) {
             $count = $this->cache->getCount($key_count);
         } else {
             $count = 0;
 
-            $list = $this->table($uid)->select('ref_uid')->where('uid = ? AND id > ?', [$uid, $start_id])->limit($this->limit)->fetchAll();
+            $list = $this->table($uid)->select('ref_uid')->where('uid = ? AND id > ?', [$uid, $start_id])->limit($limit)->fetchAll();
             if ($list) {
                 $n = 0;
                 $data = [$key];

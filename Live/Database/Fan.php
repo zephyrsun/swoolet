@@ -26,10 +26,9 @@ class Fan extends Follow
         if ($uid == $follow_uid)
             return false;
 
-        $fan = $this->add($uid, $follow_uid);
-
+        $fan = $this->add($follow_uid, $uid);
         if ($fan)
-            $follow = (new Follow())->add($follow_uid, $uid);
+            $follow = (new Follow())->add($uid, $follow_uid);
 
         return $fan;
     }
@@ -39,16 +38,16 @@ class Fan extends Follow
         if ($uid == $follow_uid)
             return false;
 
-        $fan = $this->del($uid, $follow_uid);
+        $fan = $this->del($follow_uid, $uid);
 
-        $follow = (new Follow())->del($follow_uid, $uid);
+        $follow = (new Follow())->del($uid, $follow_uid);
 
         return $fan;
     }
 
     public function isFollow($uid, $follow_uid)
     {
-        $this->getList($uid, 0, 1);
-        return false !== $this->cache->link->zScore($this->key . $uid, $follow_uid);
+        $this->getList($follow_uid, 0, 1);
+        return false !== $this->cache->link->zScore($this->key . $follow_uid, $uid);
     }
 }

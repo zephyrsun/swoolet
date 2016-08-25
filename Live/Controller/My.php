@@ -13,7 +13,6 @@ use Live\Database\Fan;
 use Live\Database\Follow;
 use Live\Database\Live;
 use Live\Database\RoomAdmin;
-use Live\Database\User;
 use Live\Database\UserLevel;
 use Live\Redis\Vip;
 use Live\Response;
@@ -51,7 +50,7 @@ class My extends Basic
         $start_id = (int)$data['key'];
 
         list($raw) = $modal->getList($data['token_uid'], $start_id);
-        $db_user = new User();
+        $db_user = new \Live\Database\User();
         $list = [];
         foreach ($raw as $uid => $key) {
             $list[] = $db_user->getShowInfo($uid, 'simple') + ['key' => $key];
@@ -76,7 +75,7 @@ class My extends Basic
         $token_uid = $data['token_uid'];
 
         $list = (new RoomAdmin())->getRoomAdmin($token_uid);
-        $ds_user = new User();
+        $ds_user = new \Live\Database\User();
         foreach ($list as &$uid) {
             $uid = $ds_user->getShowInfo($uid, 'lv');
         }
@@ -94,7 +93,7 @@ class My extends Basic
 
         $money = 2;
         $exp = 10;
-        if ((new User())->isVip($token_uid)) {
+        if ((new \Live\Database\User())->isVip($token_uid)) {
 
             $exp = 20;
             $ds_vip = new Vip();
