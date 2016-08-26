@@ -359,3 +359,17 @@ token
 返回:
 {"msg":"ok","c":0}
 ```
+
+###获取支付商品
+```
+接口:
+/Charge/getGoods
+
+参数:
+pf: 平台 ios或android
+channel: 目前传1
+type: 1:普通充值 2:开通会员
+
+返回:
+{"list":[{"id":1,"coin":42,"money":6,"exp":60},{"id":2,"coin":147,"money":30,"exp":300},{"id":3,"coin":686,"money":98,"exp":980},{"id":4,"coin":2086,"money":298,"exp":2980},{"id":5,"coin":4116,"money":588,"exp":5880},{"id":6,"coin":11186,"money":1598,"exp":15980},{"id":7,"coin":27916,"money":3988,"exp":39880},{"id":8,"coin":55216,"money":7888,"exp":78880}],"c":0}
+```

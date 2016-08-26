@@ -50,7 +50,7 @@ class Follow extends Basic
         $ret = $this->table($uid)->where('uid = ? AND ref_uid = ?', [$uid, $ref_uid])->delete();
 
         $ret = $this->cache->link->zRem($this->key . $uid, $ref_uid);
-        if($ret)
+        if ($ret)
             $this->cache->link->del($this->key . $uid, $this->key_count . $uid);
 
         return $ret;
@@ -62,38 +62,23 @@ class Follow extends Basic
         return $arr[1];
     }
 
-    public function getList($uid, $start_id, $limit = 500)
+    public function getList($uid, $start, $limit)
     {
-        $key = $this->key . $uid;
-        $key_count = $this->key_count . $uid;
+        return parent::getListWithCount($this->key . $uid, $this->key_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
+            $this->table($uid)->limit(500);
 
-        if ($list = $this->cache->revRange($key, $start_id, $limit, true)) {
-            $count = $this->cache->getCount($key_count);
-        } else {
-            $count = 0;
-
-            $list = $this->table($uid)->select('ref_uid')->where('uid = ? AND id > ?', [$uid, $start_id])->limit($limit)->fetchAll();
-            if ($list) {
-                $n = 0;
-                $data = [$key];
+            $this->table($uid)->select('id,ref_uid')->orderBy('id DESC')->where('uid', $uid);
+            if ($list = $this->fetchAll()) {
+                $data = [];
                 foreach ($list as $row) {
-                    $data[] = $n++;
+                    $data[] = $row['id'];
                     $data[] = $row['ref_uid'];
                 }
 
-                //缓存人数
-                $count = $this->fetchCount();
-                // $this->cache->incrCount($key_count, $count, $this->timeout);
-                $this->cache->link->set($key_count, $count, $this->timeout);
-
-                //缓存列表
-                call_user_func_array([$this->cache->link, 'zAdd'], $data);
-                $this->cache->expire($key, $this->timeout);
-
-                $list = $this->cache->revRange($key, $start_id, $limit, true);
+                return $data;
             }
-        }
 
-        return [$list, $count];
+            return $list;
+        }, false);
     }
 }

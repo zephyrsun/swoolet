@@ -111,20 +111,20 @@ class User extends Basic
         //访问记录
         $ds_user->addVisit($uid, $token_uid);
 
-        $visit = $ds_user->getVisit($uid, 0, 5);
-        $album = (new Album())->getList($uid, 0, 8);
-        $replay = (new Replay())->getList($uid, 0, 8);
-        return Response::data([
+        $data = [
             'user' => $user,
-            'visit' => $visit,
-            'album' => $album,
-            'replay' => $replay,
-        ]);
+            'visit' => $ds_user->getVisit($uid, 0, 5),
+        ];
+
+        $data += (new Album())->getList($uid, 0, 7);
+        $data += (new Replay())->getList($uid, 0, 7);
+
+        return Response::data($data);
     }
 
     public function getVisit($request)
     {
-        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 0)->getResult();
         if (!$data)
             return $data;
 
@@ -141,7 +141,7 @@ class User extends Basic
 
     public function getAlbum($request)
     {
-        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 0)->getResult();
         if (!$data)
             return $data;
 
@@ -151,14 +151,12 @@ class User extends Basic
 
         $album = (new Album())->getList($uid, $start, 20);
 
-        return Response::data([
-            'list' => $album,
-        ]);
+        return Response::data($album);
     }
 
     public function getReplay($request)
     {
-        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('key', 0)->getResult();
         if (!$data)
             return $data;
 
@@ -168,8 +166,6 @@ class User extends Basic
 
         $replay = (new Replay())->getList($uid, $start, 20);
 
-        return Response::data([
-            'list' => $replay,
-        ]);
+        return Response::data($replay);
     }
 }

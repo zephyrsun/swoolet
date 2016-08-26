@@ -34,7 +34,9 @@ class RedisAsync
     {
         if ($cfg_key || $cfg_key = $this->cfg_key) {
             $this->option = App::getConfig($cfg_key) + $this->option;
-            $this->cache_key = $cache_key ? $cache_key : $cfg_key;
+
+            if ($cache_key)
+                $this->cache_key = $cache_key;
         }
     }
 

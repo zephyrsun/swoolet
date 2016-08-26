@@ -49,7 +49,7 @@ class My extends Basic
 
         $start_id = (int)$data['key'];
 
-        list($raw) = $modal->getList($data['token_uid'], $start_id);
+        list($raw) = $modal->getList($data['token_uid'], $start_id, 30);
         $ds_user = new \Live\Database\User();
         $ds_level = new UserLevel();
         $list = [];

@@ -18,7 +18,7 @@ class User extends Basic
 
     public $key_user = 'user:';
 
-    public $key_home_visit = 'home_visit:';
+    public $key_home_visit = 'h_visit:';
 
     CONST PF_MOBILE = 1;
 
@@ -175,12 +175,16 @@ class User extends Basic
 
     public function addVisit($uid, $visit_uid)
     {
-        return $this->cache->link->rPush($this->key_home_visit . $uid, $visit_uid);
+        if ($uid == $visit_uid)
+            return;
+
+        return $this->cache->link->zAdd($this->key_home_visit . $uid, \Swoolet\App::$ts, $visit_uid);
     }
 
     public function getVisit($uid, $start, $limit)
     {
-        $list = $this->cache->link->lRange($this->key_home_visit . $uid, $start, $limit - 1);
+        //$list = $this->cache->link->lRange($this->key_home_visit . $uid, $start, $limit - 1);
+        $list = $this->cache->revRange($this->key_home_visit . $uid, $start, $limit);
 
         $i = 0;
         foreach ($list as &$uid) {

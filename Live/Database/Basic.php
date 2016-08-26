@@ -43,4 +43,41 @@ class Basic extends PDO
         return $data;
     }
 
+
+    public function getListWithCount($key, $key_count, $start_id, $limit, $cb, $unpack = true)
+    {
+        if ($list = $this->cache->revRange($key, $start_id, $limit, true)) {
+            $count = $this->cache->getCount($key_count);
+        } else {
+            $count = 0;
+
+            if ($data = $cb()) {
+
+                array_unshift($data, $key);
+
+                //缓存人数
+                $count = $this->fetchCount();
+                // $this->cache->incrCount($key_count, $count, $this->timeout);
+                $this->cache->link->set($key_count, $count, $this->timeout);
+
+                //缓存列表
+                call_user_func_array([$this->cache->link, 'zAdd'], $data);
+                $this->cache->expire($key, $this->timeout);
+
+                $list = $this->cache->revRange($key, $start_id, $limit, true);
+            }
+        }
+
+        if ($unpack) {
+            $new_list = [];
+            foreach ($list as $val => $key) {
+                $new_list[] = \msgpack_unpack($val) + ['key' => $key];
+            }
+
+            $list = $new_list;
+        }
+
+        return [$list, $count];
+    }
+
 }

@@ -43,42 +43,53 @@ class Goods extends Basic
      * @param bool $force
      * @return array
      */
-    public function getChannel($channel, $type, $pf = '', $force = false)
+    public function getList($pf, $type, $channel, $force = false)
     {
-        $key = $this->key_goods . $channel;
-        if ($force || !$ret = $this->cache->get($key)) {
-            $data = $this->table(1)->select('id,coin,money,exp,vip_day,tycoon_day')->where('channel', $channel)->orderBy('money ASC')->fetchAll();
+        $key = $this->key_goods . 'all';
+        if ($force || !$list = $this->cache->get($key)) {
 
-            $ret = [];
+            $this->table(1)->select('id,channel,type,coin,money,exp,vip_day,tycoon_day')->orderBy('money ASC');
+
+            $data = $this->fetchAll();
+
+            $list = [];
             foreach ($data as $row) {
-                $ret[$row['id']] = $row;
+                $list[$row['id']] = $row;
             }
 
-            if ($ret)
-                $this->cache->set($key, $ret);
+            if ($list)
+                $this->cache->set($key, $list);
         }
 
-        $list = [];
-        foreach ($ret as $row) {
+        if ($type > 0) {
+            $new_list = [];
 
-            if ($pf == 'ios')
-                $row['coin'] *= 0.7;
+            foreach ($list as $row) {
+                if ($pf == 'ios')
+                    $row['coin'] *= 0.7;
 
-            if ($row['type'] == $type) {
-                unset($row['vip_day'], $row['tycoon_day']);
-                $list[] = $row;
+                if ($row['channel'] == $channel && $row['type'] == $type) {
+                    unset($row['channel'], $row['type'], $row['vip_day'], $row['tycoon_day']);
+                    $new_list[] = $row;
+                }
             }
+
+            return $new_list;
         }
 
         return $list;
     }
 
-    public function getGoods($id, $pf = '')
+    public function getGoods($id, $pf)
     {
-        $ret = $this->table(1)->where('id', $id)->fetch();
-        if ($ret && $pf == 'ios')
-            $ret['coin'] *= 0.7;
+        //$ret = $this->table(1)->where('id', $id)->fetch();
 
-        return $ret;
+        $list = $this->getList($pf, 0, 0);
+
+        $row = &$list[$id];
+        if ($row && $pf == 'ios')
+            $row['coin'] *= 0.7;
+
+        return $row;
     }
 }

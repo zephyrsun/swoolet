@@ -47,7 +47,7 @@ class Conn
     public function __construct()
     {
         $this->sub = new RedisAsync('redis_async', 'sub');
-        $this->pub = new RedisPub('redis_async');
+        $this->pub = new RedisPub();
     }
 
     public function &getFd($uid)
