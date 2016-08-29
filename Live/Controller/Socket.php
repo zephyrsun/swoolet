@@ -9,6 +9,7 @@
 namespace Live\Controller;
 
 use Live\Database\ChatMsg;
+use Live\Database\User;
 use \Live\Response;
 use \Live\Lib\Conn;
 use Live\Third\JPush;
@@ -40,7 +41,9 @@ class Socket extends Basic
         //$ret = \Swoolet\App::$server->sw->bind($request->fd, '11423_432141324');
         //var_dump('aaaa', $request->fd, $ret, \Swoolet\App::$server->sw->connection_info($request->fd));
 
-        $this->conn->join($request->fd, $token_uid);
+        $user = (new User())->getShowInfo($token_uid, 'lv');
+
+        $this->conn->join($request->fd, $token_uid, $user);
 
         return Response::msg('ok');
     }
@@ -83,7 +86,7 @@ class Socket extends Basic
             $this->conn->sendToUser($to_uid, [
                 't' => Conn::TYPE_CHAT,
                 'msg' => [
-                    'uid' => $from_uid,
+                    'user' => $user,
                     'msg' => $msg,
                 ],
             ], $cb);

@@ -8,7 +8,7 @@ use Live\Response;
 
 class Login extends Basic
 {
-    public $sms_key = 'sms:';
+    const SMS_KEY = 'sms:';
 
     public function third()
     {
@@ -26,7 +26,7 @@ class Login extends Basic
         $mobile = $data['mobile'];
         $code = $data['code'];
 
-        $r_code = (new Common())->get($this->sms_key . $mobile);
+        $r_code = (new Common())->get(self::SMS_KEY . $mobile);
         if ($r_code != $code)
             return Response::msg('验证码错误', 1001);
 
@@ -35,6 +35,7 @@ class Login extends Basic
         $user = $db_user->login($db_user::PF_MOBILE, $mobile, [
             'city' => $data['city'],
             'nickname' => '手机尾号' . substr($mobile, -4),
+            //'mobile' => $mobile,
         ]);
 
         Response::data([
@@ -57,7 +58,7 @@ class Login extends Basic
 
         $common = new Common();
 
-        if (!$common->set($this->sms_key . $mobile, $code, $timeout))
+        if (!$common->set(self::SMS_KEY . $mobile, $code, $timeout))
             return;
 
         Response::data([

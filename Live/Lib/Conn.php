@@ -11,7 +11,6 @@ namespace Live\Lib;
 
 use Live\Redis\RedisPub;
 use Swoolet\App;
-use Swoolet\Data\Redis;
 use Swoolet\Data\RedisAsync;
 use Swoolet\Lib\File;
 
@@ -47,6 +46,7 @@ class Conn
     public function __construct()
     {
         $this->sub = new RedisAsync('redis_async', 'sub');
+        $this->sub_user = new RedisAsync('redis_async', 'sub_user');
         $this->pub = new RedisPub();
     }
 
@@ -67,13 +67,13 @@ class Conn
         return $room;
     }
 
-    public function join($fd, $uid)
+    public function join($fd, $uid, $user)
     {
         $this->uid[$uid] = $fd;
 
         $this->subUser($uid);
 
-        $this->joinRoom($fd, 0, $uid, []);
+        $this->joinRoom($fd, 0, $uid, $user);
     }
 
     public function leave($fd)
@@ -82,7 +82,9 @@ class Conn
         if ($conn && ($uid = $conn[0]) && $this->getFd($uid) == $fd) {
             unset($this->conn[$fd], $this->uid[$uid]);
 
-            RedisAsync::release($uid, $this->key_user_chat . $uid);
+            //RedisAsync::release($uid, $this->key_user_chat . $uid);
+            $this->sub_user->unsubscribe($this->key_user_chat . $uid, function ($data, $err) {
+            });
         }
     }
 
@@ -113,8 +115,9 @@ class Conn
 
     public function subUser($uid)
     {
-        $sub = new RedisAsync('redis_async', $uid);
-        $sub->subscribe($this->key_user_chat . $uid, function ($data, $err) use ($uid) {
+        //$sub = new RedisAsync('redis_async', $uid);
+        $this->sub_user->subscribe($this->key_user_chat . $uid, function ($data, $err) use ($uid) {
+            //var_dump($data);
             if ($err)
                 return;
 
@@ -196,7 +199,7 @@ class Conn
         ];
 
         $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg), function ($result, $err) {
-            var_dump('updateUser', $result);
+            //var_dump('updateUser', $result);
         });
     }
 
@@ -251,7 +254,7 @@ class Conn
         File::touch("/tmp/worker_{$worker_id}.php", $data, true);
 
         RedisAsync::release('sub', $this->key_room_chat);
-        RedisAsync::release('pub');
+        RedisAsync::release('sub_user');
 
         return $this;
     }

@@ -36,7 +36,7 @@ class Gift extends Basic
     public function getAll($force = false)
     {
         if ($force || !$ret = $this->cache->get($this->key_gift)) {
-            $data = $this->table(1)->orderBy('sort ASC')->fetchAll();
+            $data = $this->table(1)->where('status', 1)->orderBy('sort ASC')->fetchAll();
 
             $ret = [];
             foreach ($data as $row)
@@ -48,15 +48,15 @@ class Gift extends Basic
         return $ret;
     }
 
-    public function getGift($gift_id, $key = '')
+    public function getGift($id, $key = '')
     {
         $all = $this->getAll();
-        $gift = &$all[$gift_id];
-        if ($gift && $gift['status'] == 1) {
+        $item = &$all[$id];
+        if ($item) {
             if ($key)
-                $gift = &$gift[$key];
+                $item = &$item[$key];
 
-            return $gift;
+            return $item;
         }
 
         return [];

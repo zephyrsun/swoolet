@@ -16,6 +16,7 @@ use Live\Database\RoomAdmin;
 use Live\Database\UserLevel;
 use Live\Redis\Vip;
 use Live\Response;
+use Live\Redis\Common;
 
 class My extends Basic
 {
@@ -133,9 +134,34 @@ class My extends Basic
         if (!$ret = (new UserLevel())->add($token_uid, $exp))
             return $ret;
 
-        Response::data([
+        return Response::data([
             'money' => $money,
             'exp' => $exp,
         ]);
+    }
+
+    public function bindMobile()
+    {
+        $data = parent::getValidator()->required('token')->mobileNumberCN('mobile')->required('code')->getResult();
+        if (!$data)
+            return $data;
+
+        $mobile = $data['mobile'];
+        $code = $data['code'];
+
+        $r_code = (new Common())->get(Login::SMS_KEY . $mobile);
+        if ($r_code != $code)
+            return Response::msg('验证码错误', 1001);
+
+        $token_uid = $data['token_uid'];
+
+        $ret = (new \Live\Database\User())->updateUser($token_uid, [
+            'mobile' => $mobile
+        ]);
+
+        if ($ret)
+            return Response::msg('ok');
+
+        return Response::msg('手机号绑定失败', 1046);
     }
 }

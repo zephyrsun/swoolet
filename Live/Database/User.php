@@ -109,6 +109,8 @@ class User extends Basic
             ];
         } elseif ($type == 'more') {
             $ts = \Swoolet\App::$ts;
+
+            $user['mobile'] = (int)$user['mobile'];
             $user += [
                 'is_vip' => $user['vip_expire'] > $ts,
                 'is_tycoon' => $user['tycoon_expire'] > $ts,
@@ -184,7 +186,7 @@ class User extends Basic
     public function getVisit($uid, $start, $limit)
     {
         //$list = $this->cache->link->lRange($this->key_home_visit . $uid, $start, $limit - 1);
-        $list = $this->cache->revRange($this->key_home_visit . $uid, $start, $limit);
+        $list = $this->cache->revRange($this->key_home_visit . $uid, $start, $limit, false);
 
         $i = 0;
         foreach ($list as &$uid) {

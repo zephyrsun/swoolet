@@ -51,7 +51,7 @@ class Replay extends Basic
             if ($list = $this->fetchAll()) {
                 $data = [];
                 foreach ($list as $row) {
-                    $data[] = $row['id'];
+                    $data[] = $row['key'];
                     $data[] = \msgpack_pack($row);
                 }
 
