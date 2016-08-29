@@ -8,6 +8,7 @@
 
 namespace Live\Database;
 
+use Live\Response;
 use Swoolet\Data\PDO;
 
 class MoneyLog extends Basic
@@ -26,6 +27,19 @@ class MoneyLog extends Basic
     public function table($key)
     {
         return PDO::table('m_2016');
+    }
+
+    public function addOrder($uid, $gift_id, $pf)
+    {
+        $goods = (new Goods())->getGoods($gift_id, $pf);
+
+        $id = (new MoneyLog())->add($uid, $uid, $goods['money'], 0, "alipay:$gift_id:{$goods['money']}");
+        if (!$id)
+            return Response::msg('充值失败', 1047);
+
+        return $goods + [
+            'trade_no' => date('Ymd', \Swoolet\App::$ts) . $id,
+        ];
     }
 
     public function add($uid, $to_uid, $money, $status = 1, $data = '')

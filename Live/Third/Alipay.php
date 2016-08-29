@@ -9,64 +9,44 @@
 
 namespace Live\Third;
 
-use Swoolet\App;
+include BASE_DIR . 'Live/Third/alipay/lib/alipay_submit.class.php';
 
-include BASE_DIR . 'Live/Third/alipay/Pili.php';
-
-class Alipy
+class Alipay
 {
-    public $hub;
+    public $config = [];
 
     public function __construct()
     {
-        $cfg = App::getConfig('qiniu');
-
-        $credentials = new \Qiniu\Credentials($cfg['key'], $cfg['secret']); # => Credentials Object
-        $this->hub = new \Pili\Hub($credentials, $cfg['hub']); # => Hub Object
+        $this->config = include BASE_DIR . 'Live/Third/alipay/alipay.camhow.php';
     }
 
-    public function start($key)
+    public function createOrder($trade_no, $coin, $total_fee, $gift_id)
     {
-        $result = @$this->hub->listStreams(null, 1, $key);
-        $items = &$result['items'];
-        if ($items && ($stream = \current($items)) && $key == $stream->title) {
-            /**
-             * @var \Pili\Stream $stream
-             */
-            $stream->enable();
-        } else {
-            $stream = $this->hub->createStream($key, null, 'static');
-        }
+        $subject = "充值{$coin}看币";
 
-        $publish_url = $stream->rtmpPublishUrl();
-        $play_url = $stream->rtmpLiveUrls()['ORIGIN'];
-        $hls_url = $stream->hlsLiveUrls()['ORIGIN'];
+        $body = "充值看币_{$coin}_{$gift_id}";
 
-        return [
-            'publish_url' => $publish_url,
-            'play_url' => $play_url,
-            'hls_url' => $hls_url,
-            'third' => $stream->id,
+        $config = $this->config;
+
+        $param = [
+            'service' => $config['service'],
+            'partner' => $config['partner'],
+            'seller_id' => $config['seller_id'],
+            'payment_type' => $config['payment_type'],
+            'notify_url' => $config['notify_url'],
+            'return_url' => $config['return_url'],
+
+            'anti_phishing_key' => $config['anti_phishing_key'],
+            'exter_invoke_ip' => $config['exter_invoke_ip'],
+            'out_trade_no' => $trade_no,
+            'total_fee' => $total_fee,
+            'subject' => $subject,
+            'body' => $body,
+            '_input_charset' => $config['input_charset'],
+
         ];
-    }
 
-    public function stop($key, $stream_id, $start_ts, $end_ts)
-    {
-        $stream = $this->hub->getStream($stream_id);
-        $stream->disable();
-
-        try {
-            $ret = $stream->saveAs("{$key}_{$start_ts}.mp4", null, (int)$start_ts, (int)$end_ts);
-
-            $ret = [
-                'play_url' => $ret['url'],
-                'duration' => $ret['duration'],
-            ];
-
-        } catch (\Exception $e) {
-            $ret = false;
-        }
-
-        return $ret;
+        $alipaySubmit = new \AlipaySubmit($this->config);
+        return $alipaySubmit->buildRequestPara($param);
     }
 }

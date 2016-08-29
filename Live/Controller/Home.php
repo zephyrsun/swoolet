@@ -14,7 +14,7 @@ class Home extends Basic
 
     public function hot()
     {
-        $data = parent::getValidator()->required('token')->required('key', false)->getResult();
+        $data = parent::getValidator()->required('token')->le('key', 0)->getResult();
         if (!$data)
             return $data;
 

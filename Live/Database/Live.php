@@ -58,7 +58,8 @@ class Live extends Basic
     {
         $key = $this->key_home;
 
-        $list = $this->table(0)->select('uid,title,city,cover,play_url')->where('status', 1)->limit($this->limit)->fetchAll();
+        $list = $this->table(0)->select('uid,title,city,cover,play_url')
+            ->where('status', 1)->orderBy('ts DESC')->limit($this->limit)->fetchAll();
 
         $db_user = new User();
         $n = 0;
@@ -74,7 +75,7 @@ class Live extends Basic
                 'zodiac' => $user['zodiac'],
             ];
 
-            $data[] = $n++;
+            $data[] = ++$n;
             $data[] = \msgpack_pack($row);
         }
 

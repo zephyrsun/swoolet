@@ -309,11 +309,11 @@ class Validator
      */
     protected function checkResult($key, $val, $result, $required)
     {
-        if ($required && $val === null)
+        if (!$required && $val === null) {
+            return $this;
+        } elseif (!$result) {
             $this->err[] = $key;
-        elseif (!$result)
-            $this->err[] = $key;
-        else
+        } else
             $this->result[$key] = $val;
 
         return $this;

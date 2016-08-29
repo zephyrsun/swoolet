@@ -20,6 +20,18 @@ class ChatMsg extends Basic
 
         $msg = (new \Live\Database\ChatMsg())->getMsg($data['token_uid']);
 
+        $users = [];
+        $ds_user = new \Live\Database\User();
+        foreach ($msg as &$row) {
+            $uid = $row['from_uid'];
+
+            $user = &$users[$uid] or $user = $ds_user->getShowInfo($uid, 'lv');
+
+            $row['user'] = $user;
+
+            unset($row['from_uid']);
+        }
+
         return Response::data([
             'msg' => $msg,
         ]);

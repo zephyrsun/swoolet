@@ -399,6 +399,20 @@ token
 {"list":[{"id":1,"title":"测试","content":"测试内容","img":"http:\/\/img.mp.itc.cn\/upload\/20160829\/cbdee074ee1a4d31a9518fa7c8beb693_th.jpeg","ts":1}],"c":0}```
 ```
 
+###获取支付宝param
+```
+接口:
+/Alipay/createOrder
+
+参数:
+token
+goods_id 商品id
+pf: 平台 ios或android
+
+返回:
+{"param":{"_input_charset":"utf-8","body":"充值看币_42_1","notify_url":"\/Alipay\/notify","out_trade_no":"2016082965","partner":"2088221665307615","payment_type":"1","return_url":"\/Alipay\/callback","seller_id":"2088221665307615","service":"create_direct_pay_by_user","subject":"充值42看币","total_fee":6,"sign":"Tx8jWUT2hnOUUipbCoo1z7dRn1iJSy60qqtSkMJwyxl+AmSaRPN7Rbjp\/Ps6FPjXNrlV83YkpIF7D3PdynkLGxOhFsb0z91tZTfKd6bAAa9r2gmYlzlWbVyFNbIPJoYbrWOr3W8QoJvPlUU3ioAQS5LFCsomtpQcAHUkP6p5JJA=","sign_type":"RSA"},"c":0}
+```
+
 
 
 
