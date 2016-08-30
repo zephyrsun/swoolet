@@ -89,31 +89,34 @@ class Gift extends Basic
             return Response::msg('送礼失败', 1013);
         }
 
-        if ($ret = $this->commit()) {
+        if ($this->commit()) {
             (new Rank())->addRank($send_uid, $to_uid, $money);
         }
 
         return $gift['name'];
     }
 
-    public function sendHorn($uid, $to_uid)
+    public function sendHorn($send_uid, $to_uid)
     {
         $money = 20;
 
         $this->beginTransaction();
-        $ret = (new Balance())->sub($uid, $money, $money);
+        $ret = (new Balance())->sub($send_uid, $money, $money);
         if (!$ret) {
             $this->rollback();
             return $ret;
         }
 
-        $ret = (new MoneyLog())->add($uid, $to_uid, $money, 1, 'horn');
+        $ret = (new MoneyLog())->add($send_uid, $to_uid, $money, 1, 'horn');
         if (!$ret) {
             $this->rollback();
             return Response::msg('发送弹幕失败', 1018);
         }
 
-        $this->commit();
+        if ($ret = $this->commit()) {
+            (new Rank())->addRank($send_uid, $to_uid, $money);
+        }
+
         return $ret;
     }
 }

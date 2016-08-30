@@ -5,7 +5,8 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 $app = \Swoolet\Socket::createServer('Live', 'dev');
 new \Live\Controller\Basic();
 
-\Swoolet\App::$ts = time();
+var_dump(microtime(true) * 1e4);
+exit;
 
 
 $ret = (new \Live\Database\Fan())->isFollow(11, 12);

@@ -153,7 +153,10 @@ class Conn
             //$send_uid != $uid
             //var_dump('room', $this->getRoom($data['room_id']));
             foreach ($this->getRoom($data['room_id']) as $uid => $fd) {
-                if ($data['uid'] != $uid && !$sw->push($fd, $data['msg'])) {
+
+                if ($data['uid'] == $uid) {
+                    continue;
+                } elseif (!$sw->push($fd, $data['msg'])) {
                     unset($this->room[$data['room_id']][$uid]);
                 }
             }

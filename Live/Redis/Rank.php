@@ -19,32 +19,37 @@ class Rank extends Common
     public $key_rank_room = 'rank_room:';
     public $key_room_user_num = 'room_user_num:';
 
+    public $limit = 30;
+
 
     public function addRank($send_uid, $to_uid, $n)
     {
         //房间土豪榜
-        $this->link->zIncrBy($this->key_rank_room . $to_uid, $n, $send_uid);
+        $score = $this->link->zIncrBy($this->key_rank_room . $to_uid, $n, $send_uid);
         //土豪总榜
         $this->link->zIncrBy($this->key_rank_send, $n, $send_uid);
         //收礼总榜
         $this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
+
+        return $score;
     }
 
     public function joinRoom($room_id, $uid)
     {
-        $limit = 10;
+        $limit = $this->limit;
         $key = $this->key_rank_room . $room_id;
 
         $n = $this->link->zCard($key);
-        if ($n < $limit) {
 
+        if ($n == 0) {
             //每周5点清空
-            if ($n == 0) {
-                $this->link->expireAt(\strtotime('next monday') + 18000);
-            }
-
-            $this->link->zIncrBy($key, 0, $uid);
+            //  $this->link->expireAt($key, \strtotime('next monday') + 18000);
+        } elseif ($n > $limit * 2) {
+            //移除超过限制的
+            $this->link->zRemRangeByRank($key, $limit + 1, -1);
         }
+
+        $this->link->zIncrBy($key, 0, $uid);
 
         $this->incrRoomUserNum($room_id);
 
@@ -56,7 +61,7 @@ class Rank extends Common
         $key = $this->key_room_user_num . $room_id;
         $n = $this->link->incr($key);
         if ($n == 1) {
-            $this->link->expire($key, 3600 * 5);
+            $this->link->expire($key, 3600 * 6);
         }
 
         return $n;
@@ -64,12 +69,21 @@ class Rank extends Common
 
     public function getRoomUserNum($room_id)
     {
-        return (int)$this->link->get($this->key_room_user_num . $room_id);
+        return $this->link->get($this->key_room_user_num . $room_id);
+    }
+
+    public function getUserRankInRoom($room_id, $uid)
+    {
+        $rank = $this->link->zRevRank($this->key_rank_room . $room_id, $uid);
+        if (!$rank || $rank > $this->limit)
+            return -1;
+
+        return $rank;
     }
 
     public function getRankInRoom($uid, $start)
     {
-        return $this->_getRank($this->key_rank_room . $uid, $start, 'room');
+        return $this->_getRank($this->key_rank_room . $uid, $start);
     }
 
     public function getRankOfSend($start)
@@ -82,9 +96,9 @@ class Rank extends Common
         return $this->_getRank($this->key_rank_income, $start);
     }
 
-    private function _getRank($key, $start, $type = '')
+    private function _getRank($key, $start)
     {
-        $data = parent::revRange($key, $start, 20, true);
+        $data = parent::revRange($key, $start, $this->limit, true);
 
         $ret = array();
         $db_user = new \Live\Database\User();

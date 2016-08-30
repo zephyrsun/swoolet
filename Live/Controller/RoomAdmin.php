@@ -38,7 +38,7 @@ class RoomAdmin extends Basic
             $this->conn->sendToRoom($room_id, $token_uid, [
                 't' => Conn::TYPE_ROOM_BROADCAST,
                 'user' => (new \Live\Database\User())->getShowInfo($admin_uid, 'simple'),
-                'msg' => ':nickname被任命为管理员',
+                'msg' => '{nickname}被任命为管理员',
             ]);
         }
 

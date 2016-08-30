@@ -9,6 +9,7 @@
 namespace Live\Controller;
 
 use Live\Response;
+use Live\Database\Banner as DataBanner;
 
 class Banner extends Basic
 {
@@ -18,7 +19,7 @@ class Banner extends Basic
         if (!$data)
             return $data;
 
-        $list = (new \Live\Database\Banner())->getAll(true);
+        $list = (new DataBanner())->getAllBanner();
         $list = array_values($list);
 
         Response::data(['list' => $list]);
@@ -30,8 +31,19 @@ class Banner extends Basic
         if (!$data)
             return $data;
 
-        $data = (new \Live\Database\Banner())->getBanner($data['id']);
+        $data = (new DataBanner())->getBanner($data['id']);
 
         //  Response::data(['banner' => $data]);
+    }
+
+    public function splash()
+    {
+        $data = parent::getValidator()->required('pf')->required('ch')->getResult();
+        if (!$data)
+            return $data;
+
+        $splash = (new DataBanner())->getSplash();
+
+        Response::data($splash);
     }
 }

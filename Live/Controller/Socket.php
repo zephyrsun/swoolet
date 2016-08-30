@@ -85,10 +85,8 @@ class Socket extends Basic
 
             $this->conn->sendToUser($to_uid, [
                 't' => Conn::TYPE_CHAT,
-                'msg' => [
-                    'user' => $user,
-                    'msg' => $msg,
-                ],
+                'user' => $user,
+                'msg' => $msg,
             ], $cb);
         }
 

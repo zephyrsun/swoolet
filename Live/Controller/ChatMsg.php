@@ -8,6 +8,7 @@
 
 namespace Live\Controller;
 
+use Live\Lib\Conn;
 use Live\Response;
 
 class ChatMsg extends Basic
@@ -23,6 +24,9 @@ class ChatMsg extends Basic
         $users = [];
         $ds_user = new \Live\Database\User();
         foreach ($msg as &$row) {
+
+            $row['t'] = Conn::TYPE_CHAT;
+
             $uid = $row['from_uid'];
 
             $user = &$users[$uid] or $user = $ds_user->getShowInfo($uid, 'lv');

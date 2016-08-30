@@ -15,6 +15,7 @@ use Live\Database\Fan;
 use Live\Database\Follow;
 use Live\Database\Income;
 use Live\Database\Replay;
+use Live\Database\RoomAdmin;
 use Live\Database\UserLevel;
 use Live\Response;
 
@@ -22,18 +23,26 @@ class User extends Basic
 {
     public function getUserInfo($request)
     {
-        $data = parent::getValidator()->required('token')->ge('uid', 1)->getResult();
+        $data = parent::getValidator()->required('token')->ge('uid', 1)->ge('room_id', 1, false)->getResult();
         if (!$data)
             return $data;
 
-        $user = (new \Live\Database\User())->getUserInfo($data['uid'], $data['token_uid']);
+        $uid = $data['uid'];
+        $token_uid = $data['token_uid'];
+
+        $user = (new \Live\Database\User())->getUserInfo($uid, $token_uid);
+
+        if ($room_id = &$data['room_id']) {
+            $user['is_admin'] = (new RoomAdmin())->isAdmin($room_id, $uid);
+        }
+
         return Response::data(['user' => $user]);
     }
 
     public function updateUserInfo($request)
     {
         $data = parent::getValidator()->required('token')
-            ->length('nickname', 1, 8, false)
+            ->length('nickname', 1, 20, false)
             ->length('sex', 1, 1, false)
             ->between('height', 150, 240, false)
             ->required('birthday', false)

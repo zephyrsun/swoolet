@@ -15,10 +15,12 @@ include BASE_DIR . 'Live/Third/Qiniu/Config.php';
 include BASE_DIR . 'Live/Third/Qiniu/functions.php';
 include BASE_DIR . 'Live/Third/Qiniu/Storage/UploadManager.php';
 include BASE_DIR . 'Live/Third/Qiniu/Storage/FormUploader.php';
+include BASE_DIR . 'Live/Third/Qiniu/Storage/BucketManager.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Client.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Request.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Response.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Error.php';
+
 
 
 use Live\Response;

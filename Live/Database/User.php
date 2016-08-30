@@ -45,6 +45,12 @@ class User extends Basic
             }
             */
 
+            if (isset($user['city'])) {
+                $this->updateUser($uid, [
+                    'city' => $user['city'],
+                ]);
+            }
+
         } else {
             $uid = $this->getUID($pf, $username);
 

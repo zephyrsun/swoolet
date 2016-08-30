@@ -20,9 +20,10 @@
         console.log("Connected to WebSocket server.")
 
         var token = 'obzjte|tuKqA76VAk3CuqD1tD8IB3MCnGx01HQtoTa6dqNwnug=';
+        var room_id = 1
 
         websocket.send('{"m":"socket_init","token":"' + token + '"}')
-        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')
+        websocket.send('{"m":"room_join","room_id":"' + room_id + '","first":true,"token":"' + token + '"}')
         websocket.send('{"m":"room_sendGift","gift_id":1,"num":"1","total":1}')
 //        websocket.send('{"m":"room_sendMsg","msg":"你好"}')
 //        websocket.send('{"m":"room_leave"}')

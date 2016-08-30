@@ -120,18 +120,24 @@ class Room extends Basic
                 if (!$ret)
                     return $ret;
 
+                $rank = (new Rank())->getUserRankInRoom($room_id, $uid);
+
             } else {
+                $rank = 0;
+
                 $t = Conn::TYPE_MESSAGE;
+
                 unset($user['avatar']);
             }
 
             $this->conn->sendToRoom($room_id, $uid, [
                 't' => $t,
                 'user' => $user,
+                'rank' => $rank,
                 'msg' => $data['msg'],
             ]);
 
-            return Response::data(['lv' => $user['lv']]);
+            return Response::data(['lv' => $user['lv'], 'rank' => $rank]);
         }
 
         return Response::msg('ok');
@@ -188,7 +194,7 @@ class Room extends Basic
     {
         $data = parent::getValidator()->required('gift_id')
             ->ge('num', 1)//当前数量
-            ->ge('total', 1)//总数
+            ->ge('total', 0)//总数
             ->getResult();
         if (!$data)
             return $data;
@@ -210,6 +216,8 @@ class Room extends Basic
 
             $lv = (new UserLevel())->getLv($uid);
 
+            $rank = (new Rank())->getUserRankInRoom($room_id, $uid);
+
             $this->conn->sendToRoom($room_id, $uid, [
                 't' => Conn::TYPE_GIFT,
                 'user' => [
@@ -218,6 +226,7 @@ class Room extends Basic
                     'avatar' => $user['avatar'],
                     'lv' => $lv,
                 ],
+                'rank' => $rank,
                 'msg' => "送给主播{$gift_name}",
                 'num' => $num,
                 'total' => $total,
@@ -226,6 +235,7 @@ class Room extends Basic
 
             return Response::data([
                 'lv' => $lv,
+                'rank' => $rank,
             ]);
         }
 

@@ -68,7 +68,7 @@ uid //增加谁
 房间消息(t值参考`房间消息类型`):
 {"t":6,"user":{"uid":"10001","nickname":"nickname10001"},"msg":":nickname被任命为管理员"}
 
-:nickname需要被user.nickname替换
+{nickname}需要被user.nickname替换
 ```
 
 ###删除房管
@@ -413,7 +413,40 @@ pf: 平台 ios或android
 {"param":{"_input_charset":"utf-8","body":"充值看币_42_1","notify_url":"\/Alipay\/notify","out_trade_no":"2016082965","partner":"2088221665307615","payment_type":"1","return_url":"\/Alipay\/callback","seller_id":"2088221665307615","service":"create_direct_pay_by_user","subject":"充值42看币","total_fee":6,"sign":"Tx8jWUT2hnOUUipbCoo1z7dRn1iJSy60qqtSkMJwyxl+AmSaRPN7Rbjp\/Ps6FPjXNrlV83YkpIF7D3PdynkLGxOhFsb0z91tZTfKd6bAAa9r2gmYlzlWbVyFNbIPJoYbrWOr3W8QoJvPlUU3ioAQS5LFCsomtpQcAHUkP6p5JJA=","sign_type":"RSA"},"c":0}
 ```
 
+###苹果支付接口
+```
+接口:
+/AppleIAP/verifyReceipt
 
+参数:
+token
+receipt 
 
+返回:
+```
 
+###房间排行接口
+```
+接口:
+/Rank/roomSent
 
+参数:
+token
+room_id 
+
+返回:
+{"rank":[{"uid":2,"nickname":"nii😀","avatar":"","lv":5,"money":700},{"uid":1,"nickname":"15921258181","avatar":"","lv":27,"money":0}],"c":0}
+```
+
+###开屏页接口
+```
+接口:
+/Banner/splash
+
+参数:
+pf 平台 ios或android
+ch 渠道特定值,默认传1
+
+返回:
+{"img":"http:\/\/cdn.duitang.com\/uploads\/item\/201308\/20\/20130820124935_kQQLU.thumb.600_0.jpeg","c":0}
+```

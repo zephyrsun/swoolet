@@ -33,12 +33,14 @@ class MoneyLog extends Basic
     {
         $goods = (new Goods())->getGoods($gift_id, $pf);
 
+        microtime(true);
+
         $id = (new MoneyLog())->add($uid, $uid, $goods['money'], 0, "alipay:$gift_id:{$goods['money']}");
         if (!$id)
             return Response::msg('充值失败', 1047);
 
         return $goods + [
-            'trade_no' => date('Ymd', \Swoolet\App::$ts) . $id,
+            'trade_no' => '21' . date('Ymd', \Swoolet\App::$ts) . $id,
         ];
     }
 
