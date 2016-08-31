@@ -82,8 +82,10 @@ uid //删除谁
 
 返回:
 无
+```
 
 ###禁言
+```
 接口:
 /RoomAdmin/silenceUser
 
@@ -95,6 +97,21 @@ uid //禁言谁
 返回:
 无
 ```
+
+###取消禁言
+```
+接口:
+/RoomAdmin/stopSilenceUser
+
+参数:
+token 
+room_id //房间号,如果是主播传主播uid
+uid //禁言谁
+
+返回:
+无
+```
+
 ###上传头像
 ```
 接口:
@@ -478,4 +495,19 @@ ts 由前一个数据返回
 返回:
 参考进入房间
 数据中有ts字段,是个时间差,表示这条信息在第几秒播放,拉取下一组数据时传入上一次最后一条的ts
+```
+
+###礼物列表
+```
+接口:
+/Gift/getGift
+
+不要每次进直播间请求,放在应用启动的时候
+
+参数:
+token
+v app版本号
+
+返回:
+{"list":[{"id":10,"name":"礼物1","money":2,"exp":2,"remark":"+2经验","sort":0,"status":1},{"id":1,"name":"礼物2","money":10,"exp":10,"remark":"+10经验","sort":1,"status":1},{"id":2,"name":"礼物3","money":20,"exp":20,"remark":"+20经验","sort":2,"status":1},{"id":3,"name":"礼物4","money":50,"exp":50,"remark":"+50经验","sort":3,"status":1},{"id":4,"name":"礼物5","money":100,"exp":100,"remark":"+100经验","sort":4,"status":1},{"id":5,"name":"礼物6","money":520,"exp":520,"remark":"+520经验","sort":5,"status":1},{"id":6,"name":"礼物7","money":999,"exp":999,"remark":"+999经验","sort":6,"status":1},{"id":7,"name":"礼物8","money":1888,"exp":1888,"remark":"+1888经验","sort":7,"status":1},{"id":9,"name":"礼物9","money":6666,"exp":6666,"remark":"+6666经验","sort":8,"status":1},{"id":8,"name":"礼物10","money":8888,"exp":8888,"remark":"+8000经验","sort":9,"status":1}],"c":0}
 ```

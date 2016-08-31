@@ -43,6 +43,9 @@ class Banner extends Basic
             return $data;
 
         $splash = (new DataBanner())->getSplash();
+        if (!$splash) {
+            $splash = ['img' => ''];
+        }
 
         Response::data($splash);
     }

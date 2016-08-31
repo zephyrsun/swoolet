@@ -65,8 +65,12 @@ class Goods extends Basic
             $new_list = [];
 
             foreach ($list as $row) {
-                if ($pf == 'ios')
+                if ($pf == 'ios') {
+                    if ($row['money'] > 1598)
+                        continue;
+
                     $row['coin'] *= 0.7;
+                }
 
                 if ($row['channel'] == $channel && $row['type'] == $type) {
                     unset($row['channel'], $row['type'], $row['vip_day'], $row['tycoon_day']);

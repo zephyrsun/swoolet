@@ -18,7 +18,7 @@ class RoomAdmin extends Basic
     public $table_prefix = 'room_admin';
 
     public $key_admin = 'room_admin:';
-    public $key_silence = 'silence:';
+    public $key_silence = 'room_silence:';
 
     public function __construct()
     {
@@ -68,12 +68,12 @@ class RoomAdmin extends Basic
 
     public function silenceUser($room_id, $uid)
     {
-        return $this->cache->link->set($this->key_silence . "{$uid}_{$room_id}", 1, 7200);
+        return $this->cache->link->set("{$this->key_silence}{$room_id}_{$uid}", 1, 7200);
     }
 
     public function isSilence($room_id, $uid)
     {
-        return $this->cache->link->get($this->key_silence . "{$uid}_{$room_id}");
+        return $this->cache->link->get("{$this->key_silence}{$room_id}_{$uid}");
     }
 
     public function isAdmin($uid, $admin_uid)

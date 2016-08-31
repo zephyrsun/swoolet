@@ -107,6 +107,9 @@ class Room extends Basic
         if ($conn) {
             list($uid, $room_id, $user) = $conn;
 
+            if (isset($user['silence']) && $user['silence'])
+                return Response::msg('你已被禁言两小时');
+
             $user += [
                 'uid' => $uid,
             ];

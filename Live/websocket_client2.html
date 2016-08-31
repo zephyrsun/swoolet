@@ -17,7 +17,7 @@
         console.log("Connected to WebSocket server.")
 
         var token = 'obzjw8|J6nDc48Hug95Ylc8An3f1\/efuibiQ19HJzhiWRWHfwk='
-        var room_id = 1
+        var room_id = 2
 
         websocket.send('{"m":"socket_init","token":"' + token + '"}')
         websocket.send('{"m":"room_join","room_id":"' + room_id + '","first":true,"token":"' + token + '"}')

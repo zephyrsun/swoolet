@@ -22,7 +22,7 @@ class Conn
     const TYPE_FOLLOW = 3;//关注主播
     const TYPE_ENTER = 4;//进入房间
     const TYPE_PRAISE = 5;//点赞
-    const TYPE_ROOM_BROADCAST = 6;//房间广播
+    const TYPE_ROOM_BROADCAST = 6;//房间广播,系统消息
     const TYPE_ROOM_ONE = 7;//房间,只自己收到
     const TYPE_CHAT = 8;//私信
 
@@ -239,7 +239,7 @@ class Conn
 
     public function onWorkerStart($sw, $worker_id)
     {
-        $filename = "/tmp/swoolet_worker_{$worker_id}.php";
+        $filename = "/tmp/swoolet_ws_{$worker_id}.php";
         $arr = File::get($filename, true);
         if ($arr) {
             list($this->uid, $this->conn, $this->room) = $arr;
@@ -271,7 +271,7 @@ class Conn
 
         //var_dump('stop', $this->room);
 
-        $ret = File::touch("/tmp/swoolet_worker_{$worker_id}.php", $data, true);
+        $ret = File::touch("/tmp/swoolet_ws_{$worker_id}.php", $data, true);
 
         RedisAsync::release('sub', $this->key_room_chat);
         RedisAsync::release('sub_user');
