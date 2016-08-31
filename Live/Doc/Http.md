@@ -450,3 +450,32 @@ ch 渠道特定值,默认传1
 返回:
 {"img":"http:\/\/cdn.duitang.com\/uploads\/item\/201308\/20\/20130820124935_kQQLU.thumb.600_0.jpeg","c":0}
 ```
+
+###回放
+```
+接口:
+/Replay/view
+
+参数:
+uid
+id 回放id
+
+返回:
+参考进入房间
+replay.view_num 是观看人数
+```
+
+###回放消息
+```
+接口:
+/Replay/getRoomMsg
+
+参数:
+uid
+id 回放id
+ts 由前一个数据返回
+
+返回:
+参考进入房间
+数据中有ts字段,是个时间差,表示这条信息在第几秒播放,拉取下一组数据时传入上一次最后一条的ts
+```

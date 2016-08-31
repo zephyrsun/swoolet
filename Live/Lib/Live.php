@@ -67,6 +67,7 @@ class Live
                     'title' => $live_data['title'],
                     'city' => $live_data['city'],
                     'cover' => $live_data['cover'],
+                    'view_num' => (new Rank())->getRoomUserNum($uid),
                 ];
 
             (new \Live\Database\Replay())->saveReplay($uid, $data);

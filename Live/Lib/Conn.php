@@ -9,6 +9,7 @@
 
 namespace Live\Lib;
 
+use Live\Database\RoomMsg;
 use Live\Redis\RedisPub;
 use Swoolet\App;
 use Swoolet\Data\RedisAsync;
@@ -30,9 +31,10 @@ class Conn
 
     const TYPE_OFFLINE_CHAT_MSG = 'offlineMsg';
 
-    public $uid;
-    public $conn;
-    public $room;
+    public $uid = [];
+    public $conn = [];
+    public $room = [];
+    public $msg = [];
 
     public $sub;
     public $pub;
@@ -108,6 +110,10 @@ class Conn
         if ($conn) {
             list($uid, $room_id) = $conn;
             unset($this->room[$room_id][$uid]);
+
+            if (isset($this->room[$uid])) {
+                $this->stopRoom($uid);
+            }
         }
 
         return $conn;
@@ -175,8 +181,19 @@ class Conn
     public function createRoom($fd, $uid, $user)
     {
         $this->room[$uid] = [];
+        $this->msg[$uid] = [];
 
         $this->joinRoom($fd, $uid, $uid, $user);
+    }
+
+    public function stopRoom($uid)
+    {
+        unset($this->room[$uid], $this->msg[$uid]);
+    }
+
+    public function msgForSave($room_id, $uid, $msg)
+    {
+        $this->msg[$room_id][] = [$uid, $msg, \Swoolet\App::$ts];
     }
 
     public function sendToRoom($room_id, $uid, $msg)
@@ -222,7 +239,7 @@ class Conn
 
     public function onWorkerStart($sw, $worker_id)
     {
-        $filename = "/tmp/worker_{$worker_id}.php";
+        $filename = "/tmp/swoolet_worker_{$worker_id}.php";
         $arr = File::get($filename, true);
         if ($arr) {
             list($this->uid, $this->conn, $this->room) = $arr;
@@ -254,10 +271,17 @@ class Conn
 
         //var_dump('stop', $this->room);
 
-        File::touch("/tmp/worker_{$worker_id}.php", $data, true);
+        $ret = File::touch("/tmp/swoolet_worker_{$worker_id}.php", $data, true);
 
         RedisAsync::release('sub', $this->key_room_chat);
         RedisAsync::release('sub_user');
+
+        $ds_msg = new RoomMsg();
+        foreach ($this->msg as $room_id => $msg) {
+            $ds_msg->addFromChat($room_id, $msg);
+        }
+
+        $this->msg = [];
 
         return $this;
     }

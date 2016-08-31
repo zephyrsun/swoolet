@@ -164,7 +164,7 @@ class Socket
 
         register_shutdown_function([$this, 'fatalHandler']);
 
-        $prefix = "/tmp/swoole_{$port}";
+        $prefix = "/tmp/swoolet_{$port}";
         $this->pid_file = "$prefix.pid";
 
         $this->service();

@@ -420,15 +420,15 @@ namespace Swoolet\Data {
          * @param array $params
          * @return \PDOStatement
          */
-        public function execSQL($sql, $params = array())
-        {
-            $this->sql = $sql;
-            $this->param = $params;
-
-            $this->exec();
-
-            return $this->sth;
-        }
+//        public function execSQL($sql, $params = array())
+//        {
+//            $this->sql = $sql;
+//            $this->param = $params;
+//
+//            $this->exec();
+//
+//            return $this->sth;
+//        }
 
         /**
          * @return bool

@@ -5,7 +5,8 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 $app = \Swoolet\Socket::createServer('Live', 'dev');
 new \Live\Controller\Basic();
 
-var_dump(microtime(true) * 1e4);
+$q = \strtotime('first day of next month 00:00');
+var_dump($q);
 exit;
 
 

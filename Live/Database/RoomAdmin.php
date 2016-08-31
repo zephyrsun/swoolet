@@ -81,6 +81,14 @@ class RoomAdmin extends Basic
         return $this->cache->link->sIsMember($this->key_admin . $uid, $admin_uid);
     }
 
+    public function getCount($uid)
+    {
+        //重新加载管理员
+        $ret = $this->getRoomAdmin($uid);
+
+        return count($ret);
+    }
+
     /**
      * 获取我的管理员
      *
@@ -94,7 +102,7 @@ class RoomAdmin extends Basic
         if (!$data = $this->cache->link->sMembers($key)) {
 
             $data = $this->table($uid)->select('admin_uid')
-                ->where('uid=?', $uid)->fetchAll(\PDO::FETCH_COLUMN, 0);
+                ->where('uid = ?', $uid)->fetchAll(\PDO::FETCH_COLUMN, 0);
 
             if ($data) {
                 array_unshift($data, $key);

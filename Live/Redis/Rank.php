@@ -21,15 +21,14 @@ class Rank extends Common
 
     public $limit = 30;
 
-
     public function addRank($send_uid, $to_uid, $n)
     {
         //房间土豪榜
         $score = $this->link->zIncrBy($this->key_rank_room . $to_uid, $n, $send_uid);
         //土豪总榜
-        $this->link->zIncrBy($this->key_rank_send, $n, $send_uid);
+        //$this->link->zIncrBy($this->key_rank_send, $n, $send_uid);
         //收礼总榜
-        $this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
+        //$this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
 
         return $score;
     }
@@ -42,8 +41,8 @@ class Rank extends Common
         $n = $this->link->zCard($key);
 
         if ($n == 0) {
-            //每周5点清空
-            //  $this->link->expireAt($key, \strtotime('next monday') + 18000);
+            //月榜
+            $this->link->expireAt($key, \strtotime('first day of next month 00:00', \Swoolet\App::$ts));
         } elseif ($n > $limit * 2) {
             //移除超过限制的
             $this->link->zRemRangeByRank($key, $limit + 1, -1);

@@ -34,6 +34,8 @@ class User extends Basic
 
         if ($room_id = &$data['room_id']) {
             $user['is_admin'] = (new RoomAdmin())->isAdmin($room_id, $uid);
+        } elseif ($uid == $token_uid) {
+            $user['admin'] = (new RoomAdmin())->getCount($uid);
         }
 
         return Response::data(['user' => $user]);

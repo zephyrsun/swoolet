@@ -16,6 +16,7 @@ class Replay extends Basic
 
     public $key_replay = 'replay:';
     public $key_replay_count = 'replay_n:';
+    public $key_replay_one = 'replay_one:';
 
     public function __construct()
     {
@@ -42,10 +43,19 @@ class Replay extends Basic
         return $ret;
     }
 
+    public function get($uid, $id)
+    {
+        $key = $this->key_replay_one . $uid;
+
+        return $this->getWithCache($key, function () use ($uid, $id) {
+            return $this->table($uid)->where('id', $id)->fetch();
+        });
+    }
+
     public function getList($uid, $start, $limit = 8)
     {
         $ret = parent::getListWithCount($this->key_replay . $uid, $this->key_replay_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
-            $this->table($uid)->limit(500);
+            $this->table($uid);
 
             $this->select('id AS `key`,title,cover,play_url')->orderBy('id DESC')->where('uid = ? AND id > ?', [$uid, $start]);
             if ($list = $this->fetchAll()) {
