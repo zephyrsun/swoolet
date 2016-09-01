@@ -4,22 +4,19 @@ namespace Live\Controller;
 
 use Live\Response;
 
-class Home extends Basic
+class Live extends Basic
 {
-    public function __call($name, $arg)
-    {
-        $this->hot();
-    }
-
-    public function hot()
+    public function follow()
     {
         $data = parent::getValidator()->required('token')->le('key', 0)->getResult();
         if (!$data)
             return $data;
 
-        $start_id = (int)$data['key'];
+        $token_uid = $data['token_uid'];
+        $token_uid = 2;
 
-        $raw = (new \Live\Database\Live())->getLiveList($start_id);
+        $start_id = (int)$data['key'];
+        $raw = (new \Live\Database\Live())->getLiveOfFollow($token_uid, $start_id);
 
         $list = [];
         foreach ($raw as $data => $key) {

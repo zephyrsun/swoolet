@@ -18,6 +18,7 @@ class Live extends Basic
     public $table_prefix = 'live';
     public $key_live = 'live:';
     public $key_home = 'home';
+    public $key_live_follow = 'live_follow:';
 
     const PIC_LARGE = '!pl';
 
@@ -37,30 +38,29 @@ class Live extends Basic
         return $this;
     }
 
-    public function getHome($start_id, $limit = 20)
+    public function getLiveList($start_id, $sub_key = 'home', $sub_clause = null, $limit = 20)
     {
-        $key = $this->key_home;
+        $key = $this->key_live . $sub_key;
         $list = $this->cache->revRange($key, $start_id, $limit, true);
         if (!$list) {
-            $this->cacheHome();
+            $this->cacheLiveList($sub_key, $sub_clause);
             $list = $this->cache->revRange($key, $start_id, $limit, true);
         }
 
-        $ret = [];
-        foreach ($list as $data => $key) {
-            $ret[] = \msgpack_unpack($data) + ['key' => $key];
-        }
-
-        return $ret;
+        return $list;
     }
 
-    public function cacheHome()
+    public function cacheLiveList($sub_key, $sub_clause)
     {
-        $key = $this->key_home;
+        $key = $this->key_live . $sub_key;
 
-        $list = $this->table(0)->select('uid,title,city,cover,play_url')
-            ->where('status', 1)->orderBy('ts DESC')->limit($this->limit)->fetchAll();
+        $this->table(0)->select('uid,title,city,cover,play_url')
+            ->where('status', 1)->orderBy('ts DESC')->limit($this->limit);
 
+        if ($sub_clause)
+            $sub_clause();
+
+        $list = $this->fetchAll();
         $db_user = new User();
         $n = 0;
         $data = [$key];
@@ -110,7 +110,7 @@ class Live extends Basic
     public function getLive($uid, $type = 'all')
     {
         $live = $this->getWithCache($this->key_live . $uid, function () use ($uid) {
-            return $this->table($uid)->where('uid', $uid)->fetch();
+            return $this->select('uid,title,city,cover,play_url,hls_url')->orderBy('ts DESC')->table($uid)->where('uid', $uid)->fetch();
         });
 
         if ($live) {
@@ -127,5 +127,13 @@ class Live extends Basic
         }
 
         return $live;
+    }
+
+    public function getLiveOfFollow($uid, $start_id)
+    {
+        return $this->getLiveList($start_id, $uid, function () use ($uid) {
+            $follow = (new Follow())->getList($uid, 0, 500);
+            $this->where('uid', 'IN', array_keys($follow[0]));
+        });
     }
 }

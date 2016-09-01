@@ -40,7 +40,7 @@ class Balance extends Basic
         });
     }
 
-    public function add($uid, $balance, $charge)
+    public function add($uid, $balance, $charge, $log = true)
     {
         $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $balance, charge = charge + $charge");
         if (!$ret) {
@@ -54,9 +54,11 @@ class Balance extends Basic
         if (!$ret)
             return Response::msg('数据更新失败', 1014);
 
-        $ret = (new MoneyLog())->add($uid, $uid, $balance, 1, "charge:{$charge}");
-        if (!$ret)
-            return Response::msg('数据插入失败', 1015);
+        if ($log) {
+            $ret = (new MoneyLog())->add($uid, $uid, $balance, 1, "charge:{$charge}");
+            if (!$ret)
+                return Response::msg('数据插入失败', 1015);
+        }
 
         return $ret;
     }

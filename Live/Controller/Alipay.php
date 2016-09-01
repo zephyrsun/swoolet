@@ -8,22 +8,15 @@
 
 namespace Live\Controller;
 
-use Live\Database\Log;
-use Live\Database\MoneyLog;
 use Live\Response;
 
 class Alipay extends Basic
 {
-    public function notify()
+    public function notify($request)
     {
-    }
-
-    public function callback($request)
-    {
-        if (isset($request->get)) {
-            (new Log())->add($request, '');
-
-            $param = (new \Live\Third\Alipay($request))->callback($request->get);
+        if (isset($request->post)) {
+            (new \Live\Database\Log())->add($request, '');
+            \Server::$msg = (new \Live\Third\Alipay())->notify($request->post);
         }
     }
 
@@ -33,11 +26,7 @@ class Alipay extends Basic
         if (!$data)
             return $data;
 
-        $info = (new MoneyLog())->addOrder($data['token_uid'], $data['goods_id'], $data['pf']);
-        if (!$info)
-            return $info;
-
-        $param = (new \Live\Third\Alipay($request))->createOrder($info['trade_no'], $info['coin'], $info['money'], $info['id']);
+        $param = (new \Live\Third\Alipay())->createOrder($data['token_uid'], $data['goods_id'], $data['pf']);
 
         Response::data(['param' => $param]);
     }

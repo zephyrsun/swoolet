@@ -6,7 +6,7 @@ $app = \Swoolet\Socket::createServer('Live', 'dev');
 new \Live\Controller\Basic();
 
 $q = \strtotime('first day of next month 00:00');
-var_dump($q);
+var_dump();
 exit;
 
 

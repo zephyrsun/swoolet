@@ -7,7 +7,9 @@ if (!$env = &$argv[2]) {
     return;
 }
 
-include \dirname(__DIR__) . '/Swoolet/App.php';
+$base_dir = \dirname(__DIR__);
+
+include $base_dir . '/Swoolet/App.php';
 
 class Server extends \Swoolet\WebSocket
 {
@@ -74,7 +76,7 @@ class Server extends \Swoolet\WebSocket
         $_POST = \json_decode($frame->data, true);
         if ($_POST && $uri = &$_POST['m']) {
 
-            \Swoolet\log($uri, $frame->fd);
+            //\Swoolet\log($uri, $frame->fd);
 
             $this->callRequest($uri, $frame);
             $this->response($frame->fd, self::$msg);
@@ -84,5 +86,4 @@ class Server extends \Swoolet\WebSocket
 
 \Swoolet\Router::$delimiter = '_';
 
-$app = Server::createServer('Live', $env);
-$app->run(':9502');
+Server::createServer('Live', $env)->run(':9502');

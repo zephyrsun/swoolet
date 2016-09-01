@@ -11,7 +11,6 @@ namespace Live\Controller;
 use Live\Database\Balance;
 use Live\Database\Fan;
 use Live\Database\Follow;
-use Live\Database\Live;
 use Live\Database\RoomAdmin;
 use Live\Database\UserLevel;
 use Live\Redis\Vip;
@@ -32,7 +31,7 @@ class My extends Basic
         $user = [];
 
         $user['cover'] = '';
-        if ($live = (new Live())->getLive($uid, 'all')) {
+        if ($live = (new \Live\Database\Live())->getLive($uid, 'all')) {
             $user['cover'] = $live['cover'];
         }
 

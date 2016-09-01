@@ -7,7 +7,9 @@ if (!$env = &$argv[2]) {
     return;
 }
 
-include \dirname(__DIR__) . '/Swoolet/App.php';
+$base_dir = \dirname(__DIR__);
+
+include $base_dir . '/Swoolet/App.php';
 
 class Server extends \Swoolet\Http
 {
@@ -31,11 +33,11 @@ class Server extends \Swoolet\Http
         self::$msg = '';
         $_POST = isset($request->post) ? $request->post : array();
 
+        //\Swoolet\log($request->server['path_info'], $request->fd);
+
         $this->callRequest($request->server['path_info'], $request);
         $this->response($request->fd, self::$msg);
     }
 }
 
-$app = Server::createServer('Live', $env);
-
-$app->run(':8090');
+Server::createServer('Live', $env)->run(':8090');

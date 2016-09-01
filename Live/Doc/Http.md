@@ -227,7 +227,6 @@ key 翻页用,返回列表里的最后一个数据项的key值,第一次传0
 返回:
 {"list":[{"uid":2,"title":"","city":"","cover":"http:\/\/obzd2fzvx.bkt.clouddn.com\/cover\/2_1471316268.jpg","play_url":"rtmp:\/\/pili-live-rtmp.camhow.com.cn\/kanhao\/test_2_1470980684","nickname":"15921258182","zodiac":"0","key":0}],"c":0}
 ```
-
 ###开播信息,获取封面
 ```
 接口:
@@ -510,4 +509,18 @@ v app版本号
 
 返回:
 {"list":[{"id":10,"name":"礼物1","money":2,"exp":2,"remark":"+2经验","sort":0,"status":1},{"id":1,"name":"礼物2","money":10,"exp":10,"remark":"+10经验","sort":1,"status":1},{"id":2,"name":"礼物3","money":20,"exp":20,"remark":"+20经验","sort":2,"status":1},{"id":3,"name":"礼物4","money":50,"exp":50,"remark":"+50经验","sort":3,"status":1},{"id":4,"name":"礼物5","money":100,"exp":100,"remark":"+100经验","sort":4,"status":1},{"id":5,"name":"礼物6","money":520,"exp":520,"remark":"+520经验","sort":5,"status":1},{"id":6,"name":"礼物7","money":999,"exp":999,"remark":"+999经验","sort":6,"status":1},{"id":7,"name":"礼物8","money":1888,"exp":1888,"remark":"+1888经验","sort":7,"status":1},{"id":9,"name":"礼物9","money":6666,"exp":6666,"remark":"+6666经验","sort":8,"status":1},{"id":8,"name":"礼物10","money":8888,"exp":8888,"remark":"+8000经验","sort":9,"status":1}],"c":0}
+```
+
+
+###首页关注列表
+```
+接口:
+/Live/follow
+
+参数:
+token
+key 翻页用,返回列表里的最后一个数据项的key值,第一次传0
+
+返回:
+{"list":[{"uid":2,"title":"","city":"","cover":"http:\/\/obzd2fzvx.bkt.clouddn.com\/cover\/2_1471316268.jpg","play_url":"rtmp:\/\/pili-live-rtmp.camhow.com.cn\/kanhao\/test_2_1470980684","nickname":"15921258182","zodiac":"0","key":0}],"c":0}
 ```

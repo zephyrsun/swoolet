@@ -36,7 +36,7 @@ class Gift extends Basic
     public function getAll($limit, $force = false)
     {
         if ($force || !$ret = $this->cache->get($this->key_gift)) {
-            $data = $this->table(1)->where('status', 1)->orderBy('sort DESC')->fetchAll();
+            $data = $this->table(1)->where('status', 1)->orderBy('id,sort')->fetchAll();
 
             $ret = [];
             foreach ($data as $row)

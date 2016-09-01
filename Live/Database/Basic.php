@@ -22,7 +22,7 @@ class Basic extends PDO
     public $table_mod = 1e6;
 
     public $limit = 20;
-    public $timeout = 86400 * 3;
+    public $timeout = 259200;
 
     public function table($key)
     {
@@ -33,11 +33,12 @@ class Basic extends PDO
         return $this;
     }
 
-    public function getWithCache($key, $callback)
+    public function getWithCache($key, $callback, $timeout = 259200)
     {
         if (true || !$data = $this->cache->get($key)) {
-            if ($data = $callback())
-                $this->cache->set($key, $data, $this->timeout);
+            if ($data = $callback()) {
+                $this->cache->set($key, $data, $timeout);
+            }
         }
 
         return $data;
@@ -46,26 +47,28 @@ class Basic extends PDO
 
     public function getListWithCount($key, $key_count, $start_id, $limit, $cb, $unpack = true)
     {
+        $count = 0;
+
         if ($list = $this->cache->revRange($key, $start_id, $limit, true)) {
-            $count = $this->cache->getCount($key_count);
-        } else {
-            $count = 0;
+            if ($key_count)
+                $count = $this->cache->getCount($key_count);
 
-            if ($data = $cb()) {
+        } elseif ($data = $cb()) {
 
-                array_unshift($data, $key);
+            array_unshift($data, $key);
 
-                //缓存人数
+            //缓存count
+            if($key_count){
                 $count = $this->fetchCount();
                 // $this->cache->incrCount($key_count, $count, $this->timeout);
                 $this->cache->link->set($key_count, $count, $this->timeout);
-
-                //缓存列表
-                call_user_func_array([$this->cache->link, 'zAdd'], $data);
-                $this->cache->expire($key, $this->timeout);
-
-                $list = $this->cache->revRange($key, $start_id, $limit, true);
             }
+
+            //缓存列表
+            call_user_func_array([$this->cache->link, 'zAdd'], $data);
+            $this->cache->expire($key, $this->timeout);
+
+            $list = $this->cache->revRange($key, $start_id, $limit, true);
         }
 
         if ($unpack) {

@@ -33,15 +33,24 @@ class MoneyLog extends Basic
     {
         $goods = (new Goods())->getGoods($gift_id, $pf);
 
-        microtime(true);
-
         $id = (new MoneyLog())->add($uid, $uid, $goods['money'], 0, "alipay:$gift_id:{$goods['money']}");
         if (!$id)
             return Response::msg('充值失败', 1047);
 
         return $goods + [
-            'trade_no' => '21' . date('Ymd', \Swoolet\App::$ts) . $id,
+            'trade_no' => 'sh' . date('Ymd', \Swoolet\App::$ts) . $id,
         ];
+    }
+
+    public function updateOrder($id, $trade_no_3rd)
+    {
+        $ts = \Swoolet\App::$ts;
+        return $this->table(1)->where('id = ? AND status = ?', [$id, 0])->update("status=1, ts={$ts}, data=CONCAT(data,':{$trade_no_3rd}')");
+    }
+
+    public function get($id)
+    {
+        return $this->table(1)->where('id', $id)->fetch();
     }
 
     public function add($uid, $to_uid, $money, $status = 1, $data = '')
@@ -49,7 +58,7 @@ class MoneyLog extends Basic
         if (is_array($data))
             $data = json_encode($data, \JSON_UNESCAPED_UNICODE);
 
-        return $this->table($uid)->insert([
+        return $this->table(1)->insert([
             'uid' => $uid,
             'to_uid' => $to_uid,
             'money' => $money,

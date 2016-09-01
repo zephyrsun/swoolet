@@ -77,16 +77,13 @@ class Socket
     public $fd;
 
     public $pid_file = '';
-
     public $namespace = 'App';
     public $env = 'test';
 
     public function __construct($namespace, $env)
     {
-        $this->namespace = $namespace;
-        $this->env = $env;
+        App::setConfig($this->namespace = $namespace, $this->env = $env);
 
-        App::setConfig($namespace, $env);
         App::$ts = \time();
     }
 
