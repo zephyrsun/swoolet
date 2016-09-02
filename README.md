@@ -7,4 +7,11 @@ Swoole + kit = Swoolet.
 ## Requirements
 
 * PHP 7.0+
-* Swoole
+* Swoole extension
+* PDO extension
+* Redis extension
+
+
+
+Live目录是个直播的参考案例,已隐去敏感信息
+

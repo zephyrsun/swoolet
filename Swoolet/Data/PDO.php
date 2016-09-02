@@ -50,6 +50,7 @@ namespace Swoolet\Data {
             #overwrite 'options' if not using MySQL
             \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true, //1000
             \PDO::MYSQL_ATTR_FOUND_ROWS => true, //1008
+            \PDO::ATTR_PERSISTENT => true,//12
         ];
 
         public function __construct($cfg_key = '')
