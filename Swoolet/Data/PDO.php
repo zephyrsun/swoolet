@@ -436,6 +436,7 @@ namespace Swoolet\Data {
          */
         public function exec()
         {
+            //var_dump($this->sql, $this->option['dbname'], $this->param);
             $this->sth = $this->link->prepare($this->sql);
             $ret = $this->sth->execute($this->param);
 

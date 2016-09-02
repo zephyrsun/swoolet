@@ -69,6 +69,7 @@ class Goods extends Basic
                     if ($row['money'] > 1598)
                         continue;
 
+                    $row['id'] = $channel . $row['id'];
                     $row['coin'] *= 0.7;
                 }
 

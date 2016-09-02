@@ -22,7 +22,6 @@ include BASE_DIR . 'Live/Third/Qiniu/Http/Response.php';
 include BASE_DIR . 'Live/Third/Qiniu/Http/Error.php';
 
 
-
 use Live\Response;
 use Qiniu\Auth;
 use Qiniu\Storage\BucketManager;
@@ -62,8 +61,7 @@ class Qiniu
     {
         $manager = new BucketManager($this->auth);
 
-        $key = explode('/', $key);
-        $key = \end($key);
+        $key = str_replace($this->domain['static'], '', $key);
 
         $err = $manager->delete($bucket, $key);
 

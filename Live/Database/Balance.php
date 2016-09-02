@@ -34,9 +34,9 @@ class Balance extends Basic
     public function get($uid, $key = 'sent')
     {
         return $this->cache->getWithCallback($uid, $key, function () use ($uid) {
-            $ret = $this->table($uid)->select('sent,charge')->where('uid', $uid)->fetch();
+            $ret = $this->table($uid)->select('balance,sent,charge')->where('uid', $uid)->fetch();
 
-            return $ret ? $ret : ['sent' => 0, 'charge' => 0];
+            return $ret ? $ret : ['balance' => 0, 'sent' => 0, 'charge' => 0];
         });
     }
 
@@ -53,6 +53,8 @@ class Balance extends Basic
 
         if (!$ret)
             return Response::msg('数据更新失败', 1014);
+
+        $this->cache->del($uid, 'balance', 'sent', 'charge');
 
         if ($log) {
             $ret = (new MoneyLog())->add($uid, $uid, $balance, 1, "charge:{$charge}");
@@ -127,7 +129,7 @@ class Balance extends Basic
             ->update("balance = balance - $balance, sent = sent + $balance");
 
         if ($ret) {
-            $this->cache->del($uid, 'sent');
+            $this->cache->del($uid, 'balance', 'sent');
             return $ret;
         }
 

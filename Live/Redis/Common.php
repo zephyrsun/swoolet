@@ -15,19 +15,19 @@ class Common extends Redis
 {
     public $cfg_key = 'redis_1';
 
-    const DEFAULT_TIMEOUT = 2592000;//30天
-
     public function set($key, $val, $ttl = 0)
     {
-        $ttl or $ttl = self::DEFAULT_TIMEOUT;
+        $ttl or $ttl = 86400 * 3;
 
-//        if (is_array($val))
-//            $val = json_encode($val, \JSON_UNESCAPED_UNICODE);
+        return $this->link->set($key, \msgpack_pack($val), $ttl);
+    }
 
-        $val = \msgpack_pack($val);
+    public function add($key, $val, $ttl = 0)
+    {
+        $ttl or $ttl = 86400 * 3;
 
-        if (!$ret = $this->link->set($key, $val, $ttl))
-            Response::msg('R错误', 100);
+        if ($ret = $this->link->setnx($key, \msgpack_pack($val)))
+            $this->expire($key, $ttl);
 
         return $ret;
     }
@@ -35,7 +35,7 @@ class Common extends Redis
     public function get($key)
     {
         if ($ret = $this->link->get($key))
-            $ret = \msgpack_unpack($ret);//return json_decode($ret, true);
+            $ret = \msgpack_unpack($ret);
 
         return $ret;
     }

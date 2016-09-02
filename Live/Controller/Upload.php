@@ -20,6 +20,10 @@ class Upload extends Basic
         $this->sdk = new Qiniu();
     }
 
+    /**
+     * 直播封面
+     * @param $request
+     */
     public function cover($request)
     {
         $bucket = 'static';
@@ -27,31 +31,66 @@ class Upload extends Basic
         $this->_upload($request, $bucket, 'cover', function ($uid, $img) use ($bucket) {
             $db = new \Live\Database\Live();
             $live = $db->getLive($uid);
-            if ($live['cover']) {
+
+            $ret = $db->updateLive($uid, [
+                'cover' => $img
+            ]);
+
+            if ($ret && $live['cover']) {
                 $this->sdk->delete($bucket, $live['cover']);
             }
 
-            $db->updateLive($uid, [
-                'cover' => $img
-            ]);
+            return $ret;
         });
     }
+
+    /**
+     * 个人主页封面
+     * @param $request
+     */
+    public function userCover($request)
+    {
+        $bucket = 'static';
+
+        $this->_upload($request, $bucket, 'user_cover', function ($uid, $img) use ($bucket) {
+            $db = new \Live\Database\User();
+            $user = $db->getShowInfo($uid, 'more');
+
+            if (!$user['is_vip']) {
+                $this->sdk->delete($bucket, $img);
+                return Response::msg('此功能需要先开通会员！');
+            }
+
+            $ret = $db->updateUser($uid, [
+                'cover' => $img
+            ]);
+
+            if ($ret && $user['cover']) {
+                $this->sdk->delete($bucket, $user['cover']);
+            }
+
+            return $ret;
+        });
+    }
+
 
     public function avatar($request)
     {
         $bucket = 'static';
 
         $this->_upload($request, $bucket, 'avatar', function ($uid, $img) use ($bucket) {
-
             $db = new \Live\Database\User();
             $user = $db->getUser($uid);
-            if ($user['avatar']) {
+
+            $ret = $db->updateUser($uid, [
+                'avatar' => $img
+            ]);
+
+            if ($ret && $user['avatar']) {
                 $this->sdk->delete($bucket, $user['avatar']);
             }
 
-            $db->updateUser($uid, [
-                'avatar' => $img
-            ]);
+            return $ret;
         });
     }
 
@@ -63,7 +102,7 @@ class Upload extends Basic
 
             $db = new \Live\Database\Album();
 
-            $db->add($uid, $img, '');
+            return $db->add($uid, $img, '');
         });
     }
 
@@ -91,7 +130,8 @@ class Upload extends Basic
         if (!$img)
             return $img;
 
-        $cb($token_uid, $img);
+        if (!$ret = $cb($token_uid, $img))
+            return $ret;
 
         return Response::data([
             'img' => $img

@@ -20,9 +20,9 @@ class Live
 
     public $prefix = '';
 
-    public function __construct()
+    public function __construct($sdk = '')
     {
-        $this->sdk = new \Live\Third\Pili();
+        $this->sdk = $sdk ? $sdk : new \Live\Third\Pili();
         $this->db = new \Live\Database\Live();
 
         $this->prefix = \Live\isProduction() ? 'live-' : 'test-';

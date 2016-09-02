@@ -37,9 +37,9 @@ class UserExt extends Redis
         return $this->link->hGetAll($this->key_ext . $uid);
     }
 
-    public function del($uid, $k1, $k2 = null)
+    public function del($uid, $k1, $k2 = null, $k3 = null)
     {
-        return $this->link->hDel($this->key_ext . $uid, $k1, $k2);
+        return $this->link->hDel($this->key_ext . $uid, $k1, $k2, $k3);
     }
 
     public function mSet($uid, $v)

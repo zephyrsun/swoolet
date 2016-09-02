@@ -10,13 +10,8 @@ namespace Live\Controller;
 
 
 use Live\Database\Album;
-use Live\Database\Balance;
 use Live\Database\Fan;
-use Live\Database\Follow;
-use Live\Database\Income;
 use Live\Database\Replay;
-use Live\Database\RoomAdmin;
-use Live\Database\UserLevel;
 use Live\Response;
 
 class User extends Basic
@@ -32,10 +27,12 @@ class User extends Basic
 
         $user = (new \Live\Database\User())->getUserInfo($uid, $token_uid);
 
+        $ra = new \Live\Database\RoomAdmin();
         if ($room_id = &$data['room_id']) {
-            $user['is_admin'] = (new RoomAdmin())->isAdmin($room_id, $uid);
+            $user['is_admin'] = $ra->isAdmin($room_id, $uid);
         } elseif ($uid == $token_uid) {
-            $user['admin'] = (new RoomAdmin())->getCount($uid);
+            $user['admin'] = $ra->getCount($uid);
+            $user['money'] = (new \Live\Database\Balance())->get($uid, 'balance');
         }
 
         return Response::data(['user' => $user]);

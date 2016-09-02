@@ -8,9 +8,8 @@
 
 namespace Live\Controller;
 
-use Live\Database\Log;
+use Live\Database\Balance;
 use Live\Response;
-use Swoolet\Lib\CURL;
 
 class AppleIAP extends Basic
 {
@@ -19,19 +18,38 @@ class AppleIAP extends Basic
 
     public function verifyReceipt($request)
     {
-        $data = parent::getValidator()->required('token')->required('receipt')->getResult();
+        $data = parent::getValidator()->required('token')->required('channel')->required('receipt')->required('pid')->getResult();
         if (!$data)
             return $data;
 
         $url = \Live\isProduction() ? self::BUY_URL : self::SANDBOX_URL;
 
-        $curl = new CURL();
-        $ret = $curl->post($url, $data['receipt']);
-        $ret = json_decode($ret, true);
+        $receipt = $data['receipt'];
 
+        $ret = (new \Live\Redis\Common())->add('iap:' . $receipt, 1, 86400 * 30);
+        if (!$ret)
+            return Response::msg('receipt已过期', 1051);
+
+        $json = json_encode([
+            'receipt-data' => $receipt
+        ]);
+
+        $curl = new \Swoolet\Lib\CURL();
+        $ret = $curl->post($url, $json);
+
+        $ret = json_decode($ret, true);
         if ($ret['status'] != 0)
             return Response::msg('购买失败', 1049);
 
-        (new Log())->add($request, $ret);
+        $product_id = $ret['receipt']['in_app'][0]['product_id'];
+        $goods_id = ltrim($product_id, $data['channel']);
+        if (!$goods_id)
+            return Response::msg('参数错误', 1050);
+
+        $ret = (new Balance())->addByGoods($data['token_uid'], $goods_id, 'ios');
+        if ($ret)
+            return Response::msg('ok');
+
+        return $ret;
     }
 }

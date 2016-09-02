@@ -8,7 +8,6 @@
 
 namespace Live\Controller;
 
-use Live\Lib\Live;
 use Live\Response;
 
 class Pili extends Basic
@@ -26,7 +25,7 @@ class Pili extends Basic
 
         list($_, $uid) = explode('-', $data['id'], 2);
 
-        (new Live())->stop($uid);
+        (new \Live\Lib\Live(new \Live\Third\Pili()))->stop($uid);
 
         return Response::msg('');
     }

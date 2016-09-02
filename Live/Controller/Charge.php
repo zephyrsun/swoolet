@@ -15,7 +15,7 @@ class Charge extends Basic
 {
     public function getGoods()
     {
-        $data = parent::getValidator()->required('token')->required('pf')->ge('channel', 1)->ge('type', 1)->getResult();
+        $data = parent::getValidator()->required('token')->required('pf')->required('channel')->ge('type', 1)->getResult();
         if (!$data)
             return $data;
 
