@@ -17,7 +17,18 @@ class Shata
     {
     }
 
-    public function start($key)
+    public function pkcs5pad($text, $size)
+    {
+        $pad = $size - (strlen($text) % $size);
+        return $text . str_repeat(chr($pad), $pad);
+    }
+
+    /**
+     * @param $key
+     * @param bool $obs true, if use OBS
+     * @return array
+     */
+    public function start($key, $obs = false)
     {
         $url = "rtmp://st-publish.camhow.com.cn/camhow/$key";
 
@@ -26,16 +37,15 @@ class Shata
             'app' => 'camhow',
             'instance' => $key,
             'code' => 'code10',
-            'rtmp-push-url' => $url
-        ]);
+            // 'rtmp-push-url' => $url
+        ]);;
 
-        $td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-        $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_DEV_RANDOM);
-        mcrypt_generic_init($td, 'shata123', $iv);
-        $ep = mcrypt_generic($td, $ep);
-        mcrypt_generic_deinit($td);
-
-        $ep = urlencode(base64_encode($ep));
+        $size = \mcrypt_get_block_size(MCRYPT_DES, MCRYPT_MODE_ECB);
+        $ep = $this->pkcs5pad($ep, $size);
+        $ep = mcrypt_encrypt(MCRYPT_DES, 'shata123', $ep, MCRYPT_MODE_ECB);
+        $ep = rawurlencode(base64_encode($ep));
+        if ($obs)
+            $ep = rawurlencode($ep);
 
         $publish_url = "$url?sid=$key&ep=$ep";
 

@@ -6,7 +6,7 @@ $app = \Swoolet\Socket::createServer('Live', 'dev');
 new \Live\Controller\Basic();
 
 
-$k = (new \Live\Third\Shata())->start('test-4');
+$k = (new \Live\Third\Shata())->start('test-4', true);
 var_dump($k);
 exit;
 
