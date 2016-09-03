@@ -38,4 +38,15 @@ class Utility
 
         return $name;
     }
+
+    static public function generateCity($city)
+    {
+        if ($city)
+            return $city;
+
+        $a1 = ['未知', '黑暗', '玲珑', '遗忘', '灵魂'];
+        $a2 = ['世界', '深渊', '沙漠', '峡谷', '宇宙'];
+
+        return array_rand($a1) . array_rand($a2);
+    }
 }

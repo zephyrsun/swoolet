@@ -321,7 +321,7 @@ token
 uid 查看谁
 
 返回:
-{"user":{"uid":1,"nickname":"15921258181","sex":"男","height":0,"birthday":"0000-00-00","zodiac":null,"city":"看好星球","sign":"","avatar":"","is_vip":true,"is_tycoon":false,"lv":27,"income":"40","sent":0,"follow":0,"fan":1,"is_follow":false},"visit":[],"album":[],"replay":[{"key":1,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471494338.m3u8"},{"key":2,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"},{"key":3,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"},{"key":4,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"}],"c":0}
+{"user":{"uid":1,"nickname":"15921258181","sex":"男","height":0,"birthday":"0000-00-00","zodiac":null,"city":"未知深海","sign":"","avatar":"","is_vip":true,"is_tycoon":false,"lv":27,"income":"40","sent":0,"follow":0,"fan":1,"is_follow":false},"visit":[],"album":[],"replay":[{"key":1,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471494338.m3u8"},{"key":2,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"},{"key":3,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"},{"key":4,"title":0,"cover":"","play_url":"http:\/\/pili-media.camhow.com.cn\/recordings\/z1.kanhao.test-1\/test-1_1471496232.m3u8"}],"c":0}
 ```
 
 

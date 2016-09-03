@@ -158,7 +158,7 @@ class User extends Basic
             if ($user = $this->table($uid)->where('uid', $uid)->fetch()) {
                 unset($user['username'], $user['create_ts']);
 
-                $user['city'] or $user['city'] = '看好星球';
+                $user['city'] = \Live\Lib\Utility::generateCity($user['city']);
             }
 
             return $user ? $user : [];

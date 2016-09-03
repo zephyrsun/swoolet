@@ -9,7 +9,6 @@
 namespace Live\Controller;
 
 use Live\Database\Fan;
-use Live\Database\Follow;
 use Live\Database\Gift;
 use Live\Database\Income;
 use Live\Database\Live;
@@ -259,7 +258,7 @@ class Room extends Basic
         $user['admin'] = true;
 
         $data['title'] or $data['title'] = "{$user['nickname']}正在直播";
-        $data['city'] or $data['city'] = '看好星球';
+        $data['city'] = \Live\Lib\Utility::generateCity($data['city']);
 
         if (!$data = (new \Live\Lib\Live())->start($token_uid, $data))
             return $data;
