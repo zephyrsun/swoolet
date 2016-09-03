@@ -50,7 +50,7 @@ class Pili
         ];
     }
 
-    public function stop($key, $stream_id, $start_ts, $end_ts)
+    public function stop($key, $start_ts, $end_ts, $stream_id)
     {
         $stream = $this->hub->getStream($stream_id);
         $stream->disable();

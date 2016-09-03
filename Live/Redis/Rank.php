@@ -68,7 +68,7 @@ class Rank extends Common
 
     public function getRoomUserNum($room_id)
     {
-        return $this->link->get($this->key_room_user_num . $room_id);
+        return (int)$this->link->get($this->key_room_user_num . $room_id);
     }
 
     public function getUserRankInRoom($room_id, $uid)

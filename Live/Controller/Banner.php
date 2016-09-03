@@ -22,7 +22,7 @@ class Banner extends Basic
         $list = (new DataBanner())->getAllBanner();
         $list = array_values($list);
 
-        Response::data(['list' => $list]);
+        return Response::data(['list' => $list]);
     }
 
     public function view()
@@ -47,6 +47,6 @@ class Banner extends Basic
             $splash = ['img' => ''];
         }
 
-        Response::data($splash);
+        return Response::data($splash);
     }
 }

@@ -15,7 +15,7 @@ use Swoolet\Data\PDO;
 class Live extends Basic
 {
     public $cfg_key = 'db_1';
-    public $table_prefix = 'live';
+    public $table_prefix = 'live_';
     public $key_live = 'live:';
     public $key_home = 'home';
     public $key_live_follow = 'live_follow:';
@@ -29,13 +29,6 @@ class Live extends Basic
         parent::__construct();
 
         $this->cache = new \Live\Redis\Room();
-    }
-
-    public function table($key)
-    {
-        PDO::table($this->table_prefix);
-
-        return $this;
     }
 
     public function getLiveList($start_id, $sub_key = 'home', $sub_clause = null, $limit = 20)
@@ -110,7 +103,7 @@ class Live extends Basic
     public function getLive($uid, $type = 'all')
     {
         $live = $this->getWithCache($this->key_live . $uid, function () use ($uid) {
-            return $this->select('uid,title,city,cover,play_url,hls_url')->orderBy('ts DESC')->table($uid)->where('uid', $uid)->fetch();
+            return $this->select('uid,title,city,cover,play_url,hls_url,ts,third')->orderBy('ts DESC')->table($uid)->where('uid', $uid)->fetch();
         });
 
         if ($live) {

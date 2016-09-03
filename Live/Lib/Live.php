@@ -9,6 +9,7 @@
 namespace Live\Lib;
 
 use Live\Redis\Rank;
+use Live\Response;
 
 class Live
 {
@@ -53,13 +54,17 @@ class Live
         return $ret;
     }
 
-    public function stop($uid)
+    public function stop($key)
     {
-        $this->db->stop($uid);
+        list($_, $uid) = explode('-', $key, 2);
+
+        $ret = $this->db->stop($uid);
+        if (!$ret)
+            Response::msg('停播失败', 1052);
 
         $live_data = $this->db->getLive($uid, 'all');
 
-        $stream_data = $this->sdk->stop($this->getKey($uid), $live_data['third'], $live_data['ts'], \Swoolet\App::$ts);
+        $stream_data = $this->sdk->stop($key, $live_data['ts'], \Swoolet\App::$ts, $live_data['third']);
 
         //$data = ['duration' => 0];
         if ($stream_data) {

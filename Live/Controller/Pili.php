@@ -23,9 +23,7 @@ class Pili extends Basic
         if (!($data = &$raw['data']) || $data['status'] != 'disconnected')
             return Response::msg('');
 
-        list($_, $uid) = explode('-', $data['id'], 2);
-
-        (new \Live\Lib\Live(new \Live\Third\Pili()))->stop($uid);
+        (new \Live\Lib\Live(new \Live\Third\Pili()))->stop($data['id']);
 
         return Response::msg('');
     }
