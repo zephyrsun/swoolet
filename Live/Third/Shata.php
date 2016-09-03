@@ -13,8 +13,11 @@ use Swoolet\App;
 
 class Shata
 {
-    public function __construct()
+    public $obs = false;
+
+    public function __construct($obs = false)
     {
+        $this->obs = $obs;
     }
 
     public function pkcs5pad($text, $size)
@@ -28,7 +31,7 @@ class Shata
      * @param bool $obs true, if use OBS
      * @return array
      */
-    public function start($key, $obs = false)
+    public function start($key)
     {
         $url = "rtmp://st-publish.camhow.com.cn/camhow/$key";
 
@@ -44,7 +47,7 @@ class Shata
         $ep = $this->pkcs5pad($ep, $size);
         $ep = mcrypt_encrypt(MCRYPT_DES, 'shata123', $ep, MCRYPT_MODE_ECB);
         $ep = rawurlencode(base64_encode($ep));
-        if ($obs)
+        if ($this->obs)
             $ep = rawurlencode($ep);
 
         $publish_url = "$url?sid=$key&ep=$ep";

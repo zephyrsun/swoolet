@@ -257,10 +257,7 @@ class Room extends Basic
         $user = (new User())->getShowInfo($token_uid, 'lv');
         $user['admin'] = true;
 
-        $data['title'] or $data['title'] = "{$user['nickname']}正在直播";
-        $data['city'] = \Live\Lib\Utility::generateCity($data['city']);
-
-        if (!$data = (new \Live\Lib\Live())->start($token_uid, $data))
+        if (!$data = (new \Live\Lib\Live())->start($token_uid, $data['title'], $data['city'], $user))
             return $data;
 
         $this->conn->createRoom($request->fd, $token_uid, $user);

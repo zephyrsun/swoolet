@@ -35,15 +35,21 @@ class Live
         //return "{$this->prefix}{$uid}_" . \Swoolet\App::$ts;
     }
 
-    public function start($uid, $data)
+    public function start($uid, $title, $city, $user = [])
     {
+        if (!$title) {
+            $user or $user = (new \Live\Database\User())->getUser($uid);
+            $n = array_rand(['花式', '热辣', '搞怪', '灵魂', '神秘']);
+            $title = "{$user['nickname']}的{$n}直播";
+        }
+
         $ret = $this->sdk->start($this->getKey($uid));
 
         $ok = $this->db->updateLive($uid, $ret + [
                 'status' => self::STATUS_START,
                 'ts' => \Swoolet\App::$ts,
-                'title' => $data['title'],
-                'city' => $data['city'],
+                'title' => $title,
+                'city' => \Live\Lib\Utility::generateCity($city),
             ]);
 
         if (!$ok)
