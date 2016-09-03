@@ -20,6 +20,8 @@ class Goods extends Basic
 
     public $key_goods = 'goods:';
 
+    public $money_line_1 = 1598;
+
     public function __construct()
     {
         $this->option['dbname'] = 'live';
@@ -66,7 +68,7 @@ class Goods extends Basic
 
             foreach ($list as $row) {
                 if ($pf == 'ios') {
-                    if ($row['money'] > 1598)
+                    if ($row['money'] > $this->money_line_1)
                         continue;
 
                     $row['id'] = $channel . $row['id'];

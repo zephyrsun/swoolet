@@ -9,7 +9,7 @@
 namespace Live\Database;
 
 use Live\Redis\UserExt;
-use Live\Redis\Vip;
+use Live\Redis\Award;
 use Live\Response;
 use Swoolet\Data\PDO;
 
@@ -97,6 +97,9 @@ class Balance extends Basic
                     // $award_key = 'charge_award_' . $threshold;
                     // if (!$this->cache->get($uid, $award_key))
                     $vip_day = $award_day;
+
+                    (new \Live\Redis\Award())->addRecommend($uid, "充值获得{$award_day}天会员");
+
                     break;
                 }
             }
@@ -108,12 +111,15 @@ class Balance extends Basic
 
                 //充值vip有机会抽取100看币
                 if ($charge >= 98) {
-                    (new Vip())->addWait($uid, $charge);
+                    (new Award())->addWait($uid, $charge);
                 }
             }
 
             if ($tycoon_day) {
                 $db_user->incrExpire($uid, 'tycoon_expire', $tycoon_day);
+
+                $msg = $tycoon_day > 30 ? '此人超级土豪' : '此人特别土豪';
+                (new \Live\Redis\Award())->addRecommend($uid, $msg);
             }
         }
 

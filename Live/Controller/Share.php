@@ -22,7 +22,7 @@ class Share extends Basic
 
         $ret = (new \Live\Redis\Share())->setShared($token_uid);
         if ($ret) {
-            $exp = mt_rand(8, 20);
+            $exp = mt_rand(8, 30);
 
             (new \Live\Database\UserLevel())->add($token_uid, $exp);
 
@@ -36,8 +36,10 @@ class Share extends Basic
             $base = 10;
             if ($exp > $base) {
                 $extra = $exp - $base;
-                return Response::msg("恭喜您获得{$base}经验以及主播幸运加成{$extra}经验，总共{$exp}经验的分享奖励！");
 
+                (new \Live\Redis\Award())->addRecommend($token_uid, "分享获得{$exp}经验");
+
+                return Response::msg("恭喜您获得{$base}经验以及主播幸运加成{$extra}经验，总共{$exp}经验的分享奖励！");
             }
 
             return Response::msg("恭喜您获得{$exp}经验的分享奖励！");

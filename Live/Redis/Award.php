@@ -9,14 +9,14 @@
 namespace Live\Redis;
 
 
-class Vip extends Common
+class Award extends Common
 {
-    public $cfg_key = 'redis_1';
+    public $cfg_key = 'redis_store';
 
-    public $key_wait = 'vip_award_wait';
-    public $key_award = 'vip_award_list';
+    public $key_wait = 'award_wait';
+    public $key_award = 'award_list';
 
-    public $key_award_limit = 'vip_award_limit:';
+    public $key_award_limit = 'award_limit:';
 
     public function addWait($uid, $val)
     {
@@ -33,7 +33,6 @@ class Vip extends Common
     public function decrWait($uid, $int)
     {
         return $this->link->hIncrBy($this->key_wait, $uid, -$int);
-
     }
 
     public function delWait($uid)
@@ -41,17 +40,22 @@ class Vip extends Common
         return $this->link->hDel($this->key_wait, $uid);
     }
 
-    public function addAward($uid, $score)
+    /**
+     * @param $uid
+     * @param $msg
+     * @return int
+     */
+    public function addRecommend($uid, $msg)
     {
-        if ($score < 30)
-            return 0;
+        // $score = substr(microtime(true) * 1e4, 4);
+        $score = \Swoolet\App::$ts . $uid;
 
-        return $this->link->rPush($this->key_award, \msgpack_pack([$uid, $score]));
+        return $this->link->zAdd($this->key_award, $score, $msg);
     }
 
-    public function getAward($start = 0, $limit)
+    public function getRecommend($start, $limit = 30)
     {
-        return $this->link->lRange($this->key_award, $start, $limit - 1);
+        return parent::revRange($this->key_award, $start, $limit, true);
     }
 
     public function couldAward($uid)

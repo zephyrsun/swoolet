@@ -7,7 +7,7 @@ new \Live\Controller\Basic();
 
 
 $k = (new \Live\Lib\Live(new Live\Third\Shata(true)))->start(4, '', '');
-var_dump($k);
+var_dump(time());
 exit;
 
 

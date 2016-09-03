@@ -13,7 +13,7 @@ use Live\Database\Fan;
 use Live\Database\Follow;
 use Live\Database\RoomAdmin;
 use Live\Database\UserLevel;
-use Live\Redis\Vip;
+use Live\Redis\Award;
 use Live\Response;
 use Live\Redis\Common;
 
@@ -107,7 +107,7 @@ class My extends Basic
         if ((new \Live\Database\User())->isVip($token_uid)) {
 
             $exp = 20;
-            $ds_vip = new Vip();
+            $ds_vip = new Award();
 
             if ($ds_vip->couldAward($token_uid) && ($rest = $ds_vip->getWait($token_uid))) {
                 //vip抽奖
@@ -120,8 +120,8 @@ class My extends Basic
                     if ($money == 1 || $ds_vip->decrWait($token_uid, $money) < 0) {
                         $money = 2;
                         $ds_vip->delWait($token_uid);
-                    } else {
-                        $ds_vip->addAward($token_uid, $money);
+                    } elseif ($money > 30) {
+                        $ds_vip->addRecommend($token_uid, "签到获得{$money}看币");
                     }
                 }
             }

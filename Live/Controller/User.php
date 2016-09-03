@@ -124,10 +124,10 @@ class User extends Basic
             'visit' => $ds_user->getVisit($uid, 0, 5),
         ];
 
-        $data += (new Album())->getList($uid, 0, 7);
-        $data += (new Replay())->getList($uid, 0, 7);
+        $album = (new Album())->getList($uid, 0, 7);
+        $replay = (new Replay())->getList($uid, 0, 7);
 
-        return Response::data($data);
+        return Response::data($data + $album + $replay);
     }
 
     public function getVisit($request)

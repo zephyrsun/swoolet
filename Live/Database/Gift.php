@@ -96,6 +96,16 @@ class Gift extends Basic
             (new Rank())->addRank($send_uid, $to_uid, $money);
         }
 
+        if ($gift['money'] > 3e3) {
+            (new \Live\Redis\Award())->addRecommend($send_uid, $gift['msg']);
+        } elseif ($num >= 100) {
+            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼达人');
+        } elseif ($num >= 666) {
+            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼大师');
+        } elseif ($num >= 9999) {
+            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼至尊');
+        }
+
         return $gift['name'];
     }
 

@@ -19,7 +19,10 @@ class App
     /**
      * @var Socket $server
      */
-    static public $ins, $server, $config, $ts = 0;
+    static public $server;
+    static public $ins;
+    static public $config;
+    static public $ts = 0;
 
 //    static public function response($str)
 //    {
