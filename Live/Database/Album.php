@@ -26,13 +26,23 @@ class Album extends Basic
 
     }
 
-    public function add($uid, $photo, $title)
+    /**
+     * @param $uid
+     * @param $photo
+     * @param $title
+     * @param $type
+     *        - 1 相册
+     *        - 2 视频
+     * @return int
+     */
+    public function add($uid, $photo, $title, $type)
     {
         $this->table($uid);
 
         $ret = parent::insert([
             'uid' => $uid,
             'title' => $title,
+            'type' => $type,
             'photo' => $photo,
             'status' => 1,
             'create_ts' => \Swoolet\App::$ts,
@@ -50,7 +60,7 @@ class Album extends Basic
         $ret = parent::getListWithCount($this->key_album . $uid, $this->key_album_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
             $this->table($uid)->limit(500);
 
-            $this->select('id AS `key`,title,photo')->orderBy('id DESC')->where('uid = ? AND id > ?', [$uid, $start]);
+            $this->select('id AS `key`,title,photo,type')->orderBy('id DESC')->where('uid = ? AND id > ?', [$uid, $start]);
             if ($list = $this->fetchAll()) {
                 $data = [];
                 foreach ($list as $row) {

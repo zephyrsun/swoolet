@@ -102,7 +102,7 @@ class Upload extends Basic
 
             $db = new \Live\Database\Album();
 
-            return $db->add($uid, $img, '');
+            return $db->add($uid, $img, '', 1);
         });
     }
 
