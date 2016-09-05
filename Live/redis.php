@@ -19,7 +19,7 @@ $data = str_repeat('1234567890', 50000);
 
 for ($i = 0; $i < 3; $i++) {
 
-    $redis = new \Swoolet\Data\RedisAsync('redis_async', $i);
+    $redis = new \Live\Redis\RedisSub($i);
     $redis->subscribe('test' . $i, function ($result, $err) use ($i) {
         var_dump('subscribe:' . $i, $result, $err);
     });

@@ -11,8 +11,8 @@ namespace Live\Lib;
 
 use Live\Database\RoomMsg;
 use Live\Redis\RedisPub;
+use Live\Redis\RedisSub;
 use Swoolet\App;
-use Swoolet\Data\RedisAsync;
 use Swoolet\Lib\File;
 
 class Conn
@@ -47,8 +47,8 @@ class Conn
 
     public function __construct()
     {
-        $this->sub = new RedisAsync('redis_async', 'sub');
-        $this->sub_user = new RedisAsync('redis_async', 'sub_user');
+        $this->sub = new RedisSub('sub');
+        $this->sub_user = new RedisSub('sub_user');
         $this->pub = new RedisPub();
     }
 
@@ -162,6 +162,11 @@ class Conn
                 }
             }
 
+            if ($data['ext'] == 'close') {
+                $uid = $data['uid'];
+                unset($this->room[$uid], $this->msg[$uid]);
+            }
+
         } elseif ($a == 'toUser') {
             if ($fd = $this->getFd($sub_uid)) {
                 //var_dump($sub_uid, $fd);
@@ -187,10 +192,10 @@ class Conn
         $this->sendToRoom($room_id, $uid, [
             't' => Conn::TYPE_LIVE_STOP,
             'msg' => '直播结束',
-        ]);
+        ], 'close');
 
         //todo:需要优化
-        unset($this->room[$uid], $this->msg[$uid]);
+        //unset($this->room[$uid], $this->msg[$uid]);
     }
 
     public function msgForReplay($room_id, $uid, $msg)
@@ -198,10 +203,11 @@ class Conn
         $this->msg[$room_id][] = [$uid, $msg, \Swoolet\App::$ts];
     }
 
-    public function sendToRoom($room_id, $uid, $msg)
+    public function sendToRoom($room_id, $uid, $msg, $ext = '')
     {
         $msg = [
             'a' => 'toRoom',
+            'ext' => $ext,
             'room_id' => $room_id,
             'uid' => $uid,
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
@@ -269,8 +275,8 @@ class Conn
 
         $ret = File::touch("/tmp/swoolet_ws_{$worker_id}.php", $data, true);
 
-        RedisAsync::release('sub', $this->key_room_chat);
-        RedisAsync::release('sub_user');
+        RedisSub::release('sub', $this->key_room_chat);
+        RedisSub::release('sub_user');
 
         $ds_msg = new RoomMsg();
         foreach ($this->msg as $room_id => $msg) {

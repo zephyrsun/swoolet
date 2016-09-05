@@ -202,7 +202,7 @@ class Socket
 
     public function onWorkerStart($sw, $worker_id)
     {
-        echo 'onWorkerStart' . PHP_EOL;
+        \Swoolet\log('onWorkerStart', $worker_id);
 
         function_exists('opcache_reset') && opcache_reset();
         function_exists('apc_clear_cache') && apc_clear_cache();
@@ -217,7 +217,7 @@ class Socket
 
     public function onWorkerStop($sw, $worker_id)
     {
-        echo 'onWorkerStop' . PHP_EOL;
+        \Swoolet\log('onWorkerStop', $worker_id);
     }
 
     public function onConnect($sw, $fd, $from_id)

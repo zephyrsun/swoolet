@@ -28,25 +28,22 @@ class RedisAsync
 
     public $cache_key = '';
 
-    public function __construct($cfg_key = '', $cache_key = '')
+    public function __construct($cfg_key = '')
     {
         if ($cfg_key || $cfg_key = $this->cfg_key) {
             $this->option = App::getConfig($cfg_key) + $this->option;
-
-            if ($cache_key)
-                $this->cache_key = $cache_key;
         }
     }
 
     public function hmset($key, array $value, $callback)
     {
-        $lines = ['hmset', $key];
+        $line = ['hmset', $key];
         foreach ($value as $k => $v) {
-            $lines[] = $k;
-            $lines[] = $v;
+            $line[] = $k;
+            $line[] = $v;
         }
         $link = $this->connect();
-        $link->command($lines, $callback);
+        $link->command($line, $callback);
     }
 
     public function hmget($key, array $value, $callback)
@@ -84,7 +81,7 @@ class RedisAsync
         $cfg = $this->option;
 
         $link = new RedisConnection();
-        $link->connect($cfg['host'], $cfg['port']);
+        $link->connect($cfg['host'], $cfg['port'], $this->cache_key);
         $link->debug = $cfg['debug'];
 
         if ($cfg['password']) {
@@ -111,16 +108,16 @@ class RedisAsync
 
     /**
      * @param $key
-     * @param string $uk unsubscribe key
+     * @param string $unsub unsubscribe key
      */
-    static public function release($key, $uk = '')
+    static public function release($key, $unsub = '')
     {
         if ($ins = self::getConnection($key)) {
             $ins->command(['close'], function () {
             });
 
-            if ($uk) {
-                $ins->command(['unsubscribe', $uk], function () {
+            if ($unsub) {
+                $ins->command(['unsubscribe', $unsub], function () {
                 });
             }
 
@@ -154,9 +151,9 @@ class RedisConnection
     {
     }
 
-    public function connect($host, $port)
+    public function connect($host, $port, $key)
     {
-        $client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
+        $client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC, $key);
         $client->on('connect', [$this, 'onConnect']);
         $client->on('error', [$this, 'onError']);
         $client->on('receive', [$this, 'onReceive']);
@@ -219,9 +216,8 @@ class RedisConnection
 
     public function getCallback()
     {
-        $cb = array_shift($this->cb_pool);
-        if ($cb)
-            $this->cb = $cb;
+        if (count($this->cb_pool) > 0)
+            $this->cb = array_shift($this->cb_pool);
 
         return $this->cb;
     }
