@@ -62,7 +62,10 @@ class Live
 
     public function stop($key)
     {
-        list($_, $uid) = explode('-', $key, 2);
+        $arr = explode('-', $key, 2);
+        $uid = \end($arr);
+
+        \Server::$conn->stopRoom($uid, $uid);
 
         $ret = $this->db->stop($uid);
         if (!$ret)

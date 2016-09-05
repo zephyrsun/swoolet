@@ -76,7 +76,7 @@ class Server extends \Swoolet\WebSocket
         $_POST = \json_decode($frame->data, true);
         if ($_POST && $uri = &$_POST['m']) {
 
-            //\Swoolet\log($uri, $frame->fd);
+            \Swoolet\log($uri, $frame->fd);
 
             $this->callRequest($uri, $frame);
             $this->response($frame->fd, self::$msg);

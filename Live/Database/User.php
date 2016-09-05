@@ -97,7 +97,7 @@ class User extends Basic
     {
         $user = $this->getUser($uid);
         if (!$user)
-            return false;
+            return [];
 
         if ($type == 'simple') {
             $user = [

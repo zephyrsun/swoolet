@@ -539,7 +539,6 @@ key 翻页用,返回列表里的最后一个数据项的key值,第一次传0
 {"list":[{"uid":2,"title":"","city":"","cover":"http:\/\/obzd2fzvx.bkt.clouddn.com\/cover\/2_1471316268.jpg","play_url":"rtmp:\/\/pili-live-rtmp.camhow.com.cn\/kanhao\/test_2_1470980684","nickname":"15921258182","zodiac":"0","key":0}],"c":0}
 ```
 
-
 ###分享回调
 ```
 接口:
@@ -551,4 +550,30 @@ room_id
 
 返回:
 {"msg":"您今天已经分享过啦，24小时以后再分享，会有惊喜！","c":0}
+```
+
+###删除照片
+```
+接口:
+/Album/del
+
+参数:
+token
+id
+
+返回:
+{"msg":"删除成功","c":0}
+```
+
+###删除回放
+```
+接口:
+/Replay/del
+
+参数:
+token
+id
+
+返回:
+{"msg":"删除成功","c":0}
 ```

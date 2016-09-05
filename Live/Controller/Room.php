@@ -139,7 +139,7 @@ class Room extends Basic
                 'msg' => $data['msg'],
             ]);
 
-            $this->conn->msgForSave($room_id, $uid, $data['msg']);
+            $this->conn->msgForReplay($room_id, $uid, $data['msg']);
 
             return Response::data(['lv' => $user['lv'], 'rank' => $rank]);
         }
@@ -277,12 +277,7 @@ class Room extends Basic
         if ($conn) {
             list($uid, $room_id) = $conn;
 
-            $this->conn->sendToRoom($room_id, $request->fd, [
-                't' => Conn::TYPE_LIVE_STOP,
-                'msg' => '直播结束',
-            ]);
-
-            $this->conn->stopRoom($uid);
+            $this->conn->stopRoom($room_id, $uid);
 
             $data = (new \Live\Lib\Live())->stop($uid);
 

@@ -58,7 +58,7 @@ class Basic extends PDO
             array_unshift($data, $key);
 
             //缓存count
-            if($key_count){
+            if ($key_count) {
                 $count = $this->fetchCount();
                 // $this->cache->incrCount($key_count, $count, $this->timeout);
                 $this->cache->link->set($key_count, $count, $this->timeout);
@@ -81,6 +81,18 @@ class Basic extends PDO
         }
 
         return [$list, $count];
+    }
+
+    public function del($uid, $id)
+    {
+        $this->table($uid);
+
+        if (strpos($id, ',')) {
+            $this->where("uid = ? AND id IN ($id)", [$uid]);
+        } else {
+            $this->where('uid = ? AND id = ?', [$uid, $id]);
+        }
+        return $this->delete();
     }
 
 }

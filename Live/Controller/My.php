@@ -47,9 +47,9 @@ class My extends Basic
         if (!$modal)
             $modal = new Follow();
 
-        $start_id = (int)$data['key'];
+        $start = (int)$data['key'];
 
-        list($raw) = $modal->getList($data['token_uid'], $start_id, 30);
+        list($raw) = $modal->getList($data['token_uid'], $start, 30);
         $ds_user = new \Live\Database\User();
         $ds_level = new UserLevel();
         $list = [];

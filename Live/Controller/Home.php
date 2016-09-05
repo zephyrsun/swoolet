@@ -17,9 +17,9 @@ class Home extends Basic
         if (!$data)
             return $data;
 
-        $start_id = (int)$data['key'];
+        $start = (int)$data['key'];
 
-        $raw = (new \Live\Database\Live())->getLiveList($start_id);
+        $raw = (new \Live\Database\Live())->getLiveList($start);
 
         $list = [];
         foreach ($raw as $data => $key) {
@@ -27,5 +27,10 @@ class Home extends Basic
         }
 
         return Response::data(['list' => $list]);
+    }
+
+    public function zodiacStar()
+    {
+        return $this->request;
     }
 }

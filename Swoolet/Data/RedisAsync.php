@@ -19,7 +19,7 @@ class RedisAsync
 {
     static public $ins;
 
-    public $option = ['host' => '127.0.0.1', 'port' => 6379, 'password' => ''];
+    public $option = ['host' => '127.0.0.1', 'port' => 6379, 'password' => '', 'debug' => false];
 
     public $link;
 
@@ -27,8 +27,6 @@ class RedisAsync
     public $db_index = 0;
 
     public $cache_key = '';
-
-    public $debug = false;
 
     public function __construct($cfg_key = '', $cache_key = '')
     {
@@ -47,28 +45,31 @@ class RedisAsync
             $lines[] = $k;
             $lines[] = $v;
         }
-        $conn = $this->connect();
-        $cmd = $conn->parseRequest($lines);
-        $conn->command($cmd, $callback);
+        $link = $this->connect();
+        $link->command($lines, $callback);
     }
 
     public function hmget($key, array $value, $callback)
     {
-        $conn = $this->connect();
-        $conn->fields = $value;
+        $link = $this->connect();
+        $link->fields = $value;
 
         array_unshift($value, 'hmget', $key);
-        $cmd = $conn->parseRequest($value);
-        $conn->command($cmd, $callback);
+        $link->command($value, $callback);
+    }
+
+    public function subscribe($key, $callback)
+    {
+        $link = $this->connect();
+        $link->command(['subscribe', $key], $callback);
     }
 
     public function __call($method, array $args)
     {
         $callback = array_pop($args);
         array_unshift($args, $method);
-        $conn = $this->connect();
-        $cmd = $conn->parseRequest($args);
-        $conn->command($cmd, $callback);
+        $link = $this->connect();
+        $link->command($args, $callback);
     }
 
     /**
@@ -84,14 +85,16 @@ class RedisAsync
 
         $link = new RedisConnection();
         $link->connect($cfg['host'], $cfg['port']);
-        $link->debug = $this->debug;
+        $link->debug = $cfg['debug'];
 
-        if ($this->option['password']) {
-            $link->command('auth', $cfg['password'], function () {
+        if ($cfg['password']) {
+            $link->command(['auth', $cfg['password']], function () {
+                //var_dump(func_get_args());
             });
         }
 
-        $link->command('select', $this->db_index, function () {
+        $link->command(['select', $this->db_index], function () {
+            //var_dump(func_get_args());
         });
 
         return $ins = $link;
@@ -113,11 +116,11 @@ class RedisAsync
     static public function release($key, $uk = '')
     {
         if ($ins = self::getConnection($key)) {
-            $ins->command('close', function () {
+            $ins->command(['close'], function () {
             });
 
             if ($uk) {
-                $ins->command('unsubscribe', $uk, function ($data, $err) {
+                $ins->command(['unsubscribe', $uk], function () {
                 });
             }
 
@@ -135,12 +138,13 @@ class RedisConnection
      * @var \swoole_client
      */
     protected $client;
-    protected $callback;
+    protected $cb = '';
+    protected $cb_pool = [];
 
     /**
      * 等待发送的数据
      */
-    protected $wait_send = false;
+    protected $wait_send = '';
     protected $wait_recv = false;
     public $fields;
 
@@ -170,36 +174,36 @@ class RedisConnection
     public function clean()
     {
         $this->buffer = '';
-        $this->callback;
-        $this->wait_send = false;
+        // $this->cb = '';
+        $this->wait_send = '';
         $this->wait_recv = false;
-        $this->fields = array();
+        $this->fields = [];
     }
 
     /**
      * 执行redis指令
      * @param $cmd
-     * @param $callback
+     * @param $cb
      */
-    public function command($cmd, $callback)
+    public function command($cmd, $cb)
     {
+        $cmd = $this->parseRequest($cmd);
         if ($this->client->isConnected()) {
             //如果已经连接，直接发送数据
             $this->client->send($cmd);
         } else {
             //未连接，等待连接成功后发送数据
-            $this->wait_send = $cmd;
+            $this->wait_send .= $cmd;
         }
-        $this->callback = $callback;
-        //从空闲连接池中移除，避免被其他任务使用
+
+        $this->cb_pool[] = $cb;
     }
 
     public function onConnect(\swoole_client $client)
     {
-        if ($this->wait_send) {
-            $client->send($this->wait_send);
-            $this->wait_send = '';
-        }
+        $client->send($this->wait_send);
+
+        $this->wait_send = '';
     }
 
     public function onError()
@@ -209,16 +213,23 @@ class RedisConnection
 
     public function onClose(\swoole_client $cli)
     {
-        if ($this->wait_send)
-            call_user_func($this->callback, 'timeout', false);
+        $cb = $this->getCallback();
+        $cb('timeout', false);
+    }
+
+    public function getCallback()
+    {
+        $cb = array_shift($this->cb_pool);
+        if ($cb)
+            $this->cb = $cb;
+
+        return $this->cb;
     }
 
     public function onReceive($cli, $data)
     {
         if ($this->debug)
             $this->trace($data);
-
-        // $this->trace($data);
 
         $result = null;
         if ($this->wait_recv) {
@@ -228,7 +239,8 @@ class RedisConnection
             if (strlen($this->buffer) >= $this->wait_recv) {
                 $result = substr($this->buffer, 0, -2);
 
-                call_user_func($this->callback, $result, $result === null);
+                $cb = $this->getCallback();
+                $cb($result);
             } else
                 return;
 
@@ -240,7 +252,8 @@ class RedisConnection
                 if ($this->wait_recv)
                     return;
 
-                call_user_func($this->callback, $result, $result === null);
+                $cb = $this->getCallback();
+                $cb($result);
             }
         }
 

@@ -13,10 +13,9 @@ class Live extends Basic
             return $data;
 
         $token_uid = $data['token_uid'];
-        $token_uid = 2;
 
-        $start_id = (int)$data['key'];
-        $raw = (new \Live\Database\Live())->getLiveOfFollow($token_uid, $start_id);
+        $start = (int)$data['key'];
+        $raw = (new \Live\Database\Live())->getLiveOfFollow($token_uid, $start);
 
         $list = [];
         foreach ($raw as $data => $key) {

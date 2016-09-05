@@ -16,6 +16,8 @@ class Album extends Basic
     public $key_album = 'album:';
     public $key_album_count = 'album_n:';
 
+    public $key_album_wall = 'album:wall';
+
     public function __construct()
     {
         $this->option['dbname'] = 'live_album';
@@ -49,7 +51,7 @@ class Album extends Basic
         ]);
 
         if ($ret) {
-            $this->cache->link->del($this->key_replay . $uid, $this->key_replay_count . $uid);
+            $this->cache->link->del($this->key_album . $uid, $this->key_album_count . $uid);
         }
 
         return $ret;
@@ -60,7 +62,7 @@ class Album extends Basic
         $ret = parent::getListWithCount($this->key_album . $uid, $this->key_album_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
             $this->table($uid)->limit(500);
 
-            $this->select('id AS `key`,title,photo,type')->orderBy('id DESC')->where('uid = ? AND id > ?', [$uid, $start]);
+            $this->select('id AS `key`,title,photo,type')->orderBy('id DESC')->where('uid', $uid);
             if ($list = $this->fetchAll()) {
                 $data = [];
                 foreach ($list as $row) {
@@ -75,5 +77,28 @@ class Album extends Basic
         }, true);
 
         return ['album' => $ret[0], 'album_total' => $ret[1]];
+    }
+
+    public function albumWall($start, $limit = 30)
+    {
+        //todo:用户过百万的问题,记得修改
+        $ret = parent::getListWithCount($this->key_album_wall, 0, $start, $limit, function () {
+            $this->table(1)->limit(500);
+
+            $this->select('id AS `key`,title,photo,type')->orderBy('id DESC');
+            if ($list = $this->fetchAll()) {
+                $data = [];
+                foreach ($list as $row) {
+                    $data[] = $row['key'];
+                    $data[] = \msgpack_pack($row);
+                }
+
+                return $data;
+            }
+
+            return $list;
+        });
+
+        return $ret[0];
     }
 }

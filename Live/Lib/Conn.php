@@ -85,7 +85,7 @@ class Conn
             unset($this->conn[$fd], $this->uid[$uid]);
 
             //RedisAsync::release($uid, $this->key_user_chat . $uid);
-            $this->sub_user->unsubscribe($this->key_user_chat . $uid, function ($data, $err) {
+            $this->sub_user->unsubscribe($this->key_user_chat . $uid, function ($data) {
             });
         }
     }
@@ -112,7 +112,7 @@ class Conn
             unset($this->room[$room_id][$uid]);
 
             if (isset($this->room[$uid])) {
-                $this->stopRoom($uid);
+                $this->stopRoom($room_id, $uid);
             }
         }
 
@@ -122,21 +122,14 @@ class Conn
     public function subUser($uid)
     {
         //$sub = new RedisAsync('redis_async', $uid);
-        $this->sub_user->subscribe($this->key_user_chat . $uid, function ($data, $err) use ($uid) {
-            //var_dump($data);
-            if ($err)
-                return;
-
+        $this->sub_user->subscribe($this->key_user_chat . $uid, function ($data) use ($uid) {
             $this->msgAction($data, $uid);
         });
     }
 
     public function subRoom()
     {
-        $this->sub->subscribe($this->key_room_chat, function ($data, $err) {
-            if ($err)
-                return;
-
+        $this->sub->subscribe($this->key_room_chat, function ($data) {
             $this->msgAction($data);
         });
 
@@ -145,8 +138,11 @@ class Conn
 
     public function msgAction($data, $sub_uid = 0)
     {
+        if (!is_array($data))
+            return;
+
         $data = \msgpack_unpack($data[2]);
-        if (!$data || !is_array($data))
+        if (!is_array($data))
             return;
 
         /**
@@ -159,13 +155,13 @@ class Conn
             //$send_uid != $uid
             //var_dump('room', $this->getRoom($data['room_id']));
             foreach ($this->getRoom($data['room_id']) as $uid => $fd) {
-
                 if ($data['uid'] == $uid) {
                     continue;
                 } elseif (!$sw->push($fd, $data['msg'])) {
                     unset($this->room[$data['room_id']][$uid]);
                 }
             }
+
         } elseif ($a == 'toUser') {
             if ($fd = $this->getFd($sub_uid)) {
                 //var_dump($sub_uid, $fd);
@@ -186,12 +182,18 @@ class Conn
         $this->joinRoom($fd, $uid, $uid, $user);
     }
 
-    public function stopRoom($uid)
+    public function stopRoom($room_id, $uid)
     {
+        $this->sendToRoom($room_id, $uid, [
+            't' => Conn::TYPE_LIVE_STOP,
+            'msg' => '直播结束',
+        ]);
+
+        //todo:需要优化
         unset($this->room[$uid], $this->msg[$uid]);
     }
 
-    public function msgForSave($room_id, $uid, $msg)
+    public function msgForReplay($room_id, $uid, $msg)
     {
         $this->msg[$room_id][] = [$uid, $msg, \Swoolet\App::$ts];
     }
@@ -205,9 +207,7 @@ class Conn
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
         ];
 
-        $this->pub->publish($this->key_room_chat, \msgpack_pack($msg), function ($result, $err) {
-            //var_dump('sendToRoom', $result);
-        });
+        $this->pub->publish($this->key_room_chat, \msgpack_pack($msg));
     }
 
     public function updateUser($uid, $user)
@@ -218,9 +218,7 @@ class Conn
             'user' => $user,
         ];
 
-        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg), function ($result, $err) {
-            //var_dump('updateUser', $result);
-        });
+        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg));
     }
 
     public function sendToUser($uid, $msg, callable $cb = null)
@@ -231,10 +229,8 @@ class Conn
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
         ];
 
-        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($data), function ($result, $err) use ($cb) {
-            //var_dump('sendToUser', $result);
-            $cb && $cb($result, $err);
-        });
+        $ret = $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($data));
+        $cb && $cb($ret);
     }
 
     public function onWorkerStart($sw, $worker_id)

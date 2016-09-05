@@ -28,7 +28,7 @@ class Rank extends Common
         //土豪总榜
         //$this->link->zIncrBy($this->key_rank_send, $n, $send_uid);
         //收礼总榜
-        //$this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
+        $this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
 
         return $score;
     }
@@ -38,19 +38,18 @@ class Rank extends Common
         $limit = $this->limit;
         $key = $this->key_rank_room . $room_id;
 
-        $n = $this->link->zCard($key);
+        $this->link->zIncrBy($key, 0, $uid);
 
+        $this->incrRoomUserNum($room_id);
+
+        $n = $this->link->zCard($key);
         if ($n == 0) {
             //月榜
             $this->link->expireAt($key, \strtotime('first day of next month 00:00', \Swoolet\App::$ts));
         } elseif ($n > $limit * 2) {
             //移除超过限制的
-            $this->link->zRemRangeByRank($key, $limit + 1, -1);
+            $this->link->zRemRangeByRank($key, 0, $n - $limit - 1);
         }
-
-        $this->link->zIncrBy($key, 0, $uid);
-
-        $this->incrRoomUserNum($room_id);
 
         return $n;
     }

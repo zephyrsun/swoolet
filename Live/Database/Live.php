@@ -31,13 +31,13 @@ class Live extends Basic
         $this->cache = new \Live\Redis\Room();
     }
 
-    public function getLiveList($start_id, $sub_key = 'home', $sub_clause = null, $limit = 20)
+    public function getLiveList($start, $sub_key = 'home', $sub_clause = null, $limit = 20)
     {
         $key = $this->key_live . $sub_key;
-        $list = $this->cache->revRange($key, $start_id, $limit, true);
+        $list = $this->cache->revRange($key, $start, $limit, true);
         if (!$list) {
             $this->cacheLiveList($sub_key, $sub_clause);
-            $list = $this->cache->revRange($key, $start_id, $limit, true);
+            $list = $this->cache->revRange($key, $start, $limit, true);
         }
 
         return $list;
@@ -122,11 +122,17 @@ class Live extends Basic
         return $live;
     }
 
-    public function getLiveOfFollow($uid, $start_id)
+    public function getLiveOfFollow($uid, $start)
     {
-        return $this->getLiveList($start_id, $uid, function () use ($uid) {
+        return $this->getLiveList($start, $uid, function () use ($uid) {
             $follow = (new Follow())->getList($uid, 0, 500);
-            $this->where('uid', 'IN', array_keys($follow[0]));
+            $follow = $follow[0];
+            if ($follow) {
+                $this->where('uid', 'IN', array_keys($follow));
+                return $this->fetchAll();
+            }
+
+            return [];
         });
     }
 }

@@ -5,14 +5,15 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 $app = \Swoolet\Socket::createServer('Live', 'dev');
 new \Live\Controller\Basic();
 
+$ds_award = new \Live\Redis\Award();
+$start = 1;
+for ($uid = $start; $uid <= $start + 100; $uid++) {
+    $ret = $ds_award->addRecommend($uid, 'msg' . $uid);
+    var_dump($ret);
+}
 
-$k = (new \Live\Lib\Live(new Live\Third\Shata(true)))->start(4, '', '');
-var_dump(time());
-exit;
+//var_dumP($ds_award->getRecommend(0));
 
-
-$ret = (new \Live\Database\Fan())->isFollow(11, 12);
-var_dump($ret);
 //$vip = new Live\Redis\Vip();
 //$uid = 1;
 //$vip->addWait($uid, 686);

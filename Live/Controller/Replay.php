@@ -8,10 +8,6 @@
 
 namespace Live\Controller;
 
-use Live\Database\Fan;
-use Live\Database\Income;
-use Live\Database\RoomMsg;
-use Live\Redis\Rank;
 use Live\Response;
 
 class Replay extends Basic
@@ -31,10 +27,21 @@ class Replay extends Basic
         Response::data([
             'replay' => $replay,
             'user' => (new \Live\Database\User())->getShowInfo($uid, 'lv'),
-            'rank' => (new Rank())->getRankInRoom($room_id, 0),
-            'is_follow' => (new Fan())->isFollow($token_uid, $room_id),
-            'money' => (new Income())->getIncome($room_id),
+            'rank' => (new \Live\Redis\Rank())->getRankInRoom($room_id, 0),
+            'is_follow' => (new \Live\Database\Fan())->isFollow($token_uid, $room_id),
+            'money' => (new \Live\Database\Income())->getIncome($room_id),
         ]);
+    }
+
+    public function del()
+    {
+        $data = parent::getValidator()->required('token')->required('id')->getResult();
+        if (!$data)
+            return $data;
+
+        (new \Live\Database\Replay())->del($data['token_uid'], $data['id']);
+
+        Response::msg('删除成功');
     }
 
     public function getRoomMsg()
@@ -56,7 +63,7 @@ class Replay extends Basic
 
         $end_ts = $replay['create_ts'] + $replay['duration'];
 
-        $room_msg = (new RoomMsg())->getByTS($room_id, $start_ts, $end_ts);
+        $room_msg = (new \Live\Database\RoomMsg())->getByTS($room_id, $start_ts, $end_ts);
 
         $ds_user = new \Live\Database\User();
         foreach ($room_msg as &$row) {
