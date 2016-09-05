@@ -6,40 +6,40 @@ use Swoolet\App;
 
 class CURL
 {
-    public $error = '', $params = array();
+    public $error = '', $params = [];
 
-    public $options = array(
+    public $options = [
         CURLOPT_HEADER => false,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 10,
         CURLOPT_CONNECTTIMEOUT => 10,
-    );
+    ];
 
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         $this->options = $options + App::getConfig('curl') + $this->options;
     }
 
-    public function post($url, $data = array(), array $options = array())
+    public function post($url, $data = [], array $options = [])
     {
-        $options += array(
+        $options += [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $data,
-        );
+        ];
 
         return $this->exec($url, $options);
     }
 
     /**
      * get data like curl -d:
-     * get('http://example.com', array(), array(\CURLOPT_POSTFIELDS => $string_data))
+     * get('http://example.com', [], [\CURLOPT_POSTFIELDS => $string_data])
      *
      * @param $url
      * @param array $data
      * @param array $options
      * @return mixed
      */
-    public function get($url, $data = array(), array $options = array())
+    public function get($url, $data = [], array $options = [])
     {
 
         if ($data) {
@@ -49,35 +49,35 @@ class CURL
             $url .= '?' . $data;
         }
         /*
-        $options += array(
+        $options += [
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_POSTFIELDS => $data,
-        );
+        ];
         */
 
         return $this->exec($url, $options);
     }
 
-    public function put($url, $data = array(), array $options = array())
+    public function put($url, $data = [], array $options = [])
     {
-        $options += array(
+        $options += [
             CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_POSTFIELDS => $data,
-        );
+        ];
 
         return $this->exec($url, $options);
     }
 
-    public function delete($url, array $options = array())
+    public function delete($url, array $options = [])
     {
-        $options += array(
+        $options += [
             CURLOPT_CUSTOMREQUEST => 'DELETE',
-        );
+        ];
 
         return $this->exec($url, $options);
     }
 
-    protected function exec($url, array $options = array())
+    protected function exec($url, array $options = [])
     {
         $ch = curl_init();
 

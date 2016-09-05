@@ -31,15 +31,15 @@ class App
 
     static public function setConfig($namespace, $env)
     {
-        return self::$config = import($namespace . '/Config/' . $env) or self::$config = array();
+        return self::$config = import($namespace . '/Config/' . $env) or self::$config = [];
     }
 
     static public function getConfig($key)
     {
-        return isset(self::$config[$key]) ? self::$config[$key] : array();
+        return isset(self::$config[$key]) ? self::$config[$key] : [];
     }
 
-    static public function getInstance($class, array $args = array(), $key = '')
+    static public function getInstance($class, array $args = [], $key = '')
     {
         $key or $key = $class;
 
@@ -85,7 +85,7 @@ class Router
 
 abstract class Result implements \Iterator, \ArrayAccess, \Countable
 {
-    private $__data = array();
+    private $__data = [];
 
     /**
      * @param $key
@@ -182,7 +182,7 @@ abstract class Result implements \Iterator, \ArrayAccess, \Countable
      */
     public function flush()
     {
-        $this->__data = array();
+        $this->__data = [];
 
         return $this;
     }

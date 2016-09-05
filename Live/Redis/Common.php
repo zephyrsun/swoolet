@@ -57,7 +57,7 @@ class Common extends Redis
     public function revRange($key, $start, $limit, $with_score)
     {
         if ($start > 0)
-            return $this->link->zRevRangeByScore($key, $start, '-inf', array('limit' => array(1, $limit), 'withscores' => $with_score));
+            return $this->link->zRevRangeByScore($key, $start, '-inf', ['limit' => [1, $limit], 'withscores' => $with_score]);
 
         return $this->link->zRevRange($key, $start, $limit - 1, $with_score);
     }

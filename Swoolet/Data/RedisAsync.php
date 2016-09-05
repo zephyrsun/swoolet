@@ -286,7 +286,7 @@ class RedisConnection
                     return null;
                 }
 
-                $bulk = array();
+                $bulk = [];
                 for ($i = 0; $i < $payload; ++$i) {
                     $bulk[$i] = $this->read();
                 }

@@ -16,7 +16,7 @@ namespace Swoolet\View\Helper;
 
 class HTML
 {
-    static public function tag($tag, $text = '', array $attributes = array())
+    static public function tag($tag, $text = '', array $attributes = [])
     {
         if ($text === null)
             $text = ' />';
@@ -40,7 +40,7 @@ class HTML
         return htmlspecialchars($string, ENT_QUOTES, 'utf-8');
     }
 
-    static public function link($url, $text = '', array $attributes = array())
+    static public function link($url, $text = '', array $attributes = [])
     {
         if (!isset($attributes['href']))
             $attributes['href'] = $url;
@@ -48,24 +48,24 @@ class HTML
         return self::tag('a', $text, $attributes);
     }
 
-    static public function radio(array $options, $checked = null, array $label_attr = array(), array $input_attr = array())
+    static public function radio(array $options, $checked = null, array $label_attr = [], array $input_attr = [])
     {
         return self::radioOption('radio', $options, $checked, $label_attr, $input_attr);
     }
 
-    static public function checkbox(array $options, $checked = null, array $label_attr = array(), array $input_attr = array())
+    static public function checkbox(array $options, $checked = null, array $label_attr = [], array $input_attr = [])
     {
         return self::radioOption('checkbox', $options, $checked, $label_attr, $input_attr);
     }
 
-    static public function select(array $options, $selected = null, array $attributes = array())
+    static public function select(array $options, $selected = null, array $attributes = [])
     {
         return self::tag('select', self::selectOption($options, $selected), $attributes);
     }
 
-    static public function selectNum($min, $max, $select = null, array $attributes = array())
+    static public function selectNum($min, $max, $select = null, array $attributes = [])
     {
-        $options = array();
+        $options = [];
         for (; $min <= $max; $min++)
             $options[$min] = $min;
 
@@ -77,9 +77,9 @@ class HTML
         $s = '';
         foreach ($options as $val => $option) {
             if (\is_array($option)) {
-                $s .= self::tag('optgroup', self::selectOption($option, $selected), array('label' => $val));
+                $s .= self::tag('optgroup', self::selectOption($option, $selected), ['label' => $val]);
             } else {
-                $attributes = array('value' => $val);
+                $attributes = ['value' => $val];
 
                 if ($val == $selected)
                     $attributes['selected'] = 'selected';

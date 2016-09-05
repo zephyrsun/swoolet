@@ -39,14 +39,13 @@ class Log extends Basic
         //if (!$code)
         //    $code = date('Ymd', \APP_TS);
 
-        return $this->table('log')->insert(array(
+        return $this->table('log')->insert([
             'get' => isset($request->get) ? \http_build_query($request->get) : '', //get
             'post' => isset($request->post) ? http_build_query($request->post) : '', //post
             'data' => $data,
             'srv_ip' => \current(\swoole_get_local_ip()),
             'client_ip' => $request->server['remote_addr'],
             'time' => \date("Y-m-d H:i:s", \Swoolet\App::$ts), //time
-        ));
+        ]);
     }
-
-} 
+}

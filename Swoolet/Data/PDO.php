@@ -130,9 +130,9 @@ namespace Swoolet\Data {
 
         /**
          * where('gender', 'male')
-         * where('user_id', 'IN', array(1, 2, 3))
+         * where('user_id', 'IN', [1, 2, 3])
          * where('email', 'LIKE', '%@abc.com', 'OR')
-         * where('(age >= ? OR age <= ?)', array(18, 30))
+         * where('(age >= ? OR age <= ?)', [18, 30])
          *
          * @param $clause
          * @param $condition
@@ -198,7 +198,7 @@ namespace Swoolet\Data {
         /**
          * @param string|array $order
          *          - 'id'
-         *          - array('id', 'ts' => -1)
+         *          - ['id', 'ts' => -1]
          *
          * @return $this
          */
@@ -263,7 +263,7 @@ namespace Swoolet\Data {
          */
         public function insert(array $data, $modifier = 'INSERT INTO')
         {
-            $col = $value = array();
+            $col = $value = [];
             foreach ($data as $k => $v) {
                 $col[] = '`' . $k . '`';
 
@@ -299,9 +299,9 @@ namespace Swoolet\Data {
          */
         public function update($data)
         {
-            $params = array();
+            $params = [];
             if (is_array($data)) {
-                $value = array();
+                $value = [];
                 foreach ($data as $col => $val) {
                     $value[] = "`{$col}` = ?";
                     $params[] = $val;
@@ -384,7 +384,7 @@ namespace Swoolet\Data {
             if ($this->exec())
                 return $this->_setFetchMode($mode, $mode_param)->fetchAll();
 
-            return array();
+            return [];
         }
 
         /**
@@ -421,7 +421,7 @@ namespace Swoolet\Data {
          * @param array $params
          * @return \PDOStatement
          */
-//        public function execSQL($sql, $params = array())
+//        public function execSQL($sql, $params = [])
 //        {
 //            $this->sql = $sql;
 //            $this->param = $params;

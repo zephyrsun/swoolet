@@ -31,7 +31,7 @@ class Server extends \Swoolet\Http
         $this->resp = $response;
 
         self::$msg = '';
-        $_POST = isset($request->post) ? $request->post : array();
+        $_POST = isset($request->post) ? $request->post : [];
 
         //\Swoolet\log($request->server['path_info'], $request->fd);
 

@@ -32,7 +32,7 @@ class Response
      */
     static public function msg($msg, $code = 0)
     {
-        self::data(array('msg' => $msg), $code);
+        self::data(['msg' => $msg], $code);
 
         return false;
     }
@@ -42,7 +42,7 @@ class Response
      * @param int $code
      * @return null
      */
-    static public function data(array $data = array(), $code = 0)
+    static public function data(array $data = [], $code = 0)
     {
         $data['c'] = $code;
         if ($m = &$_POST['m'])

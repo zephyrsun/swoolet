@@ -19,25 +19,25 @@ use Swoolet\View\Helper\HTML;
 
 class Pagination
 {
-    public $options = array(
+    public $options = [
         'page_size' => 10,
         'nav_num' => 5,
         'class' => 'pagination',
         'id' => 'pagination',
-        'attributes' => array('class' => 'pagination'),
+        'attributes' => ['class' => 'pagination'],
         'prev_text' => '&laquo;',
         'next_text' => '&raquo;',
-        'query' => array(),
-    )
-    , $total = 1
-    , $current = 1
-    , $uri = '';
+        'query' => [],
+    ],
+        $total = 1,
+        $current = 1,
+        $uri = '';
 
     /**
      * @param $total
      * @param array $options
      */
-    public function __construct($total, array $options = array())
+    public function __construct($total, array $options = [])
     {
 
         $this->options = $options += App::getConfig('pagination') + $this->options;
@@ -74,7 +74,7 @@ class Pagination
      *
      * @return string
      */
-    static public function tag($page, $text, $attributes = array())
+    static public function tag($page, $text, $attributes = [])
     {
         return HTML::tag('li', HTML::link($page, $text), $attributes);
     }
@@ -88,7 +88,7 @@ class Pagination
             return static::tag($this->link($this->current - 1), $this->options['prev_text']);
 
         return '';
-        //return static::tag('javascript:;', $this->options['prev_text'], array('class' => 'disabled'));
+        //return static::tag('javascript:;', $this->options['prev_text'], ['class' => 'disabled']);
     }
 
     /**
@@ -129,7 +129,7 @@ class Pagination
 
     public function dots()
     {
-        return static::tag('javascript:;', '&hellip;', array('class' => 'disabled'));
+        return static::tag('javascript:;', '&hellip;', ['class' => 'disabled']);
     }
 
     /**
@@ -137,7 +137,7 @@ class Pagination
      * @param array $options
      * @return string
      */
-    static public function generate($total, array $options = array())
+    static public function generate($total, array $options = [])
     {
         $class = get_called_class();
         $obj = new $class($total, $options);
@@ -169,9 +169,9 @@ class Pagination
         for ($i = $start; $i <= $end; ++$i) {
 
             if ($this->current == $i) {
-                $attr = array('class' => 'active');
+                $attr = ['class' => 'active'];
             } else {
-                $attr = array();
+                $attr = [];
             }
 
             $html .= static::tag($this->link($i), $i, $attr);

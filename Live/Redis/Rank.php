@@ -98,7 +98,7 @@ class Rank extends Common
     {
         $data = parent::revRange($key, $start, $this->limit, true);
 
-        $ret = array();
+        $ret = [];
         $db_user = new \Live\Database\User();
         foreach ($data as $uid => $money) {
 

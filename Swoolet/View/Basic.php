@@ -19,15 +19,15 @@ use Swoolet\Result;
 
 class Basic extends Result
 {
-    public $options = array(
+    public $options = [
         'source_dir' => '',
         'source_ext' => 'php',
-    );
+    ];
 
     /**
      * @param array $options
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         $this->options = $options + App::getConfig('view') + $this->options;
 

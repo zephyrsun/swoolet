@@ -66,7 +66,7 @@ class File
     static public function ls($dir, $r = false)
     {
         if (\is_dir($dir) && $dh = \opendir($dir)) {
-            $ret = array();
+            $ret = [];
             while (false != ($file = \readdir($dh))) {
                 if ($file != '.' && $file != '..') {
                     $file = $dir . \DIRECTORY_SEPARATOR . $file;
