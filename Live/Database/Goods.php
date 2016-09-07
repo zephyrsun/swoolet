@@ -31,9 +31,9 @@ class Goods extends Basic
         $this->cache = new \Live\Redis\Goods();
     }
 
-    public function table($key)
+    public function hashTable($key)
     {
-        return PDO::table('goods');
+        return PDO::hashTable('goods');
     }
 
     /**
@@ -50,7 +50,7 @@ class Goods extends Basic
         $key = $this->key_goods . 'all';
         if ($force || !$list = $this->cache->get($key)) {
 
-            $this->table(1)->select('id,channel,type,coin,money,exp,vip_day,tycoon_day')->orderBy('money ASC');
+            $this->hashTable(1)->select('id,channel,type,coin,money,exp,vip_day,tycoon_day')->orderBy('money ASC');
 
             $data = $this->fetchAll();
 

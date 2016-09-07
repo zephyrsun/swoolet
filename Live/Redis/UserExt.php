@@ -13,7 +13,7 @@ use Swoolet\Data\Redis;
 
 class UserExt extends Redis
 {
-    public $cfg_key = 'redis_1';
+    public $cfg_key = 'redis_store';
 
     public $key_ext = 'user_ext:';
 

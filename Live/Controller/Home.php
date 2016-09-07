@@ -19,18 +19,25 @@ class Home extends Basic
 
         $start = (int)$data['key'];
 
-        $raw = (new \Live\Database\Live())->getLiveList($start);
+        $ds = new \Live\Database\Live();
 
-        $list = [];
-        foreach ($raw as $data => $key) {
-            $list[] = \msgpack_unpack($data) + ['key' => $key];
-        }
+        $list = $ds->getList($ds->key_list_hot, $start);
 
         return Response::data(['list' => $list]);
     }
 
-    public function zodiacStar()
+    public function latest()
     {
-        return $this->request;
+        $data = parent::getValidator()->required('token')->le('key', 0)->getResult();
+        if (!$data)
+            return $data;
+
+        $start = (int)$data['key'];
+
+        $ds = new \Live\Database\Live();
+
+        $list = $ds->getList($ds->key_list_latest, $start);
+
+        return Response::data(['list' => $list]);
     }
 }

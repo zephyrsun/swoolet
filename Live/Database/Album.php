@@ -39,7 +39,7 @@ class Album extends Basic
      */
     public function add($uid, $photo, $title, $type)
     {
-        $this->table($uid);
+        $this->hashTable($uid);
 
         $ret = parent::insert([
             'uid' => $uid,
@@ -57,10 +57,21 @@ class Album extends Basic
         return $ret;
     }
 
+    public function del($uid, $id)
+    {
+        $uid = 3;
+        $ret = parent::del($uid, $id);
+        if ($ret) {
+            $this->cache->link->del($this->key_album . $uid, $this->key_album_count . $uid);
+        }
+
+        return $ret;
+    }
+
     public function getList($uid, $start, $limit = 8)
     {
         $ret = parent::getListWithCount($this->key_album . $uid, $this->key_album_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
-            $this->table($uid)->limit(500);
+            $this->hashTable($uid)->limit(500);
 
             $this->select('id AS `key`,title,photo,type')->orderBy('id DESC')->where('uid', $uid);
             if ($list = $this->fetchAll()) {
@@ -83,7 +94,7 @@ class Album extends Basic
     {
         //todo:用户过百万的问题,记得修改
         $ret = parent::getListWithCount($this->key_album_wall, 0, $start, $limit, function () {
-            $this->table(1)->limit(500);
+            $this->hashTable(1)->limit(500);
 
             $this->select('id AS `key`,title,photo,type')->orderBy('id DESC');
             if ($list = $this->fetchAll()) {

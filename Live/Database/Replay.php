@@ -35,7 +35,17 @@ class Replay extends Basic
             'create_ts' => \Swoolet\App::$ts,
         ];
 
-        $ret = $this->table($uid)->insert($data);
+        $ret = $this->hashTable($uid)->insert($data);
+        if ($ret) {
+            $this->cache->link->del($this->key_replay . $uid, $this->key_replay_count . $uid);
+        }
+
+        return $ret;
+    }
+
+    public function del($uid, $id)
+    {
+        $ret = parent::del($uid, $id);
         if ($ret) {
             $this->cache->link->del($this->key_replay . $uid, $this->key_replay_count . $uid);
         }
@@ -48,14 +58,14 @@ class Replay extends Basic
         $key = $this->key_replay_one . $uid;
 
         return $this->getWithCache($key, function () use ($uid, $id) {
-            return $this->table($uid)->where('id', $id)->fetch();
+            return $this->hashTable($uid)->where('id', $id)->fetch();
         });
     }
 
     public function getList($uid, $start, $limit = 8)
     {
         $ret = parent::getListWithCount($this->key_replay . $uid, $this->key_replay_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
-            $this->table($uid);
+            $this->hashTable($uid);
 
             $this->select('id AS `key`,title,cover,play_url')->orderBy('id DESC')->limit(500)->where('uid = ?', $uid);
             if ($list = $this->fetchAll()) {

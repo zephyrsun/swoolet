@@ -18,7 +18,7 @@ class Album extends Basic
         if (!$data)
             return $data;
 
-        (new \Live\Database\Album())->del($data['token_uid'], $data['id']);
+        $ret = (new \Live\Database\Album())->del($data['token_uid'], $data['id']);
 
         Response::msg('删除成功');
     }
@@ -33,6 +33,6 @@ class Album extends Basic
 
         (new \Live\Database\Album())->albumWall($start);
 
-        Response::msg('删除成功');
+        Response::msg('ok');
     }
 }

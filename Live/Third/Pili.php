@@ -25,18 +25,24 @@ class Pili
         $this->hub = new \Pili\Hub($credentials, $cfg['hub']); # => Hub Object
     }
 
-    public function start($key)
+    public function start($key, $stream_id)
     {
+        try {
+            $stream = $this->hub->getStream($stream_id);
+            $stream->enable();
+        } catch (\Exception $e) {
+            $stream = $this->hub->createStream($key, null, 'static');
+        }
+
+        /*
         $result = @$this->hub->listStreams(null, 1, $key);
         $items = &$result['items'];
         if ($items && ($stream = \current($items)) && $key == $stream->title) {
-            /**
-             * @var \Pili\Stream $stream
-             */
             $stream->enable();
         } else {
             $stream = $this->hub->createStream($key, null, 'static');
         }
+        */
 
         $publish_url = $stream->rtmpPublishUrl();
         $play_url = $stream->rtmpLiveUrls()['ORIGIN'];

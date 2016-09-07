@@ -28,7 +28,7 @@ class ChatMsg extends Basic
 
     public function add($uid, $from_uid, $msg)
     {
-        return $this->table($uid)->insert([
+        return $this->hashTable($uid)->insert([
             'uid' => $uid,
             'from_uid' => $from_uid,
             'msg' => $msg,
@@ -38,7 +38,7 @@ class ChatMsg extends Basic
 
     public function getMsg($uid)
     {
-        $this->table($uid)->select('id,from_uid,msg,ts')
+        $this->hashTable($uid)->select('id,from_uid,msg,ts')
             ->orderBy('id DESC')->where('uid', $uid);
 
         return $this->fetchAll();
@@ -46,6 +46,6 @@ class ChatMsg extends Basic
 
     public function markAsRead($uid)
     {
-        return $this->table($uid)->where('uid', $uid)->delete();
+        return $this->hashTable($uid)->where('uid', $uid)->delete();
     }
 }

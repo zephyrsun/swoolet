@@ -34,7 +34,7 @@ class Balance extends Basic
     public function get($uid, $key = 'sent')
     {
         return $this->cache->getWithCallback($uid, $key, function () use ($uid) {
-            $ret = $this->table($uid)->select('balance,sent,charge')->where('uid', $uid)->fetch();
+            $ret = $this->hashTable($uid)->select('balance,sent,charge')->where('uid', $uid)->fetch();
 
             return $ret ? $ret : ['balance' => 0, 'sent' => 0, 'charge' => 0];
         });
@@ -42,9 +42,9 @@ class Balance extends Basic
 
     public function add($uid, $balance, $charge, $log = true)
     {
-        $ret = $this->table($uid)->where('uid', $uid)->update("balance = balance + $balance, charge = charge + $charge");
+        $ret = $this->hashTable($uid)->where('uid', $uid)->update("balance = balance + $balance, charge = charge + $charge");
         if (!$ret) {
-            $ret = $this->table($uid)->insert([
+            $ret = $this->hashTable($uid)->insert([
                 'uid' => $uid,
                 'balance' => $balance,
                 'charge' => $charge,
@@ -131,10 +131,12 @@ class Balance extends Basic
         if ($balance <= 0)
             return Response::msg('参数错误', 1016);
 
-        $ret = $this->table($uid)->where('uid = ? AND balance >= ?', [$uid, $balance])
+        $ret = $this->hashTable($uid)->where('uid = ? AND balance >= ?', [$uid, $balance])
             ->update("balance = balance - $balance, sent = sent + $balance");
 
         if ($ret) {
+            (new UserLevel())->add($uid, $exp);
+
             $this->cache->del($uid, 'balance', 'sent');
             return $ret;
         }

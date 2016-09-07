@@ -55,23 +55,23 @@ class Replay extends Basic
 
         $replay = (new \Live\Database\Replay())->get($uid, $id);
 
+        $end_ts = $replay['create_ts'];
+
         if ($data['ts'] > 0) {
             $start_ts = $data['ts'];
         } else {
-            $start_ts = $replay['create_ts'];
+            $start_ts = $end_ts - $replay['duration'];
         }
-
-        $end_ts = $replay['create_ts'] + $replay['duration'];
 
         $room_msg = (new \Live\Database\RoomMsg())->getByTS($room_id, $start_ts, $end_ts);
 
-        $ds_user = new \Live\Database\User();
-        foreach ($room_msg as &$row) {
-            $row['user'] = $ds_user->getShowInfo($row['from_uid'], 'lv');
-            unset($row['from_uid']);
-
-            $row['ts'] -= $start_ts;
-        }
+//        $ds_user = new \Live\Database\User();
+//        foreach ($room_msg as &$row) {
+//            $row['user'] = $ds_user->getShowInfo($row['from_uid'], 'lv');
+//            unset($row['from_uid']);
+//
+//            $row['ts'] -= $start_ts;
+//        }
 
         Response::data(['room_msg' => $room_msg]);
     }

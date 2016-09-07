@@ -12,6 +12,7 @@ namespace Live\Controller;
 use Live\Database\Album;
 use Live\Database\Fan;
 use Live\Database\Replay;
+use Live\Lib\Elasticsearch;
 use Live\Response;
 
 class User extends Basic
@@ -33,9 +34,13 @@ class User extends Basic
         } elseif ($uid == $token_uid) {
             $user['admin'] = $ra->getCount($uid);
             $user['money'] = (new \Live\Database\Balance())->get($uid, 'balance');
+
+            $user += (new \Live\Database\UserLevel())->getLvAndExp($uid);
         }
 
-        return Response::data(['user' => $user]);
+        return Response::data([
+            'user' => $user,
+        ]);
     }
 
     public function updateUserInfo($request)
@@ -63,15 +68,20 @@ class User extends Basic
             }
         }
 
-        $db_user = new \Live\Database\User();
+        if ($data) {
+            $db_user = new \Live\Database\User();
 
-        if ($data)
             $ret = $db_user->updateUser($uid, $data);
-        else
-            $ret = 0;
+            if ($ret) {
+                if ($data['nickname']) {
+                    (new Elasticsearch())->add('user', $uid, ['nickname' => $data['nickname']]);
+                } elseif ($data['sign']) {
+                    (new Elasticsearch())->add('user', $uid, ['sign' => $data['sign']]);
+                }
 
-        if ($ret)
-            return Response::data(['user' => $db_user->getUser($uid)]);
+                return Response::data(['user' => $db_user->getUser($uid)]);
+            }
+        }
 
         return Response::msg('更新失败', 1041);
     }
@@ -122,6 +132,7 @@ class User extends Basic
         $data = [
             'user' => $user,
             'visit' => $ds_user->getVisit($uid, 0, 5),
+            'play_url' => (new \Live\Database\Live())->getLivingUrl($uid),
         ];
 
         $album = (new Album())->getList($uid, 0, 7);

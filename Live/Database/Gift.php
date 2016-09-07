@@ -28,15 +28,15 @@ class Gift extends Basic
         $this->cache = new \Live\Redis\Gift();
     }
 
-    public function table($key)
+    public function hashTable($key)
     {
-        return PDO::table('gift');
+        return PDO::hashTable('gift');
     }
 
     public function getAll($limit, $force = false)
     {
         if ($force || !$ret = $this->cache->get($this->key_gift)) {
-            $data = $this->table(1)->where('status', 1)->orderBy('id,sort')->fetchAll();
+            $data = $this->hashTable(1)->where('status', 1)->orderBy('id,sort')->fetchAll();
 
             $ret = [];
             foreach ($data as $row)
@@ -96,15 +96,15 @@ class Gift extends Basic
             (new Rank())->addRank($send_uid, $to_uid, $money);
         }
 
-        if ($gift['money'] > 3e3) {
-            (new \Live\Redis\Award())->addRecommend($send_uid, $gift['msg']);
-        } elseif ($num >= 100) {
-            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼达人');
-        } elseif ($num >= 666) {
-            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼大师');
-        } elseif ($num >= 9999) {
-            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼至尊');
-        }
+//        if ($gift['money'] > 3e3) {
+//            (new \Live\Redis\Award())->addRecommend($send_uid, $gift['msg']);
+//        } elseif ($num >= 100) {
+//            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼达人');
+//        } elseif ($num >= 666) {
+//            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼大师');
+//        } elseif ($num >= 9999) {
+//            (new \Live\Redis\Award())->addRecommend($send_uid, '送礼至尊');
+//        }
 
         return $gift['name'];
     }

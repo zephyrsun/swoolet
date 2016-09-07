@@ -78,11 +78,13 @@ class Conn
         $this->joinRoom($fd, 0, $uid, $user);
     }
 
-    public function leave($fd)
+    public function leave($fd, $unset = true)
     {
         $conn = $this->getConn($fd);
         if ($conn && ($uid = $conn[0]) && $this->getFd($uid) == $fd) {
-            unset($this->conn[$fd], $this->uid[$uid]);
+
+            if ($unset)
+                unset($this->conn[$fd], $this->uid[$uid]);
 
             //RedisAsync::release($uid, $this->key_user_chat . $uid);
             $this->sub_user->unsubscribe($this->key_user_chat . $uid, function ($data) {
@@ -92,8 +94,6 @@ class Conn
 
     public function joinRoom($fd, $room_id, $uid, $user)
     {
-        $this->conn[$fd] = [$uid, $room_id, $user];
-
         //退出已经存在的房间
         if ($room_id) {
             $this->leaveRoom($fd);
@@ -102,6 +102,10 @@ class Conn
 
             //$this->subscribe($this->key_room_chat . $room_id, $uid, $fd);
         }
+
+        $this->conn[$fd] = [$uid, $room_id, $user];
+
+        \Swoolet\Log(json_encode($this->room), 'joinRom');
     }
 
     public function leaveRoom($fd)
@@ -153,7 +157,8 @@ class Conn
         $a = &$data['a'];
         if ($a == 'toRoom') {
             //$send_uid != $uid
-            //var_dump('room', $this->getRoom($data['room_id']));
+
+            //\Swoolet\Log(json_encode($this->getRoom($data['room_id'])), 'Room');
             foreach ($this->getRoom($data['room_id']) as $uid => $fd) {
                 if ($data['uid'] == $uid) {
                     continue;
@@ -162,8 +167,13 @@ class Conn
                 }
             }
 
-            if ($data['ext'] == 'close') {
+            if ($data['ext'] == 'stop') {
                 $uid = $data['uid'];
+
+                if ($msg = &$this->msg[$uid]) {
+                    (new RoomMsg())->addFromChat($uid, $msg);
+                }
+
                 unset($this->room[$uid], $this->msg[$uid]);
             }
 
@@ -181,10 +191,10 @@ class Conn
 
     public function createRoom($fd, $uid, $user)
     {
+        $this->joinRoom($fd, $uid, $uid, $user);
+
         $this->room[$uid] = [];
         $this->msg[$uid] = [];
-
-        $this->joinRoom($fd, $uid, $uid, $user);
     }
 
     public function stopRoom($room_id, $uid)
@@ -192,7 +202,7 @@ class Conn
         $this->sendToRoom($room_id, $uid, [
             't' => Conn::TYPE_LIVE_STOP,
             'msg' => '直播结束',
-        ], 'close');
+        ], 'stop');
 
         //todo:需要优化
         //unset($this->room[$uid], $this->msg[$uid]);
@@ -205,13 +215,17 @@ class Conn
 
     public function sendToRoom($room_id, $uid, $msg, $ext = '')
     {
+        $json_msg = json_encode($msg, \JSON_UNESCAPED_UNICODE);
+
         $msg = [
             'a' => 'toRoom',
             'ext' => $ext,
             'room_id' => $room_id,
             'uid' => $uid,
-            'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
+            'msg' => $json_msg,
         ];
+
+        $this->msgForReplay($room_id, $uid, $json_msg);
 
         $this->pub->publish($this->key_room_chat, \msgpack_pack($msg));
     }
@@ -244,6 +258,8 @@ class Conn
         $filename = "/tmp/swoolet_ws_{$worker_id}.php";
         $arr = File::get($filename, true);
         if ($arr) {
+            // \Swoolet\Log(json_encode($arr), 'recover');
+
             list($this->uid, $this->conn, $this->room) = $arr;
 
             //var_dump('start', $this->room);
@@ -270,8 +286,6 @@ class Conn
             $this->conn,
             $this->room,
         ];
-
-        //var_dump('stop', $this->room);
 
         $ret = File::touch("/tmp/swoolet_ws_{$worker_id}.php", $data, true);
 

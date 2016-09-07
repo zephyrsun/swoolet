@@ -54,7 +54,7 @@ class User extends Basic
         } else {
             $uid = $this->getUID($pf, $username);
 
-            $this->table($uid);
+            $this->hashTable($uid);
             $this->insert($user + [
                     'uid' => $uid,
                     'username' => $username,
@@ -73,7 +73,7 @@ class User extends Basic
 
     public function updateUser($uid, $data)
     {
-        $this->table($uid)->where('uid', $uid);
+        $this->hashTable($uid)->where('uid', $uid);
 
         return parent::update($data);
     }
@@ -118,6 +118,8 @@ class User extends Basic
             $ts = \Swoolet\App::$ts;
 
             $user['mobile'] = (int)$user['mobile'];
+
+            $exp =
             $user += [
                 'is_vip' => $user['vip_expire'] > $ts,
                 'is_tycoon' => $user['tycoon_expire'] > $ts,
@@ -155,7 +157,7 @@ class User extends Basic
     public function getUser($uid)
     {
         $user = $this->getWithCache($this->key_user . $uid, function () use ($uid) {
-            if ($user = $this->table($uid)->where('uid', $uid)->fetch()) {
+            if ($user = $this->hashTable($uid)->where('uid', $uid)->fetch()) {
                 unset($user['username'], $user['create_ts']);
 
                 $user['city'] = \Live\Lib\Utility::generateCity($user['city']);
@@ -169,14 +171,14 @@ class User extends Basic
 
     public function getByUsername($pf, $username)
     {
-        return PDO::table('user_increment')
+        return PDO::hashTable('increment')
             ->where('pf=? AND username=?', [$pf, $username])
             ->fetch();
     }
 
     public function getUID($pf, $username)
     {
-        return PDO::table('user_increment')->insert([
+        return PDO::hashTable('increment')->insert([
             'pf' => $pf,
             'username' => $username,
         ]);

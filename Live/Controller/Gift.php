@@ -14,7 +14,7 @@ class Gift extends Basic
 {
     public function getGift()
     {
-        $data = parent::getValidator()->required('token')->required('v')->getResult();
+        $data = parent::getValidator()->required('v')->getResult();
         if (!$data)
             return $data;
 

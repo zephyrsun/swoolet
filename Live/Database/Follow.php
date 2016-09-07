@@ -34,7 +34,7 @@ class Follow extends Basic
      */
     public function add($uid, $ref_uid)
     {
-        $ret = $this->table($uid)->insert([
+        $ret = $this->hashTable($uid)->insert([
             'uid' => $uid,
             'ref_uid' => $ref_uid,
         ], 'INSERT IGNORE');
@@ -47,7 +47,7 @@ class Follow extends Basic
 
     public function del($uid, $ref_uid)
     {
-        $ret = $this->table($uid)->where('uid = ? AND ref_uid = ?', [$uid, $ref_uid])->delete();
+        $ret = $this->hashTable($uid)->where('uid = ? AND ref_uid = ?', [$uid, $ref_uid])->delete();
 
         $ret = $this->cache->link->zRem($this->key . $uid, $ref_uid);
         if ($ret)
@@ -65,9 +65,9 @@ class Follow extends Basic
     public function getList($uid, $start, $limit)
     {
         return parent::getListWithCount($this->key . $uid, $this->key_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
-            $this->table($uid)->limit(500);
+            $this->hashTable($uid)->limit(500);
 
-            $this->table($uid)->select('id,ref_uid')->orderBy('id DESC')->where('uid', $uid);
+            $this->hashTable($uid)->select('id,ref_uid')->orderBy('id DESC')->where('uid', $uid);
             if ($list = $this->fetchAll()) {
                 $data = [];
                 foreach ($list as $row) {

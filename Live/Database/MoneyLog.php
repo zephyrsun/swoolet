@@ -24,9 +24,9 @@ class MoneyLog extends Basic
         //$this->cache = new \Live\Redis\User();
     }
 
-    public function table($key)
+    public function hashTable($key)
     {
-        return PDO::table('m_2016');
+        return PDO::hashTable('m_2016');
     }
 
     public function addOrder($uid, $gift_id, $pf)
@@ -45,12 +45,12 @@ class MoneyLog extends Basic
     public function updateOrder($id, $trade_no_3rd)
     {
         $ts = \Swoolet\App::$ts;
-        return $this->table(1)->where('id = ? AND status = ?', [$id, 0])->update("status=1, ts={$ts}, data=CONCAT(data,':{$trade_no_3rd}')");
+        return $this->hashTable(1)->where('id = ? AND status = ?', [$id, 0])->update("status=1, ts={$ts}, data=CONCAT(data,':{$trade_no_3rd}')");
     }
 
     public function get($id)
     {
-        return $this->table(1)->where('id', $id)->fetch();
+        return $this->hashTable(1)->where('id', $id)->fetch();
     }
 
     public function add($uid, $to_uid, $money, $status = 1, $data = '')
@@ -58,7 +58,7 @@ class MoneyLog extends Basic
         if (is_array($data))
             $data = json_encode($data, \JSON_UNESCAPED_UNICODE);
 
-        return $this->table(1)->insert([
+        return $this->hashTable(1)->insert([
             'uid' => $uid,
             'to_uid' => $to_uid,
             'money' => $money,

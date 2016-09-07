@@ -29,9 +29,9 @@ class RoomAdmin extends Basic
         $this->cache = new \Live\Redis\RoomAdmin();
     }
 
-    public function table($key)
+    public function hashTable($key)
     {
-        PDO::table($this->table_prefix);
+        PDO::hashTable($this->table_prefix);
 
         return $this;
     }
@@ -46,7 +46,7 @@ class RoomAdmin extends Basic
         elseif (in_array($admin_uid, $admins, true))
             return true;
 
-        $ret = $this->table($uid)->insert([
+        $ret = $this->hashTable($uid)->insert([
             'uid' => $uid,
             'admin_uid' => $admin_uid,
         ], 'INSERT IGNORE INTO');
@@ -59,7 +59,7 @@ class RoomAdmin extends Basic
 
     public function del($uid, $admin_uid)
     {
-        $ret = $this->table($uid)->where('uid=? AND admin_uid=?', [$uid, $admin_uid])->delete();
+        $ret = $this->hashTable($uid)->where('uid=? AND admin_uid=?', [$uid, $admin_uid])->delete();
         if ($ret)
             $this->cache->del($this->key_admin . $uid);
 
@@ -101,7 +101,7 @@ class RoomAdmin extends Basic
 
         if (!$data = $this->cache->link->sMembers($key)) {
 
-            $data = $this->table($uid)->select('admin_uid')
+            $data = $this->hashTable($uid)->select('admin_uid')
                 ->where('uid = ?', $uid)->fetchAll(\PDO::FETCH_COLUMN, 0);
 
             if ($data) {

@@ -1,4 +1,3 @@
-
 <form action="http://test.camhow.com.cn/upload/cover" method="post" enctype="multipart/form-data">
     <input type="file" name="file"/>
     <input type="hidden" name="token" value="oboi24|GVkwPzXRhNTLbcLFBX8tkrYI3t84BUNz7+a9yWpaBAU="/>
@@ -21,7 +20,7 @@
 
         websocket.send('{"m":"socket_init","token":"' + token + '"}')
         websocket.send('{"m":"room_join","room_id":"' + room_id + '","first":true,"token":"' + token + '"}')
-        websocket.send('{"m":"room_sendGift","gift_id":1,"num":"1","total":1}')
+        //  websocket.send('{"m":"room_sendGift","gift_id":1,"num":"1","total":1}')
 //        websocket.send('{"m":"room_sendMsg","msg":"你好2"}')
 //        websocket.send('{"m":"room_leave"}')
 //        websocket.send('{"m":"room_join","room_id":"1","first":true,"token":"' + token + '"}')

@@ -60,6 +60,7 @@ class UserLevel extends Basic
         38 => 419800,
         39 => 531800,
         40 => 647000,
+        41 => 9999999,
     ];
 
     public function __construct()
@@ -80,10 +81,12 @@ class UserLevel extends Basic
         if (!$new_exp)
             return Response::msg('服务器错误', 1030);
 
+        $new_exp = min($new_exp, end(self::$exp));
+
         $lv = self::exp2lv($new_exp);
         $this->cache->set($uid, 'lv', $lv);
 
-        $ret = $this->table($uid)->replace([
+        $ret = $this->hashTable($uid)->replace([
             'uid' => $uid,
             'exp' => $new_exp,
             'lv' => $lv,
@@ -92,17 +95,45 @@ class UserLevel extends Basic
         return $new_exp;
     }
 
+    public function reCache($uid)
+    {
+        $data = $this->hashTable($uid)->select('exp,lv')->where('uid', $uid)->fetch();
+        if ($data) {
+            $this->cache->mSet($uid, $data);
+        }
+
+        return $data;
+    }
+
     public function getLv($uid)
     {
-        if (!$lv = $this->cache->get($uid, 'lv')) {
-            $data = $this->table($uid)->select('exp,lv')->where('uid', $uid)->fetch();
-            if ($data) {
-                $this->cache->mSet($uid, $data);
-                $lv = $data['lv'];
+        if (!$ret = $this->cache->get($uid, 'lv')) {
+            $data = $this->reCache($uid);
+            if ($data)
+                $ret = $data['lv'];
+        }
+
+        return $ret ? (int)$ret : 1;
+    }
+
+    public function getLvAndExp($uid)
+    {
+        if (!$ret = $this->cache->get($uid, ['exp', 'lv'])) {
+            if (!$ret = $this->reCache($uid)) {
+                $ret = [
+                    'exp' => 0,
+                    'lv' => 1,
+                ];
             }
         }
 
-        return $lv ? (int)$lv : 1;
+        end(self::$exp);
+        $max_lv = key(self::$exp);
+        $next_lv = $ret['lv'] < $max_lv ? $ret['lv'] + 1 : $max_lv;
+
+        $ret['next_exp'] = self::$exp[$next_lv];
+
+        return $ret;
     }
 
     /**

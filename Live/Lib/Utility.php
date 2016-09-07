@@ -49,4 +49,12 @@ class Utility
 
         return array_rand($a1) . array_rand($a2);
     }
+
+    static function imageLarge($img)
+    {
+        if ($img)
+            $img .= '!pl';
+
+        return $img;
+    }
 }

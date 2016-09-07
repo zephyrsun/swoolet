@@ -296,7 +296,7 @@ function import($name)
     return null;
 }
 
-function log($msg, $fd)
+function log($msg, $id)
 {
-    echo date("Y-m-d H:i:s", \Swoolet\App::$ts) . " ($fd)" . $msg . PHP_EOL;
+    echo date("Y-m-d H:i:s", \Swoolet\App::$ts) . " ($id)" . $msg . PHP_EOL;
 }

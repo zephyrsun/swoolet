@@ -49,6 +49,8 @@ class Award extends Common
      */
     public function addRecommend($uid, $msg)
     {
+        return;
+
         $key = $this->key_award;
         $key_msg = $this->key_award_msg;
         $limit = 50;

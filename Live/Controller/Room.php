@@ -139,8 +139,6 @@ class Room extends Basic
                 'msg' => $data['msg'],
             ]);
 
-            $this->conn->msgForReplay($room_id, $uid, $data['msg']);
-
             return Response::data(['lv' => $user['lv'], 'rank' => $rank]);
         }
 
@@ -212,8 +210,8 @@ class Room extends Basic
             $num = $data['num'];
             $total = $data['total'];
 
-            if ($uid == $to_uid)
-                return Response::msg('礼物不能送给自己', 1023);
+            // if ($uid == $to_uid)
+            //     return Response::msg('礼物不能送给自己', 1023);
 
             if (!$gift_name = (new Gift())->sendGift($uid, $to_uid, $gift_id, $num))
                 return $gift_name;

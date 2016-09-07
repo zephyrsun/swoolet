@@ -26,8 +26,9 @@ const TYPE_LIVE_STOP = 20;//停播
 登录后调用socket_init, 
 进入房间调用room_join, 
 退出房间调用room_leave,
-程序退到后台调用socket_quit,
-切回来继续调用socket_init，如果断网重新握手
+程序退到后台调用socket_pause,
+切回来调用socket_resume,需要传token
+如果断网重新socket_init
 ```
 
 ###私信

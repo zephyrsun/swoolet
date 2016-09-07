@@ -26,9 +26,9 @@ class ReportUser extends Basic
         parent::__construct();
     }
 
-    public function table($key)
+    public function hashTable($key)
     {
-        PDO::table($this->table_prefix);
+        PDO::hashTable($this->table_prefix);
 
         return $this;
     }
@@ -38,7 +38,7 @@ class ReportUser extends Basic
         if ($uid == $to_uid)
             return Response::msg('自己举报自己是一种怎样的体验？', 1037);
 
-        return $this->table($uid)->insert([
+        return $this->hashTable($uid)->insert([
             'uid' => $uid,
             'to_uid' => $to_uid,
             'reason' => $reason,

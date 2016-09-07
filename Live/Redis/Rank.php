@@ -19,6 +19,8 @@ class Rank extends Common
     public $key_rank_room = 'rank_room:';
     public $key_room_user_num = 'room_user_num:';
 
+    public $key_recent_income = 'recent_income:';
+
     public $limit = 30;
 
     public function addRank($send_uid, $to_uid, $n)
@@ -28,9 +30,31 @@ class Rank extends Common
         //土豪总榜
         //$this->link->zIncrBy($this->key_rank_send, $n, $send_uid);
         //收礼总榜
-        $this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
+        //$this->link->zIncrBy($this->key_rank_income, $n, $to_uid);
+
+        //近期收入
+        $this->link->incrBy($this->key_recent_income . $to_uid, $n);
 
         return $score;
+    }
+
+    public function decrRecentIncome($uid, $factor)
+    {
+        $key = $this->key_recent_income . $uid;
+        $n = $this->link->get($key);
+        if ($n > 0) {
+            $n = $factor > 0 ? $n * $factor : 0;
+        } else
+            $n = 0;
+
+        $this->link->set($key, $n, 86400 * 10);
+
+        return $n;
+    }
+
+    public function getRecentIncome($uid)
+    {
+        return $this->link->get($this->key_recent_income . $uid);
     }
 
     public function joinRoom($room_id, $uid)

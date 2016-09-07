@@ -48,6 +48,26 @@ class Socket extends Basic
         return Response::msg('ok');
     }
 
+    public function resume($request)
+    {
+        $conn = $this->conn->getConn($request->fd);
+        if ($conn) {
+            list($uid) = $conn;
+            $this->conn->subUser($uid);
+
+            return Response::msg('ok');
+        }
+
+        return $this->init($request);
+    }
+
+    public function pause($request)
+    {
+        $this->conn->leave($request->fd, false);
+
+        return Response::msg('ok');
+    }
+
     public function quit($request)
     {
         $this->conn->leave($request->fd);
@@ -71,7 +91,7 @@ class Socket extends Basic
             if ($from_uid == $to_uid)
                 return Response::msg('自己和自己聊天是一种什么感受?');
 
-            $cb = function ($result, $err) use ($from_uid, $to_uid, $user, $msg) {
+            $cb = function ($result) use ($from_uid, $to_uid, $user, $msg) {
                 if ($result)
                     return;
 
@@ -91,6 +111,15 @@ class Socket extends Basic
         }
 
         return Response::msg('ok');
+    }
 
+    public function getServer()
+    {
+        $list = [
+            'test.camhow.com.cn:9502',
+            'test.camhow.com.cn:9502',
+        ];
+
+        Response::data(['list' => $list]);
     }
 }

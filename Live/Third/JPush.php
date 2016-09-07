@@ -9,11 +9,6 @@
 
 namespace Live\Third;
 
-use Swoolet\App;
-use Swoolet\Lib\CURL;
-
-include BASE_DIR . 'Live/Third/pili/Pili.php';
-
 class JPush
 {
     public $curl, $url = 'https://api.jpush.cn/v3';

@@ -45,12 +45,11 @@ namespace Swoolet\Data {
             \PDO::ATTR_EMULATE_PREPARES => false,
             \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4',
             //\PDO::ATTR_AUTOCOMMIT => false,
-            //\PDO::ATTR_PERSISTENT => false,
+            \PDO::ATTR_PERSISTENT => true,//12
 
             #overwrite 'options' if not using MySQL
             \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true, //1000
             \PDO::MYSQL_ATTR_FOUND_ROWS => true, //1008
-            \PDO::ATTR_PERSISTENT => true,//12
         ];
 
         public function __construct($cfg_key = '')
@@ -411,9 +410,14 @@ namespace Swoolet\Data {
          */
         public function query($sql)
         {
+            $old = $this->link->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
             $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
 
-            return $this->link->query($sql);
+            $ret = $this->link->query($sql);
+
+            $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $old);
+
+            return $ret;
         }
 
         /**

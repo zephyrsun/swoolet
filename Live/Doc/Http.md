@@ -242,6 +242,20 @@ key 翻页用,返回列表里的最后一个数据项的key值,第一次传0
 返回:
 {"list":[{"uid":2,"title":"","city":"","cover":"http:\/\/obzd2fzvx.bkt.clouddn.com\/cover\/2_1471316268.jpg","play_url":"rtmp:\/\/pili-live-rtmp.camhow.com.cn\/kanhao\/test_2_1470980684","nickname":"15921258182","zodiac":"0","key":0}],"c":0}
 ```
+
+###发现页
+```
+接口:
+/Home/latest
+
+参数:
+token
+key 翻页用,返回列表里的最后一个数据项的key值,第一次传0
+
+返回:
+{"list":[{"uid":2,"title":"","city":"","cover":"http:\/\/obzd2fzvx.bkt.clouddn.com\/cover\/2_1471316268.jpg","play_url":"rtmp:\/\/pili-live-rtmp.camhow.com.cn\/kanhao\/test_2_1470980684","nickname":"15921258182","zodiac":"0","key":0}],"c":0}
+```
+
 ###开播信息,获取封面
 ```
 接口:
@@ -576,4 +590,18 @@ id
 
 返回:
 {"msg":"删除成功","c":0}
+```
+
+###获取Socket服务器
+```
+接口:
+/Socket/getServer
+
+返回数组,第一台连不上的话尝试连第二台,直到最后一台连不上
+
+参数:
+无
+
+返回:
+{"list":["test.camhow.com.cn:9502","test.camhow.com.cn:9502"],"c":0}
 ```

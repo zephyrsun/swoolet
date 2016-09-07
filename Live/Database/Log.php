@@ -24,9 +24,9 @@ class Log extends Basic
         $this->cache = new \Live\Redis\Room();
     }
 
-    public function table($key)
+    public function hashTable($key)
     {
-        PDO::table($this->table_prefix);
+        PDO::hashTable($this->table_prefix);
 
         return $this;
     }
@@ -39,7 +39,7 @@ class Log extends Basic
         //if (!$code)
         //    $code = date('Ymd', \APP_TS);
 
-        return $this->table('log')->insert([
+        return $this->hashTable('log')->insert([
             'get' => isset($request->get) ? \http_build_query($request->get) : '', //get
             'post' => isset($request->post) ? http_build_query($request->post) : '', //post
             'data' => $data,

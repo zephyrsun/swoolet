@@ -24,13 +24,24 @@ class Basic extends PDO
     public $limit = 20;
     public $timeout = 259200;
 
-    public function table($key)
+    public function hashTable($key)
     {
         $mod = (int)($key / $this->table_mod);
 
-        PDO::table($this->table_prefix . $mod);
+        parent::table($this->table_prefix . $mod);
 
         return $this;
+    }
+
+    public function getAllTable()
+    {
+        $ret = $this->query("SHOW TABLES LIKE '{$this->table_prefix}%'")->fetchAll();
+
+        $table = [];
+        foreach ($ret as $row)
+            $table[] = current($row);
+
+        return $table;
     }
 
     public function getWithCache($key, $callback, $timeout = 259200)
@@ -74,7 +85,9 @@ class Basic extends PDO
         if ($unpack) {
             $new_list = [];
             foreach ($list as $val => $key) {
-                $new_list[] = \msgpack_unpack($val) + ['key' => $key];
+                $val = \msgpack_unpack($val);
+                $val['key'] = $key;
+                $new_list[] = $val;
             }
 
             $list = $new_list;
@@ -85,13 +98,10 @@ class Basic extends PDO
 
     public function del($uid, $id)
     {
-        $this->table($uid);
+        $this->hashTable($uid);
 
-        if (strpos($id, ',')) {
-            $this->where("uid = ? AND id IN ($id)", [$uid]);
-        } else {
-            $this->where('uid = ? AND id = ?', [$uid, $id]);
-        }
+        $this->where('uid', $uid)->where('id', 'IN', explode(',', $id));
+
         return $this->delete();
     }
 

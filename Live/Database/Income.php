@@ -34,7 +34,7 @@ class Income extends Basic
     public function getIncome($uid)
     {
         return $this->cache->getWithCallback($uid, 'income', function () use ($uid) {
-            return (int)$this->table($uid)->select('income')->where('uid', $uid)->fetchColumn();
+            return (int)$this->hashTable($uid)->select('income')->where('uid', $uid)->fetchColumn();
         });
     }
 
@@ -43,9 +43,9 @@ class Income extends Basic
         if ($money <= 0)
             return Response::msg('参数错误', 1011);
 
-        $ret = $this->table($uid)->where('uid', $uid)->update("income = income + $money, total = total + $money");
+        $ret = $this->hashTable($uid)->where('uid', $uid)->update("income = income + $money, total = total + $money");
         if (!$ret) {
-            $ret = $this->table($uid)->insert([
+            $ret = $this->hashTable($uid)->insert([
                 'uid' => $uid,
                 'income' => $money,
                 'total' => $money,

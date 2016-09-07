@@ -31,14 +31,14 @@ class Banner extends Basic
         $this->cache = new \Live\Redis\Banner();
     }
 
-    public function table($key)
+    public function hashTable($key)
     {
-        return PDO::table('banner');
+        return PDO::hashTable('banner');
     }
 
     public function add($title, $img, $content, $sort)
     {
-        $ret = $this->table('')->insert([
+        $ret = $this->hashTable('')->insert([
             'title' => $title,
             'img' => $img,
             'content' => $content,
@@ -62,7 +62,7 @@ class Banner extends Basic
         $type = self::TYPE_BANNER;
         $key = $this->key_banner . $type;
         if ($force || !$ret = $this->cache->get($key)) {
-            $data = $this->table($type)->where('status = ? AND type = ?', [1, $type])
+            $data = $this->hashTable($type)->where('status = ? AND type = ?', [1, $type])
                 ->orderBy('sort DESC')->fetchAll();
 
             $ret = [];
@@ -93,7 +93,7 @@ class Banner extends Basic
         $type = self::TYPE_SPLASH;
         $key = $this->key_banner . $type;
         if ($force || !$ret = $this->cache->get($key)) {
-            $ret = $this->table($type)->select('img')->where('status = ? AND type = ?', [1, $type])
+            $ret = $this->hashTable($type)->select('img')->where('status = ? AND type = ?', [1, $type])
                 ->orderBy('id DESC')->fetch();
 
             if ($ret) {

@@ -43,11 +43,24 @@ class Live
             $title = "{$user['nickname']}的{$n}直播";
         }
 
-        $ret = $this->sdk->start($this->getKey($uid));
+        $ts = \Swoolet\App::$ts;
+
+        $live_data = $this->db->getLive($uid, 'all');
+        if ($live_data) {
+            $third = $live_data['third'];
+            $factor = ceil(($ts - $live_data['ts']) / 86400);
+            if ($factor > 1) {
+                (new \Live\Redis\Rank())->decrRecentIncome($uid, 1 - $factor / 10);
+            }
+        } else {
+            $third = '';
+        }
+
+        $ret = $this->sdk->start($this->getKey($uid), $third);
 
         $ok = $this->db->updateLive($uid, $ret + [
                 'status' => self::STATUS_START,
-                'ts' => \Swoolet\App::$ts,
+                'ts' => $ts,
                 'title' => $title,
                 'city' => \Live\Lib\Utility::generateCity($city),
             ]);

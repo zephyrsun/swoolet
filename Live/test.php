@@ -3,15 +3,16 @@
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
 $app = \Swoolet\Socket::createServer('Live', 'dev');
-new \Live\Controller\Basic();
+$rank = new \Live\Redis\Rank();
 
-$ds_award = new \Live\Redis\Award();
-$start = 1;
-for ($uid = $start; $uid <= $start + 100; $uid++) {
-    $ret = $ds_award->addRecommend($uid, 'msg' . $uid);
-    var_dump($ret);
-}
 
+$q = new \Live\Lib\Elasticsearch();
+
+$ret = $q->indexUser();
+var_dump($ret);
+
+//$ds_award = new \Live\Third\Pili();
+//$ds_award->start('1', '9090');
 //var_dumP($ds_award->getRecommend(0));
 
 //$vip = new Live\Redis\Vip();
