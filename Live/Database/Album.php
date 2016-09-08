@@ -59,7 +59,6 @@ class Album extends Basic
 
     public function del($uid, $id)
     {
-        $uid = 3;
         $ret = parent::del($uid, $id);
         if ($ret) {
             $this->cache->link->del($this->key_album . $uid, $this->key_album_count . $uid);

@@ -14,32 +14,31 @@ class Award extends Common
     public $cfg_key = 'redis_store';
     public $db_index = 1;
 
-    public $key_wait = 'award_wait';
+    public $key_vip = 'award_vip';
     public $key_award = 'award_list';
     public $key_award_msg = 'award_list_msg';
 
     public $key_award_limit = 'award_limit:';
 
-    public function addWait($uid, $val)
+    public function addVip($uid, $val)
     {
-        $val = (int)($val / 10);//相当于返现10%
-
-        return $this->link->hSet($this->key_wait, $uid, $val);
+        $this->link->rPush($this->key_vip, $uid);
     }
 
-    public function getWait($uid)
+    public function getVip($n = 3)
     {
-        return $this->link->hGet($this->key_wait, $uid);
-    }
+        $key = $this->key_vip;
+        $limit = 500;
 
-    public function decrWait($uid, $int)
-    {
-        return $this->link->hIncrBy($this->key_wait, $uid, -$int);
-    }
+        $len = $this->link->lLen($key);
+        $start = mt_rand(0, $len - $n);
+        $ret = $this->link->lRange($key, $start, $start + $n - 1);
 
-    public function delWait($uid)
-    {
-        return $this->link->hDel($this->key_wait, $uid);
+        if ($len > $limit * 2) {
+            $this->link->lTrim($key, $len - $limit, -1);
+        }
+
+        return $ret;
     }
 
     /**

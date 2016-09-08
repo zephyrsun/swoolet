@@ -138,6 +138,12 @@ class User extends Basic
         ];
     }
 
+    public function isVip($user)
+    {
+        //$user = $this->getUser($uid);
+        return $user['vip_expire'] > \Swoolet\App::$ts;
+    }
+
     public function getUserInfo($uid, $follow_uid)
     {
         $user = $this->getShowInfo($uid, 'more');
@@ -151,13 +157,6 @@ class User extends Basic
             'fan' => $db_fan->getCount($uid),
             'is_follow' => $db_fan->isFollow($follow_uid, $uid),
         ];
-    }
-
-    public function isVip($uid)
-    {
-        $user = $this->getUser($uid);
-
-        return $user['vip_expire'] > \Swoolet\App::$ts;
     }
 
     public function getUser($uid)

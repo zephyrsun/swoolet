@@ -18,4 +18,21 @@ class Search extends Basic
 
         return Response::data(['list' => $list]);
     }
+
+    public function userRecommend()
+    {
+        $data = parent::getValidator()->required('token')->getResult();
+        if (!$data)
+            return $data;
+
+        $list = (new \Live\Redis\Award())->getVip();
+        $ds_user = (new \Live\Database\User());
+        $ret = [];
+        foreach ($list as $uid) {
+            if ($user = $ds_user->getShowInfo($uid, 'lv'))
+                $ret[] = $user;
+        }
+
+        return Response::data(['list' => $ret]);
+    }
 }

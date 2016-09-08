@@ -53,17 +53,17 @@ class My extends Basic
         $ds_level = new UserLevel();
         $list = [];
         foreach ($raw as $uid => $key) {
-            $user = $ds_user->getUser($uid);
-
-            $list[] = [
-                'uid' => $user['uid'],
-                'nickname' => $user['nickname'],
-                'avatar' => $user['avatar'],
-                'zodiac' => $user['zodiac'],
-                'city' => $user['city'],
-                'key' => $key,
-                'lv' => $ds_level->getLv($uid),
-            ];
+            if ($user = $ds_user->getUser($uid)) {
+                $list[] = [
+                    'uid' => $user['uid'],
+                    'nickname' => $user['nickname'],
+                    'avatar' => $user['avatar'],
+                    'zodiac' => $user['zodiac'],
+                    'city' => $user['city'],
+                    'key' => $key,
+                    'lv' => $ds_level->getLv($uid),
+                ];
+            }
         }
 
         Response::data([
@@ -103,24 +103,28 @@ class My extends Basic
 
         $money = 2;
         $exp = 10;
-        if ((new \Live\Database\User())->isVip($token_uid)) {
+
+        $ds_user = new \Live\Database\User();
+        $user = $ds_user->getUser($token_uid);
+        if ($ds_user->isVip($user)) {
 
             $exp = 20;
             $ds_vip = new Award();
 
-            if ($ds_vip->couldAward($token_uid) && ($rest = $ds_vip->getWait($token_uid))) {
+            if ($ds_vip->couldAward($token_uid)) {
                 //vip抽奖
 
                 $j = date('j', \Swoolet\App::$ts);
                 if ($j % 2 == $token_uid % 2) {
                     //余数相同,暴击
-                    $money = mt_rand(1, $rest);
-
-                    if ($money == 1 || $ds_vip->decrWait($token_uid, $money) < 0) {
-                        $money = 2;
-                        $ds_vip->delWait($token_uid);
-                    } elseif ($money > 30) {
+                    $money = mt_rand(1, 30);
+                    if ($money > 10) {
                         $ds_vip->addRecommend($token_uid, "签到获得{$money}看币");
+                    }
+                } elseif ($j % 3 == $token_uid % 3) {
+                    $exp = mt_rand(10, 50);
+                    if ($exp > 20) {
+                        $ds_vip->addRecommend($token_uid, "签到获得{$exp}经验");
                     }
                 }
             }

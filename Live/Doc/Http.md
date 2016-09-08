@@ -619,3 +619,17 @@ key
 返回:
 {"list":[{"uid":4,"nickname":"13410380378","avatar":"","key":5},{"uid":6,"nickname":"十年一刻","avatar":"","key":6}],"c":0}
 ```
+
+###用户推荐
+```
+接口:
+/Search/userRecommend
+
+参数:
+token
+kw 关键字
+key
+
+返回:
+{"list":[{"is_vip":false,"is_tycoon":false,"uid":10,"nickname":"","avatar":"","zodiac":null,"lv":1},{"is_vip":false,"is_tycoon":false,"uid":11,"nickname":"","avatar":"","zodiac":null,"lv":1},{"is_vip":false,"is_tycoon":false,"uid":12,"nickname":"","avatar":"","zodiac":null,"lv":1}],"c":0}
+```

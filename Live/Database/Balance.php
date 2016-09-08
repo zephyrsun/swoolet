@@ -111,7 +111,7 @@ class Balance extends Basic
 
                 //充值vip有机会抽取100看币
                 if ($charge >= 98) {
-                    (new Award())->addWait($uid, $charge);
+                    (new Award())->addVip($uid, $charge);
                 }
             }
 
