@@ -118,7 +118,7 @@ class UserLevel extends Basic
 
     public function getLvAndExp($uid)
     {
-        if (!$ret = $this->cache->get($uid, ['exp', 'lv'])) {
+        if (!$ret = $this->cache->mget($uid, ['exp', 'lv'])) {
             if (!$ret = $this->reCache($uid)) {
                 $ret = [
                     'exp' => 0,

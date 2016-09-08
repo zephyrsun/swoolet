@@ -2,7 +2,7 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-$app = \Swoolet\Socket::createServer('Live', 'dev');
+$app = \Swoolet\Socket::createServer('Live', 'test');
 $rank = new \Live\Redis\Rank();
 
 

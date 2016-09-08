@@ -27,6 +27,18 @@ class Elasticsearch
         $this->curl = new CURL();
     }
 
+    public function search($data)
+    {
+        $data = json_encode($data, JSON_UNESCAPED_UNICODE);
+
+        $ret = $this->curl->post("http://{$this->option['host']}/{$this->index}/_search", $data);
+        $ret = \json_decode($ret, true);
+        if (isset($ret['error']))
+            return [];
+
+        return $ret['hits']['hits'];
+    }
+
     public function add($type, $id, $data)
     {
         $data = json_encode($data, JSON_UNESCAPED_UNICODE);

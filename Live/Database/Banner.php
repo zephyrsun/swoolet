@@ -33,7 +33,7 @@ class Banner extends Basic
 
     public function hashTable($key)
     {
-        return PDO::hashTable('banner');
+        return parent::table('banner');
     }
 
     public function add($title, $img, $content, $sort)

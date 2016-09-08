@@ -107,29 +107,35 @@ class User extends Basic
                 //'height' => $user['height'],
             ];
         } elseif ($type == 'lv') {
-            $user = [
-                'uid' => $user['uid'],
-                'nickname' => $user['nickname'],
-                'avatar' => $user['avatar'],
-                'zodiac' => $user['zodiac'],
-                'lv' => (new UserLevel())->getLv($uid)
-            ];
+            $user = $this->isExpired($user) + [
+                    'uid' => $user['uid'],
+                    'nickname' => $user['nickname'],
+                    'avatar' => $user['avatar'],
+                    'zodiac' => $user['zodiac'],
+                    'lv' => (new UserLevel())->getLv($uid)
+                ];
         } elseif ($type == 'more') {
-            $ts = \Swoolet\App::$ts;
 
-            $user['mobile'] = (int)$user['mobile'];
+            $user['mobile'] = (string)$user['mobile'];
 
-            $exp =
-            $user += [
-                'is_vip' => $user['vip_expire'] > $ts,
-                'is_tycoon' => $user['tycoon_expire'] > $ts,
-                'lv' => (new UserLevel())->getLv($uid),
-            ];
+            $user += $this->isExpired($user) + [
+                    'lv' => (new UserLevel())->getLv($uid),
+                ];
 
             unset($user['vip_expire'], $user['tycoon_expire']);
         }
 
         return $user;
+    }
+
+    public function isExpired($user)
+    {
+        $ts = \Swoolet\App::$ts;
+
+        return [
+            'is_vip' => $user['vip_expire'] > $ts,
+            'is_tycoon' => $user['tycoon_expire'] > $ts,
+        ];
     }
 
     public function getUserInfo($uid, $follow_uid)
@@ -171,14 +177,14 @@ class User extends Basic
 
     public function getByUsername($pf, $username)
     {
-        return PDO::hashTable('increment')
+        return parent::table('increment')
             ->where('pf=? AND username=?', [$pf, $username])
             ->fetch();
     }
 
     public function getUID($pf, $username)
     {
-        return PDO::hashTable('increment')->insert([
+        return parent::table('increment')->insert([
             'pf' => $pf,
             'username' => $username,
         ]);

@@ -73,9 +73,9 @@ class User extends Basic
 
             $ret = $db_user->updateUser($uid, $data);
             if ($ret) {
-                if ($data['nickname']) {
+                if (isset($data['nickname'])) {
                     (new Elasticsearch())->add('user', $uid, ['nickname' => $data['nickname']]);
-                } elseif ($data['sign']) {
+                } elseif (isset($data['sign'])) {
                     (new Elasticsearch())->add('user', $uid, ['sign' => $data['sign']]);
                 }
 

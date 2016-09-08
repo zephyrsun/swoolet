@@ -46,9 +46,9 @@ class Live extends Basic
 
         $ret = [];
         if ($list) {
-
-            if ($list_cb)
-                $list = $list_cb($list);
+            if ($list_cb && !$list = $list_cb($list)) {
+                return $ret;
+            }
 
             $data = $this->cache->link->hMGet($this->key_list_data, array_keys($list));
             foreach ($data as $uid => $row) {

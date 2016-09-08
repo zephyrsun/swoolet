@@ -13,7 +13,6 @@ use Swoolet\Data\PDO;
 class Log extends Basic
 {
     public $cfg_key = 'db_1';
-    public $table_prefix = 'log';
 
     public function __construct()
     {
@@ -26,7 +25,7 @@ class Log extends Basic
 
     public function hashTable($key)
     {
-        PDO::hashTable($this->table_prefix);
+        parent::table('log');
 
         return $this;
     }

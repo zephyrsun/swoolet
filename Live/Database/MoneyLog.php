@@ -26,7 +26,7 @@ class MoneyLog extends Basic
 
     public function hashTable($key)
     {
-        return PDO::hashTable('m_2016');
+        return parent::table('m_2016');
     }
 
     public function addOrder($uid, $gift_id, $pf)

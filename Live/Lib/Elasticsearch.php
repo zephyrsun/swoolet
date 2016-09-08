@@ -32,6 +32,9 @@ class Elasticsearch extends \Swoolet\Lib\Elasticsearch
                         'nickname' => $row['nickname'],
                         'sign' => $row['sign'],
                     ]);
+
+                    var_export($ret);
+                    echo PHP_EOL;
                 }
             }
         }
@@ -39,7 +42,7 @@ class Elasticsearch extends \Swoolet\Lib\Elasticsearch
 
     public function search($kw, $from = 0)
     {
-        $size = 2;
+        $size = 20;
 
         $data = [
             'query' => [
@@ -51,24 +54,20 @@ class Elasticsearch extends \Swoolet\Lib\Elasticsearch
                     'query' => $kw,
                     'type' => 'best_fields',
                     'fields' => ['nickname', 'sign'],
-                    'analyzer' => 'keyword',
+                    'analyzer' => 'standard',
                 ],
             ],
             'from' => $from,
             'size' => $size,
         ];
 
-        $data = json_encode($data, JSON_UNESCAPED_UNICODE);
-
-        $ret = $this->curl->post("http://{$this->option['host']}/{$this->index}/_search", $data);
-        $ret = \json_decode($ret, true);
-        $ret = $ret['hits']['hits'];
+        $ret = parent::search($data);
 
         $ds_user = new \Live\Database\User();
         $n = 0;
         foreach ($ret as &$row) {
             $uid = $row['_id'];
-            $row = $ds_user->getShowInfo($uid);
+            $row = $ds_user->getShowInfo($uid, 'lv');
             $row['key'] = ++$n + $from;
         }
 

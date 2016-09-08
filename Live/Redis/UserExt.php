@@ -32,6 +32,11 @@ class UserExt extends Redis
         return $this->link->hGet($this->key_ext . $uid, $k);
     }
 
+    public function mget($uid, $k)
+    {
+        return $this->link->hMGet($this->key_ext . $uid, $k);
+    }
+
     public function getAll($uid)
     {
         return $this->link->hGetAll($this->key_ext . $uid);

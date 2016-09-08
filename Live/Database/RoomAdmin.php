@@ -31,7 +31,7 @@ class RoomAdmin extends Basic
 
     public function hashTable($key)
     {
-        PDO::hashTable($this->table_prefix);
+       parent::table($this->table_prefix);
 
         return $this;
     }

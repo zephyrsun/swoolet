@@ -33,7 +33,7 @@ class Goods extends Basic
 
     public function hashTable($key)
     {
-        return PDO::hashTable('goods');
+        return parent::table('goods');
     }
 
     /**

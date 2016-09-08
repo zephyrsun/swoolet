@@ -14,7 +14,7 @@
 
 namespace Swoolet\View;
 
-use \Swoolet\App;
+use Swoolet\App;
 use Swoolet\Result;
 
 class Basic extends Result
@@ -32,7 +32,7 @@ class Basic extends Result
         $this->options = $options + App::getConfig('view') + $this->options;
 
         if (!$this->options['source_dir'])
-            $this->options['source_dir'] = \APP_DIR . 'View';
+            $this->options['source_dir'] = \BASE_DIR . App::$server->namespace . DIRECTORY_SEPARATOR . 'View';
     }
 
     /**
@@ -49,18 +49,6 @@ class Basic extends Result
     }
 
     /**
-     * @param $key
-     * @param null $val
-     * @return $this
-     */
-    public function assign($key, $val = null)
-    {
-        parent::set($key, $val);
-
-        return $this;
-    }
-
-    /**
      * @param $name
      * @param null $ext
      * @return string
@@ -70,6 +58,18 @@ class Basic extends Result
         \ob_start();
         $this->render($name, $ext);
         return \ob_get_clean();
+    }
+
+    /**
+     * @param $key
+     * @param null $val
+     * @return $this
+     */
+    public function assign($key, $val = null)
+    {
+        parent::set($key, $val);
+
+        return $this;
     }
 
     /**

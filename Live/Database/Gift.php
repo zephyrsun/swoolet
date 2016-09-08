@@ -30,7 +30,7 @@ class Gift extends Basic
 
     public function hashTable($key)
     {
-        return PDO::hashTable('gift');
+        return parent::table('gift');
     }
 
     public function getAll($limit, $force = false)
