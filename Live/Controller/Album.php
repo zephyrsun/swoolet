@@ -22,17 +22,4 @@ class Album extends Basic
 
         Response::msg('删除成功');
     }
-
-    public function wall()
-    {
-        $data = parent::getValidator()->required('token')->le('key', 0)->getResult();
-        if (!$data)
-            return $data;
-
-        $start = (int)$data['key'];
-
-        (new \Live\Database\Album())->albumWall($start);
-
-        Response::msg('ok');
-    }
 }

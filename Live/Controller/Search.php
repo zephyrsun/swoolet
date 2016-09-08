@@ -6,17 +6,15 @@ use Live\Response;
 
 class Search extends Basic
 {
-    public function user()
+    public function keyword()
     {
-        $data = parent::getValidator()->required('token')->required('kw')->le('key', 0)->getResult();
+        $data = parent::getValidator()->required('token')->required('kw')->ge('key', 0)->getResult();
         if (!$data)
             return $data;
 
         $start = (int)$data['key'];
 
-        $ds = new \Live\Database\Live();
-
-        $list = $ds->getList($ds->key_list_hot, $start);
+        $list = (new \Live\Lib\Elasticsearch())->search($data['kw'], $start);
 
         return Response::data(['list' => $list]);
     }

@@ -8,7 +8,7 @@ class Live extends Basic
 {
     public function follow()
     {
-        $data = parent::getValidator()->required('token')->le('key', 0)->getResult();
+        $data = parent::getValidator()->required('token')->ge('key', 0)->getResult();
         if (!$data)
             return $data;
 

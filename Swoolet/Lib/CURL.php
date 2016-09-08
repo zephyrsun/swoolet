@@ -31,8 +31,8 @@ class CURL
     }
 
     /**
-     * get data like curl -d:
-     * get('http://example.com', [], [\CURLOPT_POSTFIELDS => $string_data])
+     * get data like curl -d 'xxxxx':
+     * get('http://example.com', [], [\CURLOPT_POSTFIELDS => $data])
      *
      * @param $url
      * @param array $data
@@ -41,7 +41,6 @@ class CURL
      */
     public function get($url, $data = [], array $options = [])
     {
-
         if ($data) {
             if (is_array($data))
                 $data = http_build_query($data);

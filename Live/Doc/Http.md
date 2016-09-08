@@ -605,3 +605,17 @@ id
 返回:
 {"list":["test.camhow.com.cn:9502","test.camhow.com.cn:9502"],"c":0}
 ```
+
+###搜索
+```
+接口:
+/Search/keyword
+
+参数:
+token
+kw 关键字
+key
+
+返回:
+{"list":[{"uid":4,"nickname":"13410380378","avatar":"","key":5},{"uid":6,"nickname":"十年一刻","avatar":"","key":6}],"c":0}
+```
