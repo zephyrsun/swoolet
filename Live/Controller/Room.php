@@ -173,17 +173,14 @@ class Room extends Basic
     {
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid, $room_id) = $conn;
+            list($uid, $room_id, $user) = $conn;
 
             $follow_uid = $room_id;
             $ret = (new Fan())->follow($uid, $follow_uid);
             if ($ret) {
                 $this->conn->sendToRoom($room_id, $uid, [
                     't' => Conn::TYPE_FOLLOW,
-                    'user' => [
-                        'uid' => $uid,
-                        'nickname' => "nickname{$uid}",
-                    ],
+                    'user' => $user,
                     'msg' => '关注了主播',
                 ]);
             }
@@ -222,12 +219,7 @@ class Room extends Basic
 
             $this->conn->sendToRoom($room_id, $uid, [
                 't' => Conn::TYPE_GIFT,
-                'user' => [
-                    'uid' => $uid,
-                    'nickname' => $user['nickname'],
-                    'avatar' => $user['avatar'],
-                    'lv' => $lv,
-                ],
+                'user' => $user,
                 'rank' => $rank,
                 'msg' => "送给主播{$gift_name}",
                 'num' => $num,

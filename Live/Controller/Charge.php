@@ -21,7 +21,7 @@ class Charge extends Basic
 
         $pf = strtolower($data['pf']);
 
-        $list = (new Goods())->getList($pf, $data['type'], $data['channel'], true);
+        $list = (new Goods())->getList($pf, $data['type'], $data['channel']);
 
         Response::data(['list' => $list]);
     }

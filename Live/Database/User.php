@@ -20,6 +20,8 @@ class User extends Basic
 
     public $key_home_visit = 'h_visit:';
 
+    public $user_level;
+
     CONST PF_MOBILE = 1;
 
     public function __construct()
@@ -29,6 +31,8 @@ class User extends Basic
         parent::__construct();
 
         $this->cache = new \Live\Redis\User();
+
+        $this->user_level = new UserLevel();
     }
 
     public function login($pf, $username, $user = [])
@@ -112,14 +116,15 @@ class User extends Basic
                     'nickname' => $user['nickname'],
                     'avatar' => $user['avatar'],
                     'zodiac' => $user['zodiac'],
-                    'lv' => (new UserLevel())->getLv($uid)
+                    'city' => $user['zodiac'],
+                    'lv' => $this->user_level->getLv($uid)
                 ];
         } elseif ($type == 'more') {
 
             $user['mobile'] = (string)$user['mobile'];
 
             $user += $this->isExpired($user) + [
-                    'lv' => (new UserLevel())->getLv($uid),
+                    'lv' => $this->user_level->getLv($uid),
                 ];
 
             unset($user['vip_expire'], $user['tycoon_expire']);
@@ -204,7 +209,7 @@ class User extends Basic
 
         $i = 0;
         foreach ($list as &$uid) {
-            $uid = $this->getShowInfo($uid, 'simple');
+            $uid = $this->getShowInfo($uid, 'lv');
             $uid['key'] = $start + $i++;
         }
 

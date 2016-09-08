@@ -34,8 +34,6 @@ class User extends Basic
         } elseif ($uid == $token_uid) {
             $user['admin'] = $ra->getCount($uid);
             $user['money'] = (new \Live\Database\Balance())->get($uid, 'balance');
-
-            $user += (new \Live\Database\UserLevel())->getLvAndExp($uid);
         }
 
         return Response::data([

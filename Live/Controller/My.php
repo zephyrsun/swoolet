@@ -29,7 +29,6 @@ class My extends Basic
 
         //$user = (new \Live\Database\User())->getUser($uid);
         $user = [];
-
         if ($live = (new \Live\Database\Live())->getLive($uid, 'all')) {
             $user['cover'] = \Live\Lib\Utility::imageLarge($live['cover']);
         }
@@ -50,19 +49,11 @@ class My extends Basic
 
         list($raw) = $modal->getList($data['token_uid'], $start, 30);
         $ds_user = new \Live\Database\User();
-        $ds_level = new UserLevel();
         $list = [];
         foreach ($raw as $uid => $key) {
-            if ($user = $ds_user->getUser($uid)) {
-                $list[] = [
-                    'uid' => $user['uid'],
-                    'nickname' => $user['nickname'],
-                    'avatar' => $user['avatar'],
-                    'zodiac' => $user['zodiac'],
-                    'city' => $user['city'],
-                    'key' => $key,
-                    'lv' => $ds_level->getLv($uid),
-                ];
+            if ($user = $ds_user->getShowInfo($uid, 'lv')) {
+                $user['key'] = $key;
+                $list[] = $user;
             }
         }
 
@@ -101,36 +92,32 @@ class My extends Basic
 
         $token_uid = $data['token_uid'];
 
-        $money = 2;
+        if (!(new Award())->couldAward($token_uid))
+            return Response::msg('今天已经签到过了');
+
+        $j = date('j', \Swoolet\App::$ts) % 2;
+
+        $money = 0;
         $exp = 10;
 
         $ds_user = new \Live\Database\User();
         $user = $ds_user->getUser($token_uid);
         if ($ds_user->isVip($user)) {
 
+            $money = 5;
             $exp = 20;
-            $ds_vip = new Award();
 
-            if ($ds_vip->couldAward($token_uid)) {
-                //vip抽奖
-
-                $j = date('j', \Swoolet\App::$ts);
-                if ($j % 2 == $token_uid % 2) {
-                    //余数相同,暴击
-                    $money = mt_rand(1, 30);
-                    if ($money > 10) {
-                        $ds_vip->addRecommend($token_uid, "签到获得{$money}看币");
-                    }
-                } elseif ($j % 3 == $token_uid % 3) {
-                    $exp = mt_rand(10, 50);
-                    if ($exp > 20) {
-                        $ds_vip->addRecommend($token_uid, "签到获得{$exp}经验");
-                    }
-                }
+            if ($j) {
+                //余数相同,暴击
+                $exp = mt_rand(21, 50);
             }
+            
+        } elseif ($j) {
+            //普通人暴击
+            $exp = mt_rand(10, 20);
         }
 
-        if (!$ret = (new Balance())->add($token_uid, $money, 0))
+        if ($money && !$ret = (new Balance())->add($token_uid, $money, 0))
             return $ret;
 
         if (!$ret = (new UserLevel())->add($token_uid, $exp))

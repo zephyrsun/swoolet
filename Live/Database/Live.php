@@ -88,6 +88,7 @@ class Live extends Basic
             $user = $ds_user->getUser($uid);
 
             $row['cover'] = \Live\Lib\Utility::imageLarge($row['cover']);
+            $row['avatar'] = \Live\Lib\Utility::imageLarge($user['avatar']);
             $row['nickname'] = $user['nickname'];
             $row['zodiac'] = (string)$user['zodiac'];
 

@@ -2,14 +2,21 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-$app = \Swoolet\Socket::createServer('Live', 'test');
+
+var_dump(rawurlencode('od6cwy|4JXktyRRRFCy+05iOJ9O/hUSJJ/LNCvZfjb4e2H9Mm0='));
+exit;
+
+$app = \Swoolet\Socket::createServer('Live', 'dev');
 $rank = new \Live\Redis\Rank();
 
-
-$q = new \Live\Lib\Elasticsearch();
-
-$ret = $q->indexUser();
+$a = new \Live\Redis\Award();
+//for ($uid = 1; $uid < 200; $uid++) {
+//    $a->addVip($uid, $uid);
+//}
+$ret = $a->getVip();
 var_dump($ret);
+//$q = new \Live\Lib\Elasticsearch();
+//$ret = $q->indexUser();
 
 //$ds_award = new \Live\Third\Pili();
 //$ds_award->start('1', '9090');
