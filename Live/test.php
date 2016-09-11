@@ -2,14 +2,19 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
+$table = new swoole_table(2 ^ 32);
+$table->column('fd', swoole_table::TYPE_INT);
+$table->column('from_id', swoole_table::TYPE_STRING, 10);
+$table->column('data', swoole_table::TYPE_STRING, 64);
+$table->create();
+for ($fd = 1; $fd < 100; $fd++) {
+    $ret = $table->set($fd, array('from_id' => pow(2, 36), 'fd' => $fd, 'data' => 'data'));
+    var_dump($fd, $ret);
+}
 
-var_dump(rawurlencode('od6cwy|4JXktyRRRFCy+05iOJ9O/hUSJJ/LNCvZfjb4e2H9Mm0='));
+var_dump($table->get(1));
 exit;
 
-$app = \Swoolet\Socket::createServer('Live', 'dev');
-$rank = new \Live\Redis\Rank();
-
-$a = new \Live\Redis\Award();
 //for ($uid = 1; $uid < 200; $uid++) {
 //    $a->addVip($uid, $uid);
 //}

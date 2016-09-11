@@ -21,9 +21,9 @@ class Server extends \Swoolet\Http
 
     public function onWorkerStart($sw, $worker_id)
     {
-        parent::onWorkerStart($sw, $worker_id);
+        self::$conn = \Live\Lib\Conn::getInstance();
 
-        Server::$conn = new \Live\Lib\Conn();
+        parent::onWorkerStart($sw, $worker_id);
     }
 
     public function onRequest($request, $response)

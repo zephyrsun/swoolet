@@ -59,9 +59,12 @@ class Pili
     public function stop($key, $start_ts, $end_ts, $stream_id)
     {
         $stream = $this->hub->getStream($stream_id);
-        $stream->disable();
 
         try {
+            //测试环境不disable
+            if (\Live\isProduction())
+                $stream->disable();
+
             $ret = $stream->saveAs("{$key}_{$start_ts}.mp4", null, (int)$start_ts, (int)$end_ts);
 
             $ret = [

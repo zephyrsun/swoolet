@@ -39,7 +39,7 @@ class Live
     {
         if (!$title) {
             $user or $user = (new \Live\Database\User())->getUser($uid);
-            $n = array_rand(['花式', '热辣', '搞怪', '灵魂', '神秘']);
+            $n = array_rand(['花式', '热辣', '搞怪', '灵魂', '神秘', '魔性']);
             $title = "{$user['nickname']}的{$n}直播";
         }
 

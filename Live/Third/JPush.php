@@ -15,9 +15,9 @@ class JPush
 
     public function __construct()
     {
-        $cfg = App::getConfig('jpush');
+        $cfg = \Swoolet\App::getConfig('jpush');
 
-        $this->curl = new CURL([
+        $this->curl = new \Swoolet\Lib\CURL([
             CURLOPT_USERPWD => $cfg['key'] . ':' . $cfg['secret']
         ]);
     }

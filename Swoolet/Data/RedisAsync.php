@@ -61,6 +61,12 @@ class RedisAsync
         $link->command(['subscribe', $key], $callback);
     }
 
+    public function unsubscribe($key, $callback)
+    {
+        $link = $this->connect();
+        $link->command(['unsubscribe', $key], $callback);
+    }
+
     public function __call($method, array $args)
     {
         $callback = array_pop($args);
@@ -108,18 +114,12 @@ class RedisAsync
 
     /**
      * @param $key
-     * @param string $unsub unsubscribe key
      */
-    static public function release($key, $unsub = '')
+    static public function release($key)
     {
         if ($ins = self::getConnection($key)) {
             $ins->command(['close'], function () {
             });
-
-            if ($unsub) {
-                $ins->command(['unsubscribe', $unsub], function () {
-                });
-            }
 
             unset(self::$ins[$key]);
         }

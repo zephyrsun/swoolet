@@ -12,8 +12,6 @@ namespace Live\Lib;
 use Live\Database\RoomMsg;
 use Live\Redis\RedisPub;
 use Live\Redis\RedisSub;
-use Swoolet\App;
-use Swoolet\Lib\File;
 
 class Conn
 {
@@ -31,170 +29,63 @@ class Conn
 
     const TYPE_OFFLINE_CHAT_MSG = 'offlineMsg';
 
-    public $uid = [];
-    public $conn = [];
-    public $room = [];
     public $msg = [];
 
-    public $sub;
-    public $pub;
-    public $sub_user;
+    public $sw;
 
-    public $key_room_chat = 'r_chat:';
-    public $key_user_chat = 'u_chat:';
+    public $sub_user;
+    public $pub;
+
+    public $store_user;
+    public $store_room;
+    public $room_msg;
+
+    const ROOM_CHAT = 'room_chat:';
+    const USER_CHAT = 'user_chat:';
 
     static public $subscribe = false;
 
     public function __construct()
     {
-        $this->sub = new RedisSub('sub');
+        $this->sw = \Swoolet\App::$server->sw;
+
         $this->sub_user = new RedisSub('sub_user');
         $this->pub = new RedisPub();
+
+        $this->store_user = ConnUserStorage::getInstance();
+        $this->store_room = ConnRoomStorage::getInstance();
+
+        $this->room_msg = new RoomMsg();
     }
 
-    public function &getFd($uid)
+    static public function getInstance()
     {
-        return $this->uid[$uid];
+        static $ins;
+
+        $ins or $ins = new Conn();
+
+        return $ins;
     }
 
-    public function &getConn($fd)
+    public function getConn($fd)
     {
-        return $this->conn[$fd];
-    }
+        if ($user = $this->store_user->get($fd)) {
+            $room_id = $user['room_id'];
 
-    public function &getRoom($room_id)
-    {
-        $room = &$this->room[$room_id] or $room = [];
+            unset($user['fd'], $user['room_id']);
 
-        return $room;
-    }
-
-    public function join($fd, $uid, $user)
-    {
-        $this->uid[$uid] = $fd;
-
-        $this->subUser($uid);
-
-        $this->joinRoom($fd, 0, $uid, $user);
-    }
-
-    public function leave($fd, $unset = true)
-    {
-        $conn = $this->getConn($fd);
-        if ($conn && ($uid = $conn[0]) && $this->getFd($uid) == $fd) {
-
-            if ($unset)
-                unset($this->conn[$fd], $this->uid[$uid]);
-
-            //RedisAsync::release($uid, $this->key_user_chat . $uid);
-            $this->sub_user->unsubscribe($this->key_user_chat . $uid, function ($data) {
-            });
-        }
-    }
-
-    public function joinRoom($fd, $room_id, $uid, $user)
-    {
-        //退出已经存在的房间
-        if ($room_id) {
-            $this->leaveRoom($fd);
-
-            $this->room[$room_id][$uid] = $fd;
-
-            //$this->subscribe($this->key_room_chat . $room_id, $uid, $fd);
+            return [$room_id, $user];
         }
 
-        $this->conn[$fd] = [$uid, $room_id, $user];
-
-        \Swoolet\Log(json_encode($this->room), 'joinRom');
+        return $user;
     }
 
-    public function leaveRoom($fd)
-    {
-        $conn = $this->getConn($fd);
-        if ($conn) {
-            list($uid, $room_id) = $conn;
-            unset($this->room[$room_id][$uid]);
-
-            if (isset($this->room[$uid])) {
-                $this->stopRoom($room_id, $uid);
-            }
-        }
-
-        return $conn;
-    }
-
-    public function subUser($uid)
-    {
-        //$sub = new RedisAsync('redis_async', $uid);
-        $this->sub_user->subscribe($this->key_user_chat . $uid, function ($data) use ($uid) {
-            $this->msgAction($data, $uid);
-        });
-    }
-
-    public function subRoom()
-    {
-        $this->sub->subscribe($this->key_room_chat, function ($data) {
-            $this->msgAction($data);
-        });
-
-        return $this;
-    }
-
-    public function msgAction($data, $sub_uid = 0)
-    {
-        if (!is_array($data))
-            return;
-
-        $data = \msgpack_unpack($data[2]);
-        if (!is_array($data))
-            return;
-
-        /**
-         * @var \swoole_websocket_server $sw
-         */
-        $sw = App::$server->sw;
-
-        $a = &$data['a'];
-        if ($a == 'toRoom') {
-            //$send_uid != $uid
-
-            //\Swoolet\Log(json_encode($this->getRoom($data['room_id'])), 'Room');
-            foreach ($this->getRoom($data['room_id']) as $uid => $fd) {
-                if ($data['uid'] == $uid) {
-                    continue;
-                } elseif (!$sw->push($fd, $data['msg'])) {
-                    unset($this->room[$data['room_id']][$uid]);
-                }
-            }
-
-            if ($data['ext'] == 'stop') {
-                $uid = $data['uid'];
-
-                if ($msg = &$this->msg[$uid]) {
-                    (new RoomMsg())->addFromChat($uid, $msg);
-                }
-
-                unset($this->room[$uid], $this->msg[$uid]);
-            }
-
-        } elseif ($a == 'toUser') {
-            if ($fd = $this->getFd($sub_uid)) {
-                //var_dump($sub_uid, $fd);
-                $sw->push($fd, $data['msg']);
-            }
-        } elseif ($a == 'updateUser') {
-            if ($fd = $this->getFd($sub_uid)) {
-                $this->conn[$fd][2] = $data['user'] + $this->conn[$fd][2];
-            }
-        }
-    }
 
     public function createRoom($fd, $uid, $user)
     {
-        $this->joinRoom($fd, $uid, $uid, $user);
+        $this->store_room->create($uid);
 
-        $this->room[$uid] = [];
-        $this->msg[$uid] = [];
+        $this->joinRoom($uid, $fd, $uid, $user);
     }
 
     public function stopRoom($room_id, $uid)
@@ -203,14 +94,142 @@ class Conn
             't' => Conn::TYPE_LIVE_STOP,
             'msg' => '直播结束',
         ], 'stop');
-
-        //todo:需要优化
-        //unset($this->room[$uid], $this->msg[$uid]);
     }
 
-    public function msgForReplay($room_id, $uid, $msg)
+    public function join($fd, $uid, $user)
     {
-        $this->msg[$room_id][] = [$uid, $msg, \Swoolet\App::$ts];
+        $this->subUser($uid, $fd);
+
+        //$this->sw->bind($fd, $uid);
+
+        $this->joinRoom(0, $fd, $uid, $user);
+    }
+
+    public function leave($fd, $unset = true)
+    {
+        $conn = $this->store_user->get($fd);
+        if ($conn && $fd == $conn['fd']) {
+            if ($unset)
+                $this->store_user->del($fd);
+
+            $this->sub_user->unsubscribe(self::USER_CHAT . $conn['uid'], function ($data) {
+            });
+        }
+    }
+
+    public function joinRoom($room_id, $fd, $uid, $user)
+    {
+        //退出已经存在的房间
+        if ($room_id) {
+            $this->leaveRoom($fd);
+
+            $this->store_room->join($room_id, $fd, $uid);
+        }
+
+        $ret = $this->store_user->set($fd, [
+            'fd' => $fd,
+            'room_id' => $room_id,
+            'uid' => $user['uid'],
+            'nickname' => $user['nickname'],
+            'lv' => $user['lv'],
+            'is_vip' => $user['is_vip'],
+            'is_tycoon' => $user['is_tycoon'],
+        ]);
+
+        //\Swoolet\Log(json_encode($this->room), 'joinRom');
+    }
+
+    public function leaveRoom($fd)
+    {
+        $conn = $this->store_user->get($fd);
+        if ($conn) {
+            $room_id = $conn['room_id'];
+            $uid = $conn['uid'];
+
+            if ($this->store_room->getRoom($room_id)) {
+                $this->stopRoom($room_id, $uid);
+            } else {
+                $this->store_user->del($fd);
+                $this->store_room->leave($room_id, $fd);
+            }
+        }
+
+        return $conn;
+    }
+
+    public function subUser($uid, $fd)
+    {
+        //$sub = new RedisAsync('redis_async', $uid);
+        //var_dump('subUser', $uid, $fd);
+        $this->sub_user->subscribe(self::USER_CHAT . $uid, function ($data) use ($fd) {
+            $this->msgAction($data, $fd);
+        });
+    }
+
+    /**
+     * @param \swoole_server $sw
+     */
+    public function subRoom($sw)
+    {
+        $process = new \swoole_process(function ($process) {
+
+            $sub = new RedisSub('sub_room');
+            $sub->subscribe(self::ROOM_CHAT, function ($data) {
+                //  [$this, 'msgAction'];
+                $this->msgAction($data);
+            });
+        });
+
+        $sw->addProcess($process);
+
+        //$this->store_room->bindProcess($process);
+
+        $sw->addProcess($this->store_room->process());
+    }
+
+    public function msgAction($data, $sub_fd = 0)
+    {
+//        if (!is_array($data))
+//            return;
+
+        $data = \msgpack_unpack($data[2]);
+        if (!is_array($data))
+            return;
+
+        /**
+         * @var \swoole_websocket_server $sw
+         */
+        $sw = $this->sw;
+
+        $a = &$data['a'];
+        if ($a == 'toRoom') {
+            //$send_uid != $uid
+
+            //\Swoolet\Log(json_encode($this->getRoom($data['room_id'])), 'Room');
+            foreach ($this->store_room->getRoom($data['room_id']) as $fd => $uid) {
+                if ($data['uid'] == $uid) {
+                    continue;
+                } elseif (!$sw->push($fd, $data['msg'])) {
+                    $this->store_room->leave($data['room_id'], $uid);
+                }
+            }
+
+            if ($data['ext'] == 'stop') {
+                $uid = $data['uid'];
+
+//                if (!\Live\isProduction()) {
+//                    $this->room_msg->saveSQL(0);
+//                }
+
+                $this->store_room->destroy($uid);
+            }
+
+        } elseif ($a == 'toUser') {
+            $sw->push($sub_fd, $data['msg']);
+
+        } elseif ($a == 'updateUser') {
+            $this->store_user->set($sub_fd, $data['user']);
+        }
     }
 
     public function sendToRoom($room_id, $uid, $msg, $ext = '')
@@ -225,9 +244,10 @@ class Conn
             'msg' => $json_msg,
         ];
 
-        $this->msgForReplay($room_id, $uid, $json_msg);
+        $this->pub->publish(self::ROOM_CHAT, \msgpack_pack($msg));
 
-        $this->pub->publish($this->key_room_chat, \msgpack_pack($msg));
+        // save msg
+        $this->room_msg->save($room_id, $uid, $json_msg, \Swoolet\App::$ts);
     }
 
     public function updateUser($uid, $user)
@@ -238,7 +258,7 @@ class Conn
             'user' => $user,
         ];
 
-        $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($msg));
+        $this->pub->publish(self::USER_CHAT . $uid, \msgpack_pack($msg));
     }
 
     public function sendToUser($uid, $msg, callable $cb = null)
@@ -249,56 +269,41 @@ class Conn
             'msg' => json_encode($msg, \JSON_UNESCAPED_UNICODE),
         ];
 
-        $ret = $this->pub->publish($this->key_user_chat . $uid, \msgpack_pack($data));
+        $ret = $this->pub->publish(self::USER_CHAT . $uid, \msgpack_pack($data));
         $cb && $cb($ret);
     }
 
     public function onWorkerStart($sw, $worker_id)
     {
-        $filename = "/tmp/swoolet_ws_{$worker_id}.php";
-        $arr = File::get($filename, true);
-        if ($arr) {
-            // \Swoolet\Log(json_encode($arr), 'recover');
 
-            list($this->uid, $this->conn, $this->room) = $arr;
 
-            //var_dump('start', $this->room);
-
-            //重新监听个人聊天
-            if ($this->uid) {
-                foreach ($this->uid as $uid => $fd) {
-                    $this->subUser($uid);
-                }
-            }
-
-            File::rm($filename);
-        }
-
-        //$this->subRoom();
+//        $filename = "/tmp/swoolet_ws_{$worker_id}.php";
+//        $arr = File::get($filename, true);
+//        if ($arr) {
+//            // \Swoolet\Log(json_encode($arr), 'recover');
+//
+//            list($this->uid, $this->conn, $this->room) = $arr;
+//
+//            //var_dump('start', $this->room);
+//
+//            //重新监听个人聊天
+//            if ($this->uid) {
+//                foreach ($this->uid as $uid => $fd) {
+//                    $this->subUser($uid, $fd);
+//                }
+//            }
+//
+//            File::rm($filename);
+//        }
+//
+//        $this->sw->connection_list(0, 100);
 
         return $this;
     }
 
     public function onWorkerStop($sw, $worker_id)
     {
-        $data = [
-            $this->uid,
-            $this->conn,
-            $this->room,
-        ];
-
-        $ret = File::touch("/tmp/swoolet_ws_{$worker_id}.php", $data, true);
-
-        RedisSub::release('sub', $this->key_room_chat);
-        RedisSub::release('sub_user');
-
-        $ds_msg = new RoomMsg();
-        foreach ($this->msg as $room_id => $msg) {
-            $ds_msg->addFromChat($room_id, $msg);
-        }
-
-        $this->msg = [];
-
-        return $this;
+        //RedisSub::release('sub_room');
+        //RedisSub::release('sub_user');
     }
 }

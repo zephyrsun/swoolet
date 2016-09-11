@@ -38,8 +38,6 @@ class Socket extends Basic
 
         $token_uid = $data['token_uid'];
 
-        //$ret = \Swoolet\App::$server->sw->bind($request->fd, '11423_432141324');
-        //var_dump('aaaa', $request->fd, $ret, \Swoolet\App::$server->sw->connection_info($request->fd));
 
         $user = (new User())->getShowInfo($token_uid, 'lv');
 
@@ -52,8 +50,11 @@ class Socket extends Basic
     {
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid) = $conn;
-            $this->conn->subUser($uid);
+            list($room_id, $user) = $conn;
+
+            $uid = $user['uid'];
+
+            $this->conn->subUser($uid, $request->fd);
 
             return Response::msg('ok');
         }
@@ -83,7 +84,9 @@ class Socket extends Basic
 
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($from_uid, $room_id, $user) = $conn;
+            list($room_id, $user) = $conn;
+
+            $from_uid = $user['uid'];
 
             $to_uid = $data['uid'];
             $msg = $data['msg'];

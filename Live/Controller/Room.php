@@ -32,7 +32,7 @@ class Room extends Basic
      */
     public function __construct()
     {
-        $this->conn = \Server::$conn->subRoom();
+        $this->conn = \Server::$conn;
     }
 
     public function join($request)
@@ -59,7 +59,7 @@ class Room extends Basic
 
             $user['admin'] = $admin = $room_admin->isAdmin($room_id, $token_uid);
 
-            $this->conn->joinRoom($request->fd, $room_id, $token_uid, $user);
+            $this->conn->joinRoom($room_id, $request->fd, $token_uid, $user);
 
             $rank->joinRoom($room_id, $token_uid);
         } else {
@@ -104,7 +104,9 @@ class Room extends Basic
         $conn = $this->conn->getConn($request->fd);
 
         if ($conn) {
-            list($uid, $room_id, $user) = $conn;
+            list($room_id, $user) = $conn;
+
+            $uid = $user['uid'];
 
             if (isset($user['silence']) && $user['silence'])
                 return Response::msg('你已被禁言两小时');
@@ -149,7 +151,9 @@ class Room extends Basic
     {
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid, $room_id, $user) = $conn;
+            list($room_id, $user) = $conn;
+
+            $uid = $user['uid'];
 
             //todo:点赞逻辑
 
@@ -173,7 +177,9 @@ class Room extends Basic
     {
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid, $room_id, $user) = $conn;
+            list($room_id, $user) = $conn;
+
+            $uid = $user['uid'];
 
             $follow_uid = $room_id;
             $ret = (new Fan())->follow($uid, $follow_uid);
@@ -200,7 +206,9 @@ class Room extends Basic
 
         $conn = $this->conn->getConn($request->fd);
         if ($conn) {
-            list($uid, $room_id, $user) = $conn;
+            list($room_id, $user) = $conn;
+
+            $uid = $user['uid'];
 
             $gift_id = $data['gift_id'];
             $to_uid = $room_id;
@@ -265,7 +273,9 @@ class Room extends Basic
         $conn = $this->conn->getConn($request->fd);
 
         if ($conn) {
-            list($uid, $room_id) = $conn;
+            list($room_id, $user) = $conn;
+
+            $uid = $user['uid'];
 
             $this->conn->stopRoom($room_id, $uid);
 

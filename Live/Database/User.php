@@ -138,15 +138,15 @@ class User extends Basic
         $ts = \Swoolet\App::$ts;
 
         return [
-            'is_vip' => $user['vip_expire'] > $ts,
-            'is_tycoon' => $user['tycoon_expire'] > $ts,
+            'is_vip' => $user['vip_expire'] > $ts ? 1 : 0,
+            'is_tycoon' => $user['tycoon_expire'] > $ts ? 1 : 0,
         ];
     }
 
     public function isVip($user)
     {
         //$user = $this->getUser($uid);
-        return $user['vip_expire'] > \Swoolet\App::$ts;
+        return $user['vip_expire'] > \Swoolet\App::$ts ? 1 : 0;
     }
 
     public function getUserInfo($uid, $follow_uid)

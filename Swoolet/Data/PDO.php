@@ -440,9 +440,20 @@ namespace Swoolet\Data {
          */
         public function exec()
         {
-            //var_dump($this->sql, $this->option['dbname'], $this->param);
-            $this->sth = $this->link->prepare($this->sql);
-            $ret = $this->sth->execute($this->param);
+            try {
+                $this->sth = $this->link->prepare($this->sql);
+                $ret = $this->sth->execute($this->param);
+            } catch (\PDOException $e) {
+                if ($e->getCode() == '2006') {
+                    //MySQL server has gone away
+                    $class = get_called_class();
+                    new $class($this->cfg_key);
+                    $this->exec();
+                } else {
+                    echo $e->getTraceAsString();
+                    echo PHP_EOL;
+                }
+            }
 
             $this->initial();
 

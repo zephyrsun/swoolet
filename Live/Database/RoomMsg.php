@@ -17,6 +17,8 @@ class RoomMsg extends Basic
 
     public $table_prefix = 'room_';
 
+    public $sql = [];
+
     public function __construct()
     {
         $this->option['dbname'] = 'live_room_msg';
@@ -26,29 +28,49 @@ class RoomMsg extends Basic
         //$this->cache = new \Live\Redis\User();
     }
 
-    public function addFromChat($room_id, $data)
+    public function save($room_id, $uid, $msg, $ts)
     {
         $this->hashTable($room_id);
-        $table = $this->clause['table'];
 
-        $sql = '';
-        $n = 0;
-        foreach ($data as $row) {
-            $v = $room_id . ", '" . implode("', '", $row) . "'";
+        $this->sql[] = "INSERT INTO `{$this->clause['table']}` (`room_id`,`from_uid`,`msg`,`ts`) VALUE ($room_id, $uid, '$msg', '$ts');";
 
-            $sql .= "INSERT INTO `$table` (`room_id`,`from_uid`,`msg`,`ts`) VALUE ($v);";
-
-            if ($n++ == 20) {
-                $this->query($sql);
-                $sql = '';
-                $n = 0;
-            }
-        }
-
-        if ($sql) {
-            $this->query($sql);
-        }
+        $this->saveSQL(100);
     }
+
+    public function saveSQL($n)
+    {
+        if (count($this->sql) < $n)
+            return;
+
+        $sql = $this->sql;
+        $this->sql = [];
+
+        $this->query(implode('', $sql));
+    }
+
+//    public function addFromChat($room_id, $data)
+//    {
+//        $this->hashTable($room_id);
+//        $table = $this->clause['table'];
+//
+//        $sql = '';
+//        $n = 0;
+//        foreach ($data as $row) {
+//            $v = $room_id . ", '" . implode("', '", $row) . "'";
+//
+//            $sql .= "INSERT INTO `$table` (`room_id`,`from_uid`,`msg`,`ts`) VALUE ($v);";
+//
+//            if ($n++ == 20) {
+//                $this->query($sql);
+//                $sql = '';
+//                $n = 0;
+//            }
+//        }
+//
+//        if ($sql) {
+//            $this->query($sql);
+//        }
+//    }
 
     public function getByTS($room_id, $start_ts, $end_ts)
     {

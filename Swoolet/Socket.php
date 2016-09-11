@@ -176,7 +176,7 @@ class Socket
         foreach ($this->events as $event)
             $sw->on($event, [$this, 'on' . $event]);
 
-        $this->sw = $sw;
+        $this->init($this->sw = $sw);
 
         $sw->start();
     }
@@ -184,6 +184,14 @@ class Socket
     protected function runServer($host, $port)
     {
         return new \swoole_server($host, $port, $this->mode, $this->sock_type);
+    }
+
+    /**
+     * @param \swoole_server $sw
+     */
+    public function init($sw)
+    {
+
     }
 
     /**

@@ -44,7 +44,7 @@ class User extends Basic
     public function updateUserInfo($request)
     {
         $data = parent::getValidator()->required('token')
-            ->length('nickname', 1, 20, false)
+            ->length('nickname', 1, 12, false)
             ->length('sex', 1, 1, false)
             ->between('height', 150, 240, false)
             ->required('birthday', false)
