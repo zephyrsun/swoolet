@@ -15,7 +15,6 @@ class RedisPub extends Common
 
     public function publish($channel, $message)
     {
-        $ret = $this->link->publish($channel, $message);
-        return $ret;
+        return $this->link->publish($channel, $message);
     }
 }

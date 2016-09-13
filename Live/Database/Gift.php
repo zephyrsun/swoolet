@@ -108,28 +108,4 @@ class Gift extends Basic
 
         return $gift['name'];
     }
-
-    public function sendHorn($send_uid, $to_uid)
-    {
-        $money = 20;
-
-        $this->beginTransaction();
-        $ret = (new Balance())->sub($send_uid, $money, $money);
-        if (!$ret) {
-            $this->rollback();
-            return $ret;
-        }
-
-        $ret = (new MoneyLog())->add($send_uid, $to_uid, $money, 1, 'horn');
-        if (!$ret) {
-            $this->rollback();
-            return Response::msg('发送弹幕失败', 1018);
-        }
-
-        if ($ret = $this->commit()) {
-            (new Rank())->addRank($send_uid, $to_uid, $money);
-        }
-
-        return $ret;
-    }
 }

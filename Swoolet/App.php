@@ -46,15 +46,16 @@ class App
         if ($obj = &self::$ins[$key])
             return $obj;
 
-        $n = count($args);
-        if ($n == 0)
-            return $obj = new $class();
-        elseif ($n == 1)
-            return $obj = new $class($args[0]);
-        elseif ($n == 2)
-            return $obj = new $class($args[0], $args[1]);
-        else
-            return $obj = new $class($args[0], $args[1], $args[2]);
+        switch (count($args)) {
+            case 0:
+                return $obj = new $class();
+            case 1:
+                return $obj = new $class($args[0]);
+            case 2:
+                return $obj = new $class($args[0], $args[1]);
+            default:
+                return $obj = new $class($args[0], $args[1], $args[2]);
+        }
     }
 }
 

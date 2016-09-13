@@ -59,7 +59,7 @@ class Room extends Basic
 
             $user['admin'] = $admin = $room_admin->isAdmin($room_id, $token_uid);
 
-            $this->conn->joinRoom($room_id, $request->fd, $token_uid, $user);
+            $this->conn->joinRoom($request->fd, $room_id, $token_uid, $user);
 
             $rank->joinRoom($room_id, $token_uid);
         } else {
@@ -120,7 +120,7 @@ class Room extends Basic
                 $t = Conn::TYPE_HORN;
 
                 $to_uid = $room_id;
-                $ret = (new Gift())->sendHorn($uid, $to_uid);
+                $ret = (new \Live\Database\Balance())->subAndLog($uid, $to_uid, 20);
                 if (!$ret)
                     return $ret;
 

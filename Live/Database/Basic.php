@@ -46,7 +46,7 @@ class Basic extends PDO
 
     public function getWithCache($key, $callback, $timeout = 259200)
     {
-        if (true || !$data = $this->cache->get($key)) {
+        if (!$data = $this->cache->get($key)) {
             if ($data = $callback()) {
                 $this->cache->set($key, $data, $timeout);
             }

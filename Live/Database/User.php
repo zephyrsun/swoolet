@@ -116,7 +116,7 @@ class User extends Basic
                     'nickname' => $user['nickname'],
                     'avatar' => $user['avatar'],
                     'zodiac' => $user['zodiac'],
-                    'city' => $user['zodiac'],
+                    'city' => $user['city'],
                     'lv' => $this->user_level->getLv($uid)
                 ];
         } elseif ($type == 'more') {

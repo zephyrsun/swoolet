@@ -627,9 +627,20 @@ key
 
 参数:
 token
-kw 关键字
 key
 
 返回:
 {"list":[{"is_vip":false,"is_tycoon":false,"uid":10,"nickname":"","avatar":"","zodiac":null,"lv":1},{"is_vip":false,"is_tycoon":false,"uid":11,"nickname":"","avatar":"","zodiac":null,"lv":1},{"is_vip":false,"is_tycoon":false,"uid":12,"nickname":"","avatar":"","zodiac":null,"lv":1}],"c":0}
+```
+
+### H5页面
+```
+接口:
+等级:/H5/level
+关于:/H5/about
+帮助:/H5/help
+
+参数:
+token
+pf
 ```

@@ -153,12 +153,17 @@ class RedisConnection
 
     public function connect($host, $port, $key)
     {
-        $client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC, $key);
+        $client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
         $client->on('connect', [$this, 'onConnect']);
         $client->on('error', [$this, 'onError']);
         $client->on('receive', [$this, 'onReceive']);
         $client->on('close', [$this, 'onClose']);
         $client->connect($host, $port);
+
+        $client->on('connect', [$this, 'onConnect']);
+        $client->on('error', [$this, 'onError']);
+        $client->on('receive', [$this, 'onReceive']);
+        $client->on('close', [$this, 'onClose']);
 
         $this->client = $client;
 
@@ -208,7 +213,7 @@ class RedisConnection
         echo 'Failed to connect redis server' . PHP_EOL;
     }
 
-    public function onClose(\swoole_client $cli)
+    public function onClose(\swoole_client $sw)
     {
         $cb = $this->getCallback();
         $cb('timeout', false);
@@ -222,12 +227,11 @@ class RedisConnection
         return $this->cb;
     }
 
-    public function onReceive($cli, $data)
+    public function onReceive($sw, $data)
     {
         if ($this->debug)
             $this->trace($data);
 
-        $result = null;
         if ($this->wait_recv) {
 
             $this->buffer .= $data;
@@ -268,9 +272,8 @@ class RedisConnection
                 return $payload;
 
             case '$':
-                if ($payload == -1) {
+                if ($payload == -1)
                     return null;
-                }
 
                 $len = $payload;
                 $chunk = $this->readBucket($len);
@@ -279,17 +282,16 @@ class RedisConnection
                     $this->buffer = $chunk;
                     return null;
                 }
+
                 return $chunk;
 
             case '*':
-                if ($payload == -1) {
+                if ($payload == -1)
                     return null;
-                }
 
                 $bulk = [];
-                for ($i = 0; $i < $payload; ++$i) {
+                for ($i = 0; $i < $payload; ++$i)
                     $bulk[$i] = $this->read();
-                }
 
                 return $bulk;
 
@@ -331,9 +333,9 @@ class RedisConnection
 
     public function trace($msg)
     {
-        echo "-----------------------------------------" . PHP_EOL;
+        echo '-----------------------------------------' . PHP_EOL;
         echo trim($msg) . PHP_EOL;
-        echo "-----------------------------------------" . PHP_EOL;
+        echo '-----------------------------------------' . PHP_EOL;
     }
 
 }

@@ -151,9 +151,10 @@ class Socket
      * @param $address
      *        - :9501
      *        - 127.0.0.1:9501
+     * @param $setting
      * @return \swoole_server
      */
-    public function run($address)
+    public function run($address, $setting = [])
     {
         list($host, $port) = explode(':', $address);
         if (!$host)
@@ -168,7 +169,7 @@ class Socket
 
         $sw = $this->runServer($host, $port);
 
-        $setting = App::getConfig('swoole') + $this->option;
+        $setting += $this->option;
         $setting['log_file'] or $setting['log_file'] = "$prefix.log";
 
         $sw->set($setting);

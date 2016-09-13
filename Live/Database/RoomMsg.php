@@ -34,7 +34,7 @@ class RoomMsg extends Basic
 
         $this->sql[] = "INSERT INTO `{$this->clause['table']}` (`room_id`,`from_uid`,`msg`,`ts`) VALUE ($room_id, $uid, '$msg', '$ts');";
 
-        $this->saveSQL(100);
+        $this->saveSQL(20);
     }
 
     public function saveSQL($n)
@@ -72,9 +72,9 @@ class RoomMsg extends Basic
 //        }
 //    }
 
-    public function getByTS($room_id, $start_ts, $end_ts)
+    public function getByTS($room_id, $start_ts, $end_ts, $replay_start_ts = 0)
     {
-        $this->hashTable($room_id)->select('id,from_uid,msg,ts')
+        $this->hashTable($room_id)->select("id,from_uid,msg,ts - $replay_start_ts as ts")
             ->where('room_id = ? AND ts > ? AND ts < ?', [$room_id, $start_ts, $end_ts]);
 
         return $this->fetchAll();

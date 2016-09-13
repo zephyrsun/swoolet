@@ -410,12 +410,19 @@ namespace Swoolet\Data {
          */
         public function query($sql)
         {
-            $old = $this->link->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
-            $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+            try {
+                $attr = \PDO::ATTR_EMULATE_PREPARES;
 
-            $ret = $this->link->query($sql);
+                $old = $this->link->getAttribute($attr);
+                $this->link->setAttribute($attr, true);
 
-            $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $old);
+                $ret = $this->link->query($sql);
+
+                $this->link->setAttribute($attr, $old);
+
+            } catch (\PDOException $e) {
+                $ret = $this->handleException($e) ? $this->query($sql) : false;
+            }
 
             return $ret;
         }
@@ -443,21 +450,34 @@ namespace Swoolet\Data {
             try {
                 $this->sth = $this->link->prepare($this->sql);
                 $ret = $this->sth->execute($this->param);
+
             } catch (\PDOException $e) {
-                if ($e->getCode() == '2006') {
-                    //MySQL server has gone away
-                    $class = get_called_class();
-                    new $class($this->cfg_key);
-                    $this->exec();
-                } else {
-                    echo $e->getTraceAsString();
-                    echo PHP_EOL;
-                }
+                $ret = $this->handleException($e) ? $this->exec() : false;
             }
 
             $this->initial();
 
             return $ret;
+        }
+
+        /**
+         * @param \PDOException $e
+         * @return bool
+         */
+        public function handleException($e)
+        {
+            if ($e->getCode() == 'HY000') {
+                echo 'MySQL server has gone away' . PHP_EOL;
+
+                $this->dial($this->cfg_key);
+
+                return true;
+            }
+
+            echo $e->getTraceAsString();
+            echo PHP_EOL;
+
+            return false;
         }
 
         public function getError()

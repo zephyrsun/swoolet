@@ -2,24 +2,33 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-$table = new swoole_table(2 ^ 32);
-$table->column('fd', swoole_table::TYPE_INT);
-$table->column('from_id', swoole_table::TYPE_STRING, 10);
-$table->column('data', swoole_table::TYPE_STRING, 64);
-$table->create();
-for ($fd = 1; $fd < 100; $fd++) {
-    $ret = $table->set($fd, array('from_id' => pow(2, 36), 'fd' => $fd, 'data' => 'data'));
-    var_dump($fd, $ret);
-}
+\Swoolet\App::setConfig('live', 'dev');
 
-var_dump($table->get(1));
+
+error_reporting(E_ALL);
+$q = [];
+
+$q[1][2] = 3;
+var_dump($q);
 exit;
+//
+//$table = new swoole_table(2 ^ 32);
+//$table->column('fd', swoole_table::TYPE_INT);
+//$table->column('from_id', swoole_table::TYPE_STRING, 10);
+//$table->column('data', swoole_table::TYPE_STRING, 64);
+//$table->create();
+//for ($fd = 1; $fd < 100; $fd++) {
+//    $ret = $table->set($fd, array('from_id' => pow(2, 36), 'fd' => $fd, 'data' => 'data'));
+//    var_dump($fd, $ret);
+//}
+//
+//var_dump($table->get(1));
+//exit;
 
 //for ($uid = 1; $uid < 200; $uid++) {
 //    $a->addVip($uid, $uid);
 //}
-$ret = $a->getVip();
-var_dump($ret);
+
 //$q = new \Live\Lib\Elasticsearch();
 //$ret = $q->indexUser();
 
@@ -47,12 +56,13 @@ var_dump($ret);
 //
 //$link->select(0);
 
-//  $db_user = new \Live\Database\UserLevel();
-//var_export(\Live\Database\UserLevel::q());
-//$user = $db_user->add(1, 1);
 
-//var_dump($user);
+function userLevel()
+{
+    var_export(\Live\Database\UserLevel::q());
+}
 
+userLevel();
 
 /*
 class  test

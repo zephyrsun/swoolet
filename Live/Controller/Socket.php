@@ -64,7 +64,7 @@ class Socket extends Basic
 
     public function pause($request)
     {
-        $this->conn->leave($request->fd, false);
+        $this->conn->leave($request->fd, 1);
 
         return Response::msg('ok');
     }
@@ -93,6 +93,12 @@ class Socket extends Basic
 
             if ($from_uid == $to_uid)
                 return Response::msg('自己和自己聊天是一种什么感受?');
+
+            if (!$user['is_vip']) {
+                $ret = (new \Live\Database\Balance())->subAndLog($from_uid, $to_uid, 20);
+                if (!$ret)
+                    return $ret;
+            }
 
             $cb = function ($result) use ($from_uid, $to_uid, $user, $msg) {
                 if ($result)

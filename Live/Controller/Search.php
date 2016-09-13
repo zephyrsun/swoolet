@@ -26,6 +26,11 @@ class Search extends Basic
             return $data;
 
         $list = (new \Live\Redis\Award())->getVip();
+        if (!$list) {
+            $ds_live = new \Live\Database\Live();
+            $list = $ds_live->cache->revRange($ds_live->key_list_hot, 0, 20, false);
+        }
+
         $ds_user = (new \Live\Database\User());
         $ret = [];
         foreach ($list as $uid) {

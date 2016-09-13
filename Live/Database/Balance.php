@@ -143,4 +143,29 @@ class Balance extends Basic
 
         return Response::msg('余额不足', 1017);
     }
+
+
+    public function subAndLog($send_uid, $to_uid, $money = 20)
+    {
+        $this->beginTransaction();
+        $ret = $this->sub($send_uid, $money, $money);
+        if (!$ret) {
+            $this->rollback();
+            return $ret;
+        }
+
+        $ret = (new MoneyLog())->add($send_uid, $to_uid, $money, 1, 'horn');
+        if (!$ret) {
+            $this->rollback();
+            return Response::msg('发送弹幕失败', 1018);
+        }
+
+//        if ($ret = $this->commit()) {
+//            (new Rank())->addRank($send_uid, $to_uid, $money);
+//        }
+
+        $ret = $this->commit();
+
+        return $ret;
+    }
 }

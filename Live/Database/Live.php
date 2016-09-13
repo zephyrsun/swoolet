@@ -67,7 +67,7 @@ class Live extends Basic
         $key_hot = $this->key_list_hot;
         $key_data = $this->key_list_data;
 
-        $expire = \Live\isProduction() ? 3600 : 5;
+        $expire = \Live\isProduction() ? 3600 : 10;
 
         $this->hashTable(0)->select('uid,title,city,cover,play_url')
             ->where('status', 1)->orderBy('ts DESC')->limit($this->limit);

@@ -19,11 +19,9 @@ class Server extends \Swoolet\Http
      */
     static public $conn;
 
-    public function onWorkerStart($sw, $worker_id)
+    public function init($sw)
     {
         self::$conn = \Live\Lib\Conn::getInstance();
-
-        parent::onWorkerStart($sw, $worker_id);
     }
 
     public function onRequest($request, $response)
@@ -40,4 +38,19 @@ class Server extends \Swoolet\Http
     }
 }
 
-Server::createServer('Live', $env)->run(':8090');
+$daemonize = $env != 'dev';
+
+Server::createServer('Live', $env)->run(':8090', [
+//    'worker_num' => 1,
+//        'reactor_num' => 1,
+    'dispatch_mode' => 2,
+    'max_request' => 0,
+
+    'open_tcp_keepalive' => 1,
+    'tcp_keepidle' => 60,
+    'tcp_keepinterval' => 60,
+    'tcp_keepcount' => 5,
+    'daemonize' => $daemonize,
+    'heartbeat_check_interval' => 60,
+    'heartbeat_idle_time' => 600,
+]);

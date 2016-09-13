@@ -57,13 +57,15 @@ class Replay extends Basic
 
         $end_ts = $replay['create_ts'];
 
+        $replay_start_ts = $end_ts - $replay['duration'];
+
         if ($data['ts'] > 0) {
             $start_ts = $data['ts'];
         } else {
-            $start_ts = $end_ts - $replay['duration'];
+            $start_ts = $replay_start_ts;
         }
 
-        $room_msg = (new \Live\Database\RoomMsg())->getByTS($room_id, $start_ts, $end_ts);
+        $room_msg = (new \Live\Database\RoomMsg())->getByTS($room_id, $start_ts, $end_ts,$replay_start_ts);
 
 //        $ds_user = new \Live\Database\User();
 //        foreach ($room_msg as &$row) {

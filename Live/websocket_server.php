@@ -21,24 +21,24 @@ class Server extends \Swoolet\WebSocket
 
     public function init($sw)
     {
-        self::$conn = \Live\Lib\Conn::getInstance();
+        self::$conn = \Live\Lib\Conn::getInstance()->process($sw);
 
-        self::$conn->subRoom($sw);
+        //self::$conn->subRoom($sw);
     }
 
     public function onWorkerStart($sw, $worker_id)
     {
         parent::onWorkerStart($sw, $worker_id);
 
-        self::$conn = \Live\Lib\Conn::getInstance();
-        self::$conn->onWorkerStart($sw, $worker_id);
+        //self::$conn = \Live\Lib\Conn::getInstance();
+        //self::$conn->onWorkerStart($sw, $worker_id);
     }
 
     public function onWorkerStop($sw, $worker_id)
     {
         parent::onWorkerStop($sw, $worker_id);
 
-        self::$conn->onWorkerStop($sw, $worker_id);
+        //self::$conn->onWorkerStop($sw, $worker_id);
     }
 
     public function onOpen($sw, $request)
@@ -47,8 +47,9 @@ class Server extends \Swoolet\WebSocket
 
         //没有成功登陆,踢出去
         swoole_timer_after(1500, function () use ($sw, $fd) {
-            if (!\Live\Lib\ConnUserStorage::getInstance()->get($fd))
+            if (!self::$conn->getConn($fd)) {
                 $this->sw->close($fd);
+            }
         });
     }
 
@@ -68,17 +69,43 @@ class Server extends \Swoolet\WebSocket
             return;
 
         self::$msg = '';
+
         $_POST = \json_decode($frame->data, true);
         if ($_POST && $uri = &$_POST['m']) {
 
             \Swoolet\log($uri, $frame->fd);
 
             $this->callRequest($uri, $frame);
-            $this->response($frame->fd, self::$msg);
         }
+
+        $this->response($frame->fd, self::$msg);
     }
 }
 
 \Swoolet\Router::$delimiter = '_';
 
-Server::createServer('Live', $env)->run(':9502');
+$cfg = [
+    'worker_num' => 8,
+//        'reactor_num' => 1,
+    'dispatch_mode' => 2,
+    'max_conn' => 10000,
+    'max_request' => 0,
+    //'task_worker_num' => 1,
+
+    'open_tcp_keepalive' => 1,
+    'tcp_keepidle' => 60,
+    'tcp_keepinterval' => 60,
+    'tcp_keepcount' => 5,
+    'daemonize' => 1,
+    'heartbeat_check_interval' => 60,
+    'heartbeat_idle_time' => 600,
+];
+
+if ($env == 'dev') {
+    //$cfg['max_request'] = 0;
+    $cfg['worker_num'] = 2;
+    $cfg['max_conn'] = 500;
+    $cfg['daemonize'] = 0;
+}
+
+Server::createServer('Live', $env)->run(':9502', $cfg);
