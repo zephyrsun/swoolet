@@ -49,21 +49,26 @@ class Room extends Basic
         if (!$user)
             return Response::msg('登录失败', 1032);
 
+        $live = (new Live())->getLive($room_id, 'app');
+
+        $admin = false;
+
         $rank = new Rank();
-        $room_admin = new RoomAdmin();
-        if (!$room_admin->isSilence($room_id, $token_uid)) {
-            $this->conn->sendToRoom($room_id, $token_uid, [
-                't' => Conn::TYPE_ENTER,
-                'user' => $user,
-            ]);
 
-            $user['admin'] = $admin = $room_admin->isAdmin($room_id, $token_uid);
+        if ($live['status'] > 0) {
+            $room_admin = new RoomAdmin();
+            if (!$room_admin->isSilence($room_id, $token_uid)) {
+                $this->conn->sendToRoom($room_id, $token_uid, [
+                    't' => Conn::TYPE_ENTER,
+                    'user' => $user,
+                ]);
 
-            $this->conn->joinRoom($request->fd, $room_id, $token_uid, $user);
+                $user['admin'] = $admin = $room_admin->isAdmin($room_id, $token_uid);
 
-            $rank->joinRoom($room_id, $token_uid);
-        } else {
-            $admin = false;
+                $this->conn->joinRoom($request->fd, $room_id, $token_uid, $user);
+
+                $rank->joinRoom($room_id, $token_uid);
+            }
         }
 
         if ($token_uid != $room_id)
@@ -73,7 +78,7 @@ class Room extends Basic
         if ($first)
             return Response::data([
                 'live' => (new Live())->getLive($room_id, 'app'),
-                'msg' => '欢迎光临直播间。主播身高：170cm，星座：白羊座，城市：上海市。',
+                'msg' => "欢迎光临直播间。主播身高：{$user['height']}cm，星座：{$user['zodiac']}，城市：{$user['city']}。",
                 'user' => $user,
                 'rank' => $rank->getRankInRoom($room_id, 0),
                 'admin' => $admin,
@@ -102,7 +107,7 @@ class Room extends Basic
             return $data;
 
         $conn = $this->conn->getConn($request->fd);
-
+        // var_dump('sendMsg$conn', $conn);
         if ($conn) {
             list($room_id, $user) = $conn;
 

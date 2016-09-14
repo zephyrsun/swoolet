@@ -86,17 +86,23 @@ class Live extends Basic
             $uid = $row['uid'];
 
             $user = $ds_user->getUser($uid);
+            if ($user) {
+                $row['avatar'] = \Live\Lib\Utility::imageLarge($user['avatar']);
+                $row['nickname'] = $user['nickname'];
+                $row['zodiac'] = (string)$user['zodiac'];
+            } else {
+                $row['avatar'] = '';
+                $row['nickname'] = '';
+                $row['zodiac'] = '';
+            }
 
             $row['cover'] = \Live\Lib\Utility::imageLarge($row['cover']);
-            $row['avatar'] = \Live\Lib\Utility::imageLarge($user['avatar']);
-            $row['nickname'] = $user['nickname'];
-            $row['zodiac'] = (string)$user['zodiac'];
 
             $latest_list[] = ++$n;
             $latest_list[] = $uid;
 
             $s = $ds_rank->getRecentIncome($uid) or $s = $n;
-            $hot_list[] = $s;
+            $hot_list[] = (int)$s;
             $hot_list[] = $uid;
 
             $data_list[$uid] = \msgpack_pack($row);
@@ -117,12 +123,31 @@ class Live extends Basic
         return $latest_list;
     }
 
+    public function stop($uid)
+    {
+        $ret = $this->hashTable($uid)->where('uid = ? AND status = 1', $uid)->update(['status' => 0]);
+
+        $this->cache->link->zRem($this->key_list_hot, $uid);
+        $this->cache->link->zRem($this->key_list_latest, $uid);
+
+        return $ret;
+    }
+
+    public function getLivingUrl($uid)
+    {
+        $live = $this->getLive($uid);
+
+        return $live['status'] > 0 ? $live['play_url'] : '';
+    }
+
     public function updateLive($uid, $new_data)
     {
         $data = $this->getLive($uid);
 
         if ($data) {
             $ret = $this->hashTable($uid)->where('uid', $uid)->update($new_data);
+
+            $this->cache->del($this->key_live . $uid);
         } else {
             $ret = $this->hashTable($uid)->insert($new_data + ['uid' => $uid]);
         }
@@ -131,18 +156,6 @@ class Live extends Basic
             return Response::msg('开播失败', 1025);
 
         return $data;
-    }
-
-    public function stop($uid)
-    {
-        return $this->hashTable($uid)->where('uid = ? AND status = 1', $uid)->update(['status' => 0]);
-    }
-
-    public function getLivingUrl($uid)
-    {
-        $live = $this->getLive($uid);
-
-        return $live['status'] > 0 ? $live['play_url'] : '';
     }
 
     public function getLive($uid, $type = 'all')
@@ -156,10 +169,12 @@ class Live extends Basic
                 //play in app
                 $live = [
                     'play_url' => $live['play_url'],
+                    'status' => $live['status'],
                 ];
             } elseif ($type == 'h5') {
                 $live = [
                     'hls_url' => $live['hls_url'],
+                    'status' => $live['status'],
                 ];
             }
         }

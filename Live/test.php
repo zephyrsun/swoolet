@@ -6,11 +6,7 @@ include \dirname(__DIR__) . '/Swoolet/App.php';
 
 
 error_reporting(E_ALL);
-$q = [];
 
-$q[1][2] = 3;
-var_dump($q);
-exit;
 //
 //$table = new swoole_table(2 ^ 32);
 //$table->column('fd', swoole_table::TYPE_INT);
@@ -61,8 +57,6 @@ function userLevel()
 {
     var_export(\Live\Database\UserLevel::q());
 }
-
-userLevel();
 
 /*
 class  test

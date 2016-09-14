@@ -41,7 +41,7 @@ class Server extends \Swoolet\Http
 $daemonize = $env != 'dev';
 
 Server::createServer('Live', $env)->run(':8090', [
-//    'worker_num' => 1,
+   'worker_num' => 8,
 //        'reactor_num' => 1,
     'dispatch_mode' => 2,
     'max_request' => 0,

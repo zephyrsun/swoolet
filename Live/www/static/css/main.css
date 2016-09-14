@@ -105,3 +105,10 @@ a:active, a:hover {
     border: 1px solid transparent;
     border-radius: 4px;
 }
+
+.pull-right {
+    float: right !important;
+}
+.pull-left {
+    float: left !important;
+}

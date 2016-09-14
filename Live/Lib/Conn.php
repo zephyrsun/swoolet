@@ -100,11 +100,6 @@ class Conn
 
     public function joinRoom($fd, $room_id, $uid, $user)
     {
-        //退出已经存在的房间
-        if ($room_id) {
-            $this->process->write("joinRoom|$fd|$room_id|$uid");
-        }
-
         $this->user_store->set($fd, [
             'fd' => $fd,
             'room_id' => $room_id,
@@ -114,7 +109,15 @@ class Conn
             'lv' => $user['lv'],
             'is_vip' => $user['is_vip'],
             'is_tycoon' => $user['is_tycoon'],
+            'silence' => 0,
         ]);
+
+        // var_dump('joinRoom', $this->user_store->get($fd));
+
+        //退出已经存在的房间
+        if ($room_id) {
+            $this->process->write("joinRoom|$fd|$room_id|$uid");
+        }
     }
 
     public function leaveRoom($fd)
@@ -142,7 +145,7 @@ class Conn
         ];
 
         $int = $this->pub->publish(self::USER_CHAT . $uid, \msgpack_pack($data));
-        var_dump('sendToUser', $int);
+        //var_dump('sendToUser', $int);
         $cb && $cb($int);
     }
 

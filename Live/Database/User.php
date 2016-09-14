@@ -79,7 +79,12 @@ class User extends Basic
     {
         $this->hashTable($uid)->where('uid', $uid);
 
-        return parent::update($data);
+        $ret = parent::update($data);
+
+        if ($ret)
+            $this->cache->del($this->key_user . $uid);
+
+        return $ret;
     }
 
     public function incrExpire($uid, $field, $day)
@@ -114,6 +119,7 @@ class User extends Basic
             $user = $this->isExpired($user) + [
                     'uid' => $user['uid'],
                     'nickname' => $user['nickname'],
+                    'height' => $user['height'],
                     'avatar' => $user['avatar'],
                     'zodiac' => $user['zodiac'],
                     'city' => $user['city'],

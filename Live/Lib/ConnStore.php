@@ -67,7 +67,6 @@ class ConnStore
             //var_dump('leave', $conn, $fd, $uid_fd, $uid);
 
             if ($uid_fd == $fd) {
-
                 $this->user_store->del($fd);
                 $this->unSubUser($uid);
 
@@ -82,27 +81,27 @@ class ConnStore
         $this->leaveRoom($fd, $room_id, $uid);
 
         $this->room_store->join($room_id, $uid, $fd);
+
+        //  var_dump('room', $this->room_store->get($room_id));
     }
 
-    public function leaveRoom($fd, $room_id = 0, $uid = 0)
+    public function leaveRoom($fd, $room_id = -1, $uid = -1)
     {
-        if ($room_id) {
-            if ($room_id == $uid) {
-                return;
-            }
-        } elseif ($conn = $this->user_store->get($fd)) {
-            $room_id = $conn['room_id'];
-            $uid = $conn['uid'];
-        } else {
+        if (!$conn = $this->user_store->get($fd))
+            return;
+
+        if ($room_id == $conn['room_id'] || $uid == $conn['room_id']) {
             return;
         }
+
+        $room_id = $conn['room_id'];
+        $uid = $conn['uid'];
 
         // var_dump('leaveRoom', $fd, $conn, $room_id);
         if ($room_id == $uid) {
             $this->stopRoom($room_id, $uid);
         }
 
-        $this->user_store->del($fd);
         $this->room_store->leave($room_id, $uid);
     }
 
@@ -191,11 +190,12 @@ class ConnStore
             $table->column('fd', \swoole_table::TYPE_INT, 4);
             $table->column('room_id', \swoole_table::TYPE_INT, 8);
             $table->column('uid', \swoole_table::TYPE_INT, 8);
-            $table->column('nickname', \swoole_table::TYPE_STRING, 12);
+            $table->column('nickname', \swoole_table::TYPE_STRING, 48);
             $table->column('avatar', \swoole_table::TYPE_STRING, 70);
             $table->column('lv', \swoole_table::TYPE_INT, 4);
             $table->column('is_vip', \swoole_table::TYPE_INT, 1);
             $table->column('is_tycoon', \swoole_table::TYPE_INT, 1);
+            $table->column('silence', \swoole_table::TYPE_INT, 1);
 
             $table->create();
         }

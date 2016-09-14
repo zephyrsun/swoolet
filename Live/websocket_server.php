@@ -73,7 +73,7 @@ class Server extends \Swoolet\WebSocket
         $_POST = \json_decode($frame->data, true);
         if ($_POST && $uri = &$_POST['m']) {
 
-            \Swoolet\log($uri, $frame->fd);
+            \Swoolet\log(\http_build_query($_POST), $frame->fd);
 
             $this->callRequest($uri, $frame);
         }
@@ -103,7 +103,7 @@ $cfg = [
 
 if ($env == 'dev') {
     //$cfg['max_request'] = 0;
-    $cfg['worker_num'] = 2;
+    //$cfg['worker_num'] = 2;
     $cfg['max_conn'] = 500;
     $cfg['daemonize'] = 0;
 }

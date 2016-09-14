@@ -47,7 +47,7 @@
             <div class="col-xs-12">
                 <div class="h3">会员特权</div>
                 <div>
-                    <span class="h1">1</span>会员每日签到可获得5看币和20经验，<span class="g">普通用户没有看币，只有10经验</span>。另外，会员每逢单数日签到可额外获得最高100经验。
+                    <span class="h1">1</span>会员每日签到可获得5看币和20经验，<span class="g">普通用户0看币，10经验</span>。会员每逢双数日签到可额外获得成长经验，最高5倍。
                 </div>
                 <div>
                     <span class="h1">2</span>可免费无限私信主播，<span class="g">普通用户每条私信需要20看币</span>。
@@ -56,7 +56,7 @@
                     <span class="h1">3</span>绚丽进房特效，会员专属特权。
                 </div>
                 <div>
-                    <span class="h1">4</span>会员标志，<span class="g">普通用户只显示等级</span>。
+                    <span class="h1">4</span>尊贵会员身份标志，与众不同。
                 </div>
                 <div>
                     <span class="h1">5</span>会员可参与主播线下活动，参与自制节目现场录制。

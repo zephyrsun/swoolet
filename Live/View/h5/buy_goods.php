@@ -30,7 +30,7 @@
         <div class="row" id="instruction">
             <div class="col-xs-12">
                 <div class="b">充值奖励</div>
-                <div>每次充值奖励<span class="pink">10倍经验</span><span class="b">（例如充值30元获得300经验）</span></div>
+                <div>每次充值奖励<span class="pink">等额经验</span><span class="b">（例如充值30元获得30经验）</span>，送礼后可再得更多经验。</div>
                 <div>充值累计满98元，奖励<span class="pink">15天会员</span><a href="/H5/buyVip?<?php echo $query; ?>">查看会员特权></a>
                 </div>
                 <div>充值累计满298元，奖励<span class="pink">45天会员</span><a href="/H5/buyVip?<?php echo $query; ?>">查看会员特权></a>

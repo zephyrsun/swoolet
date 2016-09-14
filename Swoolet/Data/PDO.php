@@ -466,16 +466,15 @@ namespace Swoolet\Data {
          */
         public function handleException($e)
         {
+            echo $e->getTraceAsString();
+            echo PHP_EOL;
+
             if ($e->getCode() == 'HY000') {
-                echo 'MySQL server has gone away' . PHP_EOL;
 
                 $this->dial($this->cfg_key);
 
                 return true;
             }
-
-            echo $e->getTraceAsString();
-            echo PHP_EOL;
 
             return false;
         }

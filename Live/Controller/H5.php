@@ -71,6 +71,75 @@ class H5 extends Basic
         return $this->render('h5/buy_vip');
     }
 
+    public function buySuccess($request)
+    {
+        $data = $this->requestValidator($request)->required('token')->required('pf')->required('channel')->required('id')->getResult();
+        if (!$data)
+            return $data;
+
+        $id = ltrim($data['id'], $data['channel']);
+
+        $token_uid = $data['token_uid'];
+        $pf = strtolower($data['pf']);
+
+        $goods = (new \Live\Database\Goods())->getGoods($id, $pf);
+
+        $this->view->assign([
+            'pf' => $pf,
+            'goods' => $goods,
+            'exp' => (new \Live\Database\UserLevel())->getExp($token_uid),
+            'coin' => (new \Live\Database\Balance())->get($token_uid, 'balance'),
+        ]);
+
+        return $this->render('h5/buy_success');
+    }
+
+    public function live($request)
+    {
+        $data = $this->requestValidator($request)->required('id')->ge('ts', 1)->getResult();
+        if (!$data)
+            return $data;
+
+        $uid = $data['id'];
+        $ts = $data['ts'];
+
+        $live = (new \Live\Database\Live())->getLive($uid);
+        $user = (new \Live\Database\User())->getUser($uid);
+
+        $video = [];
+
+        if ($live['status']) {
+            $video['title'] = $live['title'];
+            $video['play_url'] = $live['play_url'];
+        } else {
+            $last_row = [];
+
+            $list = (new \Live\Database\Replay())->getList($uid, 0, 10);
+            foreach ($list as $row) {
+                if ($ts > $row['ts']) {
+                    $video['title'] = $last_row['title'];
+                    $video['play_url'] = $last_row['play_url'];
+                    break;
+                }
+
+                $last_row = $row;
+            }
+        }
+
+        if (!$data) {
+            //回放
+            $video['title'] = '';
+            $video['play_url'] = '';
+        }
+
+        $this->view->assign([
+            'video' => $video,
+            'user' => $user,
+        ]);
+
+        return $this->render('h5/live');
+    }
+
     public function level($request)
     {
         $data = $this->requestValidator($request)->required('token')->required('pf')->getResult();

@@ -82,7 +82,7 @@ class Balance extends Basic
             $this->cache->del($uid, 'sent', 'charge');
             $money = $this->get($uid, 'charge');
 
-            $db_user = (new User());
+            $ds_user = new User();
 
             $vip_day = $goods['vip_day'];
             $tycoon_day = $goods['tycoon_day'];
@@ -105,7 +105,7 @@ class Balance extends Basic
             }
 
             if ($vip_day) {
-                $db_user->incrExpire($uid, 'vip_expire', $vip_day);
+                $ds_user->incrExpire($uid, 'vip_expire', $vip_day);
                 //if ($award_key)
                 //    $this->cache->set($uid, $award_key, $award_day);
 
@@ -116,7 +116,7 @@ class Balance extends Basic
             }
 
             if ($tycoon_day) {
-                $db_user->incrExpire($uid, 'tycoon_expire', $tycoon_day);
+                $ds_user->incrExpire($uid, 'tycoon_expire', $tycoon_day);
 
                 $msg = $tycoon_day > 30 ? '此人超级土豪' : '此人特别土豪';
                 (new \Live\Redis\Award())->addRecommend($uid, $msg);
