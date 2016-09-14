@@ -2,6 +2,7 @@
 
 namespace Live\Controller;
 
+use Live\Lib\Utility;
 use Live\Response;
 
 class H5 extends Basic
@@ -59,12 +60,14 @@ class H5 extends Basic
             return $data;
 
         $pf = strtolower($data['pf']);
+        $token_uid = $data['token_uid'];
 
         $goods = (new \Live\Database\Goods())->getList($pf, 2, $data['channel']);
 
         $this->view->assign([
             'pf' => $pf,
             'goods' => $goods,
+            'uid' => $token_uid,
             //'query' => http_build_query($request->get),
         ]);
 
@@ -106,11 +109,14 @@ class H5 extends Basic
         $live = (new \Live\Database\Live())->getLive($uid);
         $user = (new \Live\Database\User())->getUser($uid);
 
+        $user['avatar'] = Utility::imageSmall($user['avatar']);
+
         $video = [];
 
         if ($live['status']) {
             $video['title'] = $live['title'];
             $video['play_url'] = $live['play_url'];
+            $video['cover'] = $live['cover'];
         } else {
             $last_row = [];
 
@@ -119,6 +125,7 @@ class H5 extends Basic
                 if ($ts > $row['ts']) {
                     $video['title'] = $last_row['title'];
                     $video['play_url'] = $last_row['play_url'];
+                    $video['cover'] = Utility::imageLarge($last_row['cover']);
                     break;
                 }
 

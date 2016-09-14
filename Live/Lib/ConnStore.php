@@ -66,11 +66,10 @@ class ConnStore
 
             //var_dump('leave', $conn, $fd, $uid_fd, $uid);
 
-            if ($uid_fd == $fd) {
-                $this->user_store->del($fd);
+            if ($pause) {
                 $this->unSubUser($uid);
-
-            } elseif ($pause) {
+            } elseif ($uid_fd == $fd) {
+                $this->user_store->del($fd);
                 $this->unSubUser($uid);
             }
         }
@@ -98,9 +97,9 @@ class ConnStore
         $uid = $conn['uid'];
 
         // var_dump('leaveRoom', $fd, $conn, $room_id);
-        if ($room_id == $uid) {
-            $this->stopRoom($room_id, $uid);
-        }
+//        if ($room_id == $uid) {
+//            $this->stopRoom($room_id, $uid);
+//        }
 
         $this->room_store->leave($room_id, $uid);
     }

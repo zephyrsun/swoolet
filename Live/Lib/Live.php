@@ -78,11 +78,11 @@ class Live
         $arr = explode('-', $key, 2);
         $uid = \end($arr);
 
-        \Server::$conn->stopRoom($uid, $uid);
-
         $ret = $this->db->stop($uid);
         if (!$ret)
             Response::msg('停播失败', 1052);
+
+        \Server::$conn->stopRoom($uid, $uid);
 
         $live_data = $this->db->getLive($uid, 'all');
 

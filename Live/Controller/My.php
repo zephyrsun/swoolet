@@ -30,7 +30,7 @@ class My extends Basic
         //$user = (new \Live\Database\User())->getUser($uid);
         $user = [];
         if ($live = (new \Live\Database\Live())->getLive($uid, 'all')) {
-            $user['cover'] = \Live\Lib\Utility::imageLarge($live['cover']);
+            $user['cover'] = $live['cover'];
         }
 
         Response::data(['user' => $user]);

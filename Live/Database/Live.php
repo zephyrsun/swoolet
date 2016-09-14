@@ -165,6 +165,8 @@ class Live extends Basic
         });
 
         if ($live) {
+            $live['cover'] = \Live\Lib\Utility::imageLarge($live['cover']);
+
             if ($type == 'app') {
                 //play in app
                 $live = [
@@ -173,7 +175,7 @@ class Live extends Basic
                 ];
             } elseif ($type == 'h5') {
                 $live = [
-                    'hls_url' => $live['hls_url'],
+                    'play_url' => $live['hls_url'],
                     'status' => $live['status'],
                 ];
             }

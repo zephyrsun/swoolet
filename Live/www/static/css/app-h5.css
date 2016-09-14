@@ -7,6 +7,10 @@ html {
     color: #3a3a3a;
 }
 
+.pink {
+    color: #f33781;
+}
+
 .header {
     padding: 20px;
 }
@@ -130,11 +134,6 @@ html {
     margin-top: 15px;
     margin-bottom: 15px;
 }
-
-#instruction .pink {
-    color: #f33781;
-}
-
 #instruction a {
     color: #3a3a3a;
     padding-left: 10px;

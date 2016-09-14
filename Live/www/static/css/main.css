@@ -19,6 +19,11 @@ audio:not([controls]) {
     height: 0;
 }
 
+img {
+    vertical-align: middle;
+    border-style: none;
+}
+
 a {
     background-color: transparent;
     text-decoration: none;
@@ -109,6 +114,7 @@ a:active, a:hover {
 .pull-right {
     float: right !important;
 }
+
 .pull-left {
     float: left !important;
 }

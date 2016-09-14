@@ -282,8 +282,6 @@ class Room extends Basic
 
             $uid = $user['uid'];
 
-            $this->conn->stopRoom($room_id, $uid);
-
             $data = (new \Live\Lib\Live())->stop($uid);
 
             return Response::data([

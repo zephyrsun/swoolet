@@ -57,4 +57,11 @@ class Utility
 
         return $img;
     }
+    static function imageSmall($img)
+    {
+        if ($img)
+            $img .= '!ps';
+
+        return $img;
+    }
 }
