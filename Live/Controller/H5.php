@@ -167,11 +167,16 @@ class H5 extends Basic
 
     public function about($request)
     {
-        $data = $this->requestValidator($request)->required('token')->required('pf')->getResult();
+        $data = $this->requestValidator($request)->required('token')->required('pf')->required('v')->getResult();
         if (!$data)
             return $data;
 
-        return Response::msg('关于');
+        $this->view->assign([
+            'v' => $data['v'],
+            //'query' => http_build_query($request->get),
+        ]);
+
+        return $this->render('h5/about');
     }
 
     public function help($request)
@@ -180,6 +185,6 @@ class H5 extends Basic
         if (!$data)
             return $data;
 
-        return Response::msg('帮助');
+        return $this->render('h5/faq');
     }
 }

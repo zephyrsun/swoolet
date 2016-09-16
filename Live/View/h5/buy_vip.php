@@ -91,6 +91,9 @@
                     <span class="h1">2</span>可免费无限私信主播，<span class="g">普通用户每条私信需要20看币</span>。
                 </div>
                 <div>
+                    <span class="h1">6</span>会员可关注500人，<span class="g">普通最多200人</span>。
+                </div>
+                <div>
                     <span class="h1">3</span>可自定义主页背景图，彰显个性，<span class="g">普通用户没有</span>。
                 </div>
                 <div>

@@ -9,6 +9,7 @@
 namespace Live\Database;
 
 
+use Live\Response;
 use Swoolet\Data\PDO;
 
 class User extends Basic
@@ -81,10 +82,38 @@ class User extends Basic
 
         $ret = parent::update($data);
 
-        if ($ret)
+        if ($ret) {
             $this->cache->del($this->key_user . $uid);
 
+            if (isset($data['nickname'])) {
+                (new \Live\Lib\Elasticsearch())->add('user', $uid, ['nickname' => $data['nickname']]);
+            } elseif (isset($data['sign'])) {
+                (new \Live\Lib\Elasticsearch())->add('user', $uid, ['sign' => $data['sign']]);
+            }
+        }
+
         return $ret;
+    }
+
+    public function limitUpdate($method, $uid, $data)
+    {
+        static $col = ['nickname' => '昵称', 'sex' => '性别', 'birthday' => '生日'];
+
+        if ($method == 'add')
+            foreach ($col as $key => $name) {
+                if (isset($data[$key])) {
+                    $this->cache->add("user_$key:$uid", 1, 86400 * 30);
+                }
+            }
+        elseif ($method == 'get') {
+            foreach ($col as $key => $name) {
+                if (isset($data[$key]) && $this->cache->get("user_$key:$uid")) {
+                    return Response::msg("\"$name\"30天内只能修改一次");
+                }
+            }
+        }
+
+        return true;
     }
 
     public function incrExpire($uid, $field, $day)
@@ -151,7 +180,8 @@ class User extends Basic
 
     public function isVip($user)
     {
-        //$user = $this->getUser($uid);
+        is_array($user) or $user = $this->getUser($user);//$user as $uid
+
         return $user['vip_expire'] > \Swoolet\App::$ts ? 1 : 0;
     }
 

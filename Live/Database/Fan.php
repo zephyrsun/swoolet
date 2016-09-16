@@ -8,6 +8,8 @@
 
 namespace Live\Database;
 
+use Live\Response;
+
 class Fan extends Follow
 {
     public $table_prefix = 'fan_';
@@ -26,9 +28,16 @@ class Fan extends Follow
         if ($uid == $follow_uid)
             return false;
 
+        $limit = (new \Live\Database\User())->isVip($uid) ? 500 : 200;
+
+        $ds_follow = new Follow();
+        $count = $ds_follow->getCount($uid);
+        if ($count >= $limit)
+            return Response::msg('关注已达上限');
+
         $fan = $this->add($follow_uid, $uid);
         if ($fan)
-            $follow = (new Follow())->add($uid, $follow_uid);
+            $follow = $ds_follow->add($uid, $follow_uid);
 
         return $fan;
     }

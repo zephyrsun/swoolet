@@ -55,9 +55,13 @@ class User extends Basic
         if (!$data)
             return $data;
 
+        if ($data['zodiac']) {
+            return Response::msg('星座不可修改');
+        }
+
         $uid = $data['token_uid'];
 
-        $user_fields = ['nickname', 'sex', 'height', 'birthday', 'zodiac', 'sign', 'city'];
+        $user_fields = ['nickname', 'sex', 'height', 'birthday', 'sign', 'city'];
 
         $data = [];
         foreach ($_POST as $k => $v) {
@@ -67,17 +71,15 @@ class User extends Basic
         }
 
         if ($data) {
-            $db_user = new \Live\Database\User();
+            $ds_user = new \Live\Database\User();
 
-            $ret = $db_user->updateUser($uid, $data);
+            if (!$ret = $ds_user->limitUpdate('get', $uid, $data))
+                return $ret;
+
+            $ret = $ds_user->updateUser($uid, $data);
             if ($ret) {
-                if (isset($data['nickname'])) {
-                    (new Elasticsearch())->add('user', $uid, ['nickname' => $data['nickname']]);
-                } elseif (isset($data['sign'])) {
-                    (new Elasticsearch())->add('user', $uid, ['sign' => $data['sign']]);
-                }
-
-                return Response::data(['user' => $db_user->getUser($uid)]);
+                $ds_user->limitUpdate('add', $uid, $data);
+                return Response::data(['user' => $ds_user->getUser($uid)]);
             }
         }
 
