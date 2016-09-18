@@ -92,16 +92,22 @@
     #top a {
         padding: 0px 6px;
     }
+
+    #player {
+        width: 100%;
+    }
 </style>
 <body>
+<!--
 <div id="top">
     <a href=""><img src="/static/img/logo-s.png"></a>
 </div>
+-->
 
-<img id="btn-play" src="/static/img/live_play.png">
-<video id="player" x-webkit-airplay="allow" crossorigin webkit-playsinline
-       preload="<?php echo $video['cover']; ?>"
-       src="http://content.jwplatform.com/manifests/vM7nH0Kl.m3u8">
+<!--http://content.jwplatform.com/manifests/vM7nH0Kl.m3u8-->
+<!--<img id="btn-play" src="/static/img/live_play.png">-->
+<video id="player" x-webkit-airplay="allow" crossorigin webkit-playsinline autoplay
+       src="<?php echo $video['play_url']; ?>">
 </video>
 <script src="//cdn.bootcss.com/plyr/2.0.7/plyr.js"></script>
 <script src="//cdn.bootcss.com/hls.js/0.6.2-6/hls.min.js"></script>

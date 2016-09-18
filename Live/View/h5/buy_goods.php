@@ -1,4 +1,14 @@
-<?php include "header.php" ?>
+<?php
+include "header.php";
+
+list($class, $num, $class_name) = \Live\Lib\Utility::levelClass($user['lv']);
+
+$html = <<<HTML
+<span class="class" style="background-image:url(/static/img/class-bg-{$class}.png)">$class_name$num</span>
+HTML;
+
+
+?>
     <link href="/static/css/app-h5.css" rel="stylesheet">
 
     <div class="container container-phone">
@@ -10,7 +20,9 @@
             </div>
             <div class="col-xs-6 text-center">
                 <img src="/static/img/level.png" width="28px">
-                <div>我的等级</div>
+                <div>我的等级
+                    <?php echo $html; ?>
+                </div>
                 <div class="progress">
                     <div class="progress-bar"
                          style="width: <?php echo (int)($user['exp'] / $user['next_exp'] * 100); ?>%;">

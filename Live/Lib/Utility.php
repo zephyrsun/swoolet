@@ -39,6 +39,14 @@ class Utility
         return $name;
     }
 
+    static function handleZodiac($zodiac)
+    {
+        if ($zodiac)
+            return $zodiac;
+
+        return '星座未知';
+    }
+
     static public function generateCity($city)
     {
         if ($city)
@@ -47,7 +55,13 @@ class Utility
         $a1 = ['未知', '黑暗', '玲珑', '遗忘', '灵魂', '神秘'];
         $a2 = ['世界', '宇宙', '深渊', '沙漠', '峡谷', '海岸'];
 
-        return array_rand($a1) . array_rand($a2);
+        return self::arrayRand($a1) . self::arrayRand($a2);
+    }
+
+    static function arrayRand($arr)
+    {
+        $n = mt_rand(0, count($arr) - 1);
+        return $arr[$n];
     }
 
     static function imageLarge($img)
@@ -57,11 +71,33 @@ class Utility
 
         return $img;
     }
+
     static function imageSmall($img)
     {
         if ($img)
             $img .= '!ps';
 
         return $img;
+    }
+
+    static function levelClass($lv)
+    {
+        $map = [
+            1 => '学渣',
+            2 => '秀才',
+            3 => '举人',
+            4 => '进士',
+            5 => '探花',
+            6 => '榜眼',
+            7 => '状元',
+            8 => '驸马',
+        ];
+
+        $class = ceil($lv / 5);
+        $num = $lv % 5;
+
+        $k = min($class, count($map));
+
+        return [$class, $num, $map[$k]];
     }
 }

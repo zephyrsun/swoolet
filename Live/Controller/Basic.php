@@ -35,6 +35,7 @@ class Response
         self::data(['msg' => $msg], $code);
 
         return false;
+        // return !$code;
     }
 
     /**
@@ -45,8 +46,8 @@ class Response
     static public function data(array $data = [], $code = 0)
     {
         $data['c'] = $code;
-        if ($m = &$_POST['m'])
-            $data['m'] = $m;
+//        if ($m = &$_POST['m'])
+//            $data['m'] = $m;
 
         \Server::$msg = json_encode($data, \JSON_UNESCAPED_UNICODE);
 

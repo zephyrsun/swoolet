@@ -2,11 +2,13 @@
 
 include \dirname(__DIR__) . '/Swoolet/App.php';
 
-\Swoolet\App::setConfig('live', 'dev');
+\Swoolet\App::setConfig('Live', 'test');
 
+var_dump(\Swoolet\App::$config);
 
 error_reporting(E_ALL);
 
+indexUser();
 //
 //$table = new swoole_table(2 ^ 32);
 //$table->column('fd', swoole_table::TYPE_INT);
@@ -25,8 +27,6 @@ error_reporting(E_ALL);
 //    $a->addVip($uid, $uid);
 //}
 
-//$q = new \Live\Lib\Elasticsearch();
-//$ret = $q->indexUser();
 
 //$ds_award = new \Live\Third\Pili();
 //$ds_award->start('1', '9090');
@@ -52,6 +52,13 @@ error_reporting(E_ALL);
 //
 //$link->select(0);
 
+function indexUser()
+{
+    $q = new \Live\Lib\Elasticsearch();
+    $ret = $q->indexUser();
+
+    var_dump($ret);
+}
 
 function userLevel()
 {

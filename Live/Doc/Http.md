@@ -639,7 +639,8 @@ key
 等级:/H5/level
 关于:/H5/about
 帮助:/H5/help
-购买成功:/H5/help,需选id:商品id
+购买:/H5/buyGoods 需传channel:目前传kb,今后会是其他值
+购买成功:/H5/help,需传id:商品id
 直播间分享:/H5/live,需传id:uid;ts:分享的时间
 
 参数:

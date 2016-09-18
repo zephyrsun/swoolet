@@ -29,6 +29,7 @@ class Elasticsearch extends \Swoolet\Lib\Elasticsearch
                     $uid = $row['uid'];
 
                     $ret = $es->add('user', $uid, [
+                        'uid' => $uid,
                         'nickname' => $row['nickname'],
                         'sign' => $row['sign'],
                     ]);
@@ -53,7 +54,7 @@ class Elasticsearch extends \Swoolet\Lib\Elasticsearch
                 'multi_match' => [
                     'query' => $kw,
                     'type' => 'best_fields',
-                    'fields' => ['nickname', 'sign'],
+                    'fields' => ['uid', 'nickname', 'sign'],
                     'analyzer' => 'standard',
                 ],
             ],

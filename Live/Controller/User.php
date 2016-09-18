@@ -46,7 +46,7 @@ class User extends Basic
         $data = parent::getValidator()->required('token')
             ->length('nickname', 1, 12, false)
             ->length('sex', 1, 1, false)
-            ->between('height', 150, 240, false)
+            ->between('height', 150, 250, false)
             ->required('birthday', false)
             ->required('zodiac', false)
             ->lengthLE('sign', 50, false)

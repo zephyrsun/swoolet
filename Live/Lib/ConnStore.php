@@ -195,6 +195,7 @@ class ConnStore
             $table->column('is_vip', \swoole_table::TYPE_INT, 1);
             $table->column('is_tycoon', \swoole_table::TYPE_INT, 1);
             $table->column('silence', \swoole_table::TYPE_INT, 1);
+            $table->column('is_admin', \swoole_table::TYPE_INT, 1);
 
             $table->create();
         }

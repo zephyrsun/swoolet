@@ -78,7 +78,7 @@ class RoomAdmin extends Basic
 
     public function isAdmin($uid, $admin_uid)
     {
-        return $this->cache->link->sIsMember($this->key_admin . $uid, $admin_uid);
+        return (int)$this->cache->link->sIsMember($this->key_admin . $uid, $admin_uid);
     }
 
     public function getCount($uid)

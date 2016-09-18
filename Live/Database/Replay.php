@@ -67,7 +67,7 @@ class Replay extends Basic
         $ret = parent::getListWithCount($this->key_replay . $uid, $this->key_replay_count . $uid, $start, $limit, function () use ($uid, $start, $limit) {
             $this->hashTable($uid);
 
-            $this->select('id AS `key`,title,cover,play_url')->orderBy('id DESC')->limit(500)->where('uid = ?', $uid);
+            $this->select('id AS `key`,title,cover,play_url,ts')->orderBy('id DESC')->limit(500)->where('uid = ?', $uid);
             if ($list = $this->fetchAll()) {
                 $data = [];
                 foreach ($list as $row) {

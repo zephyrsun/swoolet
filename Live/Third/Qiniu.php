@@ -61,7 +61,7 @@ class Qiniu
     {
         $manager = new BucketManager($this->auth);
 
-        $key = str_replace($this->domain['static'], '', $key);
+        $key = str_replace([$this->domain['static'], '!pl'], ['', ''], $key);
 
         $err = $manager->delete($bucket, $key);
 

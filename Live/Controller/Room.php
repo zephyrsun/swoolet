@@ -51,7 +51,7 @@ class Room extends Basic
 
         $live = (new Live())->getLive($room_id, 'app');
 
-        $admin = false;
+        $admin = 0;
 
         $rank = new Rank();
 
@@ -63,7 +63,7 @@ class Room extends Basic
                     'user' => $user,
                 ]);
 
-                $user['admin'] = $admin = $room_admin->isAdmin($room_id, $token_uid);
+                $user['is_admin'] = $admin = $room_admin->isAdmin($room_id, $token_uid);
 
                 $this->conn->joinRoom($request->fd, $room_id, $token_uid, $user);
 
@@ -71,17 +71,17 @@ class Room extends Basic
             }
         }
 
-        if ($token_uid != $room_id)
-            $user = $db_user->getShowInfo($room_id, 'lv');
+        $zhubo = $db_user->getShowInfo($room_id, 'lv');
 
         $first = $data['first'];
         if ($first)
             return Response::data([
+                'm' => $_POST['m'],
                 'live' => (new Live())->getLive($room_id, 'app'),
-                'msg' => "欢迎光临直播间。主播身高：{$user['height']}cm，星座：{$user['zodiac']}，城市：{$user['city']}。",
-                'user' => $user,
+                'msg' => "欢迎光临直播间。主播身高：{$zhubo['height']}cm，星座：{$zhubo['zodiac']}，城市：{$zhubo['city']}。",
+                'user' => $zhubo,
                 'rank' => $rank->getRankInRoom($room_id, 0),
-                'admin' => $admin,
+                //'admin' => $admin,
                 'is_follow' => (new Fan())->isFollow($token_uid, $room_id),
                 'num' => $rank->getRoomUserNum($room_id),
                 'money' => (new Income())->getIncome($room_id),
@@ -146,7 +146,11 @@ class Room extends Basic
                 'msg' => $data['msg'],
             ]);
 
-            return Response::data(['lv' => $user['lv'], 'rank' => $rank]);
+            return Response::data([
+                'm' => $_POST['m'],
+                'lv' => $user['lv'],
+                'rank' => $rank
+            ]);
         }
 
         return Response::msg('ok');
@@ -241,6 +245,7 @@ class Room extends Basic
             ]);
 
             return Response::data([
+                'm' => $_POST['m'],
                 'lv' => $lv,
                 'rank' => $rank,
             ]);
@@ -258,7 +263,6 @@ class Room extends Basic
         $token_uid = $data['token_uid'];
 
         $user = (new User())->getShowInfo($token_uid, 'lv');
-        $user['admin'] = true;
 
         if (!$data = (new \Live\Lib\Live())->start($token_uid, $data['title'], $data['city'], $user))
             return $data;
@@ -269,6 +273,7 @@ class Room extends Basic
         (new RoomAdmin())->getRoomAdmin($token_uid);
 
         return Response::data([
+            'm' => $_POST['m'],
             'publish_url' => $data['publish_url'],
         ]);
     }
@@ -285,6 +290,7 @@ class Room extends Basic
             $data = (new \Live\Lib\Live())->stop($uid);
 
             return Response::data([
+                'm' => $_POST['m'],
                 't' => Conn::TYPE_LIVE_STOP,
                 'd' => $data,
             ]);

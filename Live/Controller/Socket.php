@@ -38,7 +38,6 @@ class Socket extends Basic
 
         $token_uid = $data['token_uid'];
 
-
         $user = (new User())->getShowInfo($token_uid, 'lv');
 
         $this->conn->join($request->fd, $token_uid, $user);
@@ -52,9 +51,7 @@ class Socket extends Basic
         if ($conn) {
             list($room_id, $user) = $conn;
 
-            $uid = $user['uid'];
-
-            $this->conn->subUser($uid, $request->fd);
+            $this->conn->join($request->fd, $user['uid'], []);
 
             return Response::msg('ok');
         }
@@ -129,6 +126,9 @@ class Socket extends Basic
             'test.camhow.com.cn:9502',
         ];
 
-        Response::data(['list' => $list]);
+        Response::data([
+            'm' => $_POST['m'],
+            'list' => $list
+        ]);
     }
 }

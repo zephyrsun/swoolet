@@ -124,9 +124,9 @@ class Socket
     /**
      * start / stop / reload / restart
      */
-    public function service()
+    public function service($pid_file)
     {
-        $pid = File::get($this->pid_file);
+        $pid = File::get($pid_file);
 
         $cmd = &$_SERVER['argv'][1];
         if ($cmd == 'stop') {
@@ -165,7 +165,7 @@ class Socket
         $prefix = "/tmp/swoolet_{$port}";
         $this->pid_file = "$prefix.pid";
 
-        $this->service();
+        $this->service($this->pid_file);
 
         $sw = $this->runServer($host, $port);
 

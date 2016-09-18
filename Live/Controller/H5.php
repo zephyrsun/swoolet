@@ -113,23 +113,20 @@ class H5 extends Basic
 
         $video = [];
 
-        if ($live['status']) {
+        if ($live['status'] > 0) {
             $video['title'] = $live['title'];
-            $video['play_url'] = $live['play_url'];
+            $video['play_url'] = $live['hls_url'];
             $video['cover'] = $live['cover'];
         } else {
-            $last_row = [];
-
             $list = (new \Live\Database\Replay())->getList($uid, 0, 10);
-            foreach ($list as $row) {
+            foreach ($list['replay'] as $row) {
                 if ($ts > $row['ts']) {
-                    $video['title'] = $last_row['title'];
-                    $video['play_url'] = $last_row['play_url'];
-                    $video['cover'] = Utility::imageLarge($last_row['cover']);
+
+                    $video['title'] = $row['title'];
+                    $video['play_url'] = $row['play_url'];
+                    //$video['cover'] = Utility::imageLarge($row['cover']);
                     break;
                 }
-
-                $last_row = $row;
             }
         }
 

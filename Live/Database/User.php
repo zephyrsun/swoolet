@@ -150,7 +150,7 @@ class User extends Basic
                     'nickname' => $user['nickname'],
                     'height' => $user['height'],
                     'avatar' => $user['avatar'],
-                    'zodiac' => $user['zodiac'],
+                    'zodiac' => \Live\Lib\Utility::handleZodiac($user['zodiac']),
                     'city' => $user['city'],
                     'lv' => $this->user_level->getLv($uid)
                 ];
@@ -230,12 +230,12 @@ class User extends Basic
         ]);
     }
 
-    public function addVisit($uid, $visit_uid)
+    public function addVisit($uid, $visitor)
     {
-        if ($uid == $visit_uid)
-            return;
+        if ($uid == $visitor)
+            return 0;
 
-        return $this->cache->link->zAdd($this->key_home_visit . $uid, \Swoolet\App::$ts, $visit_uid);
+        return $this->cache->link->zAdd($this->key_home_visit . $uid, \Swoolet\App::$ts, $visitor);
     }
 
     public function getVisit($uid, $start, $limit)

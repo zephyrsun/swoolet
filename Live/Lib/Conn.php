@@ -88,7 +88,8 @@ class Conn
 
     public function join($fd, $uid, $user)
     {
-        $this->joinRoom($fd, 0, $uid, $user);
+        if ($user)
+            $this->joinRoom($fd, 0, $uid, $user);
 
         $this->process->write("join|$fd|$uid");
     }
@@ -110,6 +111,7 @@ class Conn
             'is_vip' => $user['is_vip'],
             'is_tycoon' => $user['is_tycoon'],
             'silence' => 0,
+            'is_admin' => isset($user['is_admin']) ? $user['is_admin'] : 0,
         ]);
 
         // var_dump('joinRoom', $this->user_store->get($fd));

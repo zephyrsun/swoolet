@@ -134,6 +134,7 @@ html {
     margin-top: 15px;
     margin-bottom: 15px;
 }
+
 #instruction a {
     color: #3a3a3a;
     padding-left: 10px;
@@ -149,4 +150,15 @@ html {
     text-shadow: none;
     background-color: transparent;
     border: 0;
+}
+
+.class {
+    width: 32px;
+    height: 13px;
+    background-size: 36px 18px;
+    line-height: 10px;
+    font-size: 10px;
+    color: #fff;
+    padding: 0 2px;
+    border-radius: 2px;
 }

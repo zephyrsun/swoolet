@@ -33,12 +33,12 @@ class Upload extends Basic
             $live = $db->getLive($uid);
 
             $ret = $db->updateLive($uid, [
-                'cover' => $img
+                'cover' => \Live\Lib\Utility::imageLarge($img),
             ]);
 
-            if ($ret && $live['cover']) {
-                $this->sdk->delete($bucket, $live['cover']);
-            }
+//            if ($ret && $live['cover']) {
+//                $this->sdk->delete($bucket, $live['cover']);
+//            }
 
             return $ret;
         });
@@ -62,7 +62,7 @@ class Upload extends Basic
             }
 
             $ret = $db->updateUser($uid, [
-                'cover' => $img
+                'cover' =>  \Live\Lib\Utility::imageLarge($img),
             ]);
 
             if ($ret && $user['cover']) {

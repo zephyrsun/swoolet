@@ -89,14 +89,14 @@ class Live extends Basic
             if ($user) {
                 $row['avatar'] = \Live\Lib\Utility::imageLarge($user['avatar']);
                 $row['nickname'] = $user['nickname'];
-                $row['zodiac'] = (string)$user['zodiac'];
+                $row['zodiac'] =  \Live\Lib\Utility::handleZodiac($user['zodiac']);
             } else {
                 $row['avatar'] = '';
                 $row['nickname'] = '';
                 $row['zodiac'] = '';
             }
 
-            $row['cover'] = \Live\Lib\Utility::imageLarge($row['cover']);
+            //$row['cover'] = \Live\Lib\Utility::imageLarge($row['cover']);
 
             $latest_list[] = ++$n;
             $latest_list[] = $uid;
@@ -165,7 +165,7 @@ class Live extends Basic
         });
 
         if ($live) {
-            $live['cover'] = \Live\Lib\Utility::imageLarge($live['cover']);
+            //$live['cover'] = \Live\Lib\Utility::imageLarge($live['cover']);
 
             if ($type == 'app') {
                 //play in app

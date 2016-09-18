@@ -36,17 +36,17 @@
             </div>
             <div>
                 <marquee id="team" direction="up" scrollamount="2">
+                    <div>产品 & 后端 & H5</div>
+                    <div class="person">孙政华</div>
                     <div>iOS</div>
                     <div class="person">宋乃银&nbsp;&nbsp;&nbsp;&nbsp;李静莹</div>
                     <div>Android</div>
                     <div class="person">崔国</div>
-                    <div>UI</div>
-                    <div class="person">祝玉婉</div>
                     <div>测试</div>
                     <div class="person">吉翔</div>
-                    <div>产品、后端、H5</div>
-                    <div class="person">孙政华</div>
-                    <div>邮箱</div>
+                    <div>UI</div>
+                    <div class="person">祝玉婉</div>
+                    <div>联系邮箱</div>
                     <div class="person"><a href="mailto:sunzhenghua@camhow.live">sunzhenghua@camhow.live</a></div>
                 </marquee>
             </div>
